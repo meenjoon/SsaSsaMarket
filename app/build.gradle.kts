@@ -75,4 +75,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.5.0")
     //Fragment ktx(ViewModel 초기화) 관련
     implementation ("androidx.fragment:fragment-ktx:1.5.7")
+    //Moshi(Json Converter) 관련
+    implementation ("com.squareup.moshi:moshi:1.14.0")
+
 }
