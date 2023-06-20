@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.GetSignInIntentRequest
 import com.google.android.gms.auth.api.identity.Identity
@@ -161,6 +162,7 @@ class LogInFragment : BaseFragment() {
         auth.signInWithCredential(authCredential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    navigateToHomeFragment()
                     Toast.makeText(requireContext(), getString(R.string.log_in_success), Toast.LENGTH_SHORT).show()
                 } else {
                     Log.e(TAG, "Firebase authentication failed", task.exception)
@@ -171,6 +173,11 @@ class LogInFragment : BaseFragment() {
                     }
                 }
             }
+    }
+
+    private fun navigateToHomeFragment() {
+        val action = LogInFragmentDirections.actionLogInFragmentToSettingNicknameFragment()
+        findNavController().navigate(action)
     }
 
     companion object {
