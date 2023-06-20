@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
 import android.util.Log
-import com.mbj.ssassamarket.ui.BaseFragment
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -25,6 +24,7 @@ import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.databinding.FragmentLogInBinding
+import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.util.Constants.AUTO_LOGIN
 
 class LogInFragment : BaseFragment() {
@@ -35,7 +35,7 @@ class LogInFragment : BaseFragment() {
     private lateinit var oneTapClient: SignInClient
     private lateinit var auth: FirebaseAuth
 
-    private lateinit var googleOneTabSignInLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private lateinit var googleOneTapSignInLauncher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var googleSignInLauncherIdentity: ActivityResultLauncher<IntentSenderRequest>
 
     private val viewModel: LogInViewModel by viewModels()
@@ -51,6 +51,10 @@ class LogInFragment : BaseFragment() {
         binding.logInBt.setOnClickListener {
             signInWithGoogleOneTap()
         }
+        observeAutoLoginEnabled()
+    }
+
+    private fun observeAutoLoginEnabled() {
         viewModel.autoLoginEnabled.observe(viewLifecycleOwner) { isChecked ->
             SsaSsaMarketApplication.preferenceManager.putBoolean(AUTO_LOGIN, isChecked)
         }
@@ -60,15 +64,17 @@ class LogInFragment : BaseFragment() {
         oneTapClient = Identity.getSignInClient(requireContext())
         auth = FirebaseAuth.getInstance()
 
-        googleOneTabSignInLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-            handleGoogleOneTabSignInResult(result.resultCode, result.data)
-        }
-        googleSignInLauncherIdentity = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-            handleGoogleSignInIdentityResult(result.resultCode, result.data)
-        }
+        googleOneTapSignInLauncher =
+            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+                handleGoogleOneTapSignInResult(result.resultCode, result.data)
+            }
+        googleSignInLauncherIdentity =
+            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+                handleGoogleSignInIdentityResult(result.resultCode, result.data)
+            }
     }
 
-    private fun handleGoogleOneTabSignInResult(resultCode: Int, data: Intent?) {
+    private fun handleGoogleOneTapSignInResult(resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
             val intent = data
             val credential = oneTapClient.getSignInCredentialFromIntent(intent)
@@ -76,10 +82,10 @@ class LogInFragment : BaseFragment() {
             if (googleIdToken != null) {
                 firebaseAuthWithGoogle(googleIdToken)
             } else {
-                Toast.makeText(requireContext(), R.string.log_in_failure, Toast.LENGTH_SHORT).show()
+                showToast(R.string.log_in_failure)
             }
         } else {
-            Toast.makeText(requireContext(), R.string.log_in_cancle, Toast.LENGTH_SHORT).show()
+            showToast(R.string.log_in_cancle)
         }
     }
 
@@ -92,30 +98,30 @@ class LogInFragment : BaseFragment() {
                 if (googleIdToken != null) {
                     firebaseAuthWithGoogle(googleIdToken)
                 } else {
-                    Toast.makeText(requireContext(), R.string.log_in_failure, Toast.LENGTH_SHORT).show()
+                    showToast(R.string.log_in_failure)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Google Sign-In failed", e)
             }
         } else {
-            Toast.makeText(requireContext(), R.string.log_in_cancle, Toast.LENGTH_SHORT).show()
+            showToast(R.string.log_in_cancle)
         }
     }
 
     private fun signInWithGoogleOneTap() {
-        oneTapClient.beginSignIn(getGoogleOneTabSignInOptions())
+        oneTapClient.beginSignIn(getGoogleOneTapSignInOptions())
             .addOnSuccessListener(requireActivity()) { result ->
                 val intentSenderRequest =
                     IntentSenderRequest.Builder(result.pendingIntent.intentSender).build()
-                googleOneTabSignInLauncher.launch(intentSenderRequest)
+                googleOneTapSignInLauncher.launch(intentSenderRequest)
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "Failed to begin one tab sign-in", e)
-                handleOneTabException(e)
+                Log.e(TAG, "Failed to begin one tap sign-in", e)
+                handleOneTapException(e)
             }
     }
 
-    private fun getGoogleOneTabSignInOptions(): BeginSignInRequest {
+    private fun getGoogleOneTapSignInOptions(): BeginSignInRequest {
         return BeginSignInRequest.builder()
             .setGoogleIdTokenRequestOptions(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
@@ -148,18 +154,17 @@ class LogInFragment : BaseFragment() {
             }
     }
 
-    private fun handleOneTabException(exception: Exception) {
+    private fun handleOneTapException(exception: Exception) {
         when (exception) {
-
             is ApiException -> {
-                Log.e(TAG, "Failed to begin one tab sign-in(ApiException)", exception)
+                Log.e(TAG, "Failed to begin one tap sign-in(ApiException)", exception)
                 when (exception.statusCode) {
-                    CommonStatusCodes.CANCELED ->  signInWithGoogleByIdentity()
-                    else ->  signInWithGoogleByIdentity()
+                    CommonStatusCodes.CANCELED -> signInWithGoogleByIdentity()
+                    else -> signInWithGoogleByIdentity()
                 }
             }
             else -> {
-                Log.e(TAG, "Failed to begin one tab sign-in(Exception)", exception)
+                Log.e(TAG, "Failed to begin one tap sign-in(Exception)", exception)
                 signInWithGoogleByIdentity()
             }
         }
@@ -171,13 +176,13 @@ class LogInFragment : BaseFragment() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     navigateToHomeFragment()
-                    Toast.makeText(requireContext(), getString(R.string.log_in_success), Toast.LENGTH_SHORT).show()
+                    showToast(R.string.log_in_success)
                 } else {
                     Log.e(TAG, "Firebase authentication failed", task.exception)
                     when (task.exception?.message) {
-                        FIREBASE_AUTH_EXCEPTION_NETWORK -> Toast.makeText(requireContext(), R.string.log_in_error_network, Toast.LENGTH_SHORT).show()
-                        FIREBASE_AUTH_EXCEPTION_NETWORK2 -> Toast.makeText(requireContext(), R.string.log_in_error_network, Toast.LENGTH_SHORT).show()
-                        else -> Toast.makeText(requireContext(), R.string.log_in_error_firebase, Toast.LENGTH_SHORT).show()
+                        FIREBASE_AUTH_EXCEPTION_NETWORK -> showToast(R.string.log_in_error_network)
+                        FIREBASE_AUTH_EXCEPTION_NETWORK2 -> showToast(R.string.log_in_error_network)
+                        else -> showToast(R.string.log_in_error_firebase)
                     }
                 }
             }
@@ -188,6 +193,10 @@ class LogInFragment : BaseFragment() {
         findNavController().navigate(action)
     }
 
+    private fun showToast(messageResId: Int) {
+        Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
+    }
+
     companion object {
         private const val TAG = "LogInFragment"
         private const val FIREBASE_AUTH_EXCEPTION_NETWORK =
@@ -196,4 +205,3 @@ class LogInFragment : BaseFragment() {
             "com.google.firebase.FirebaseNetworkException: A network error (such as timeout, interrupted connection or unreachable host)" //네트워크 오류로 인해 Firebase 인증 실패 오류 메세지
     }
 }
-
