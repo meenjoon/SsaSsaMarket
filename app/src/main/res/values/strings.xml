@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">SsaSsaMarket</string>
     <string name="auto_log_in_tv">자동 로그인</string>
+    <string name="log_in_cancle">로그인 취소</string>
+    <string name="log_in_failure">로그인 실패</string>
+    <string name="log_in_error_network">네트워크 오류</string>
+    <string name="log_in_success">로그인에 성공하셨습니다.</string>
+    <string name="log_in_error_firebase">문의글을 남겨주세요</string>
 </resources>

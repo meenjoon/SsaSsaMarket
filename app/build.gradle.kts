@@ -1,7 +1,13 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
+
+val properties = Properties()
+properties.load(rootProject.file("local.properties").inputStream())
 
 android {
     compileSdkVersion(33)
@@ -13,13 +19,18 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField("String", "GOOGLE_CLIENT_ID", properties.getProperty("google_client_id"))
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
@@ -43,6 +54,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("com.google.android.gms:play-services-base:18.2.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -50,6 +62,15 @@ dependencies {
     //Jetpack Navigation Graph 관련
     implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
+    //Firebase Bom 관련
+    implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
+    //Firebase analytics 관련
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    //Firebase auth 관련
+    implementation("com.google.firebase:firebase-auth-ktx:22.0.0")
     //Google Play Services의 base 관련
     implementation("com.google.android.gms:play-services-base:18.2.0")
+    //Google Play Services의 auth 관련
+    implementation("com.google.android.gms:play-services-auth:20.5.0")
+
 }
