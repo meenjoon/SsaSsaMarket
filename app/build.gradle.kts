@@ -73,5 +73,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-base:18.2.0")
     //Google Play Services의 auth 관련
     implementation("com.google.android.gms:play-services-auth:20.5.0")
-
+    //Fragment ktx(ViewModel 초기화) 관련
+    implementation ("androidx.fragment:fragment-ktx:1.5.7")
 }
