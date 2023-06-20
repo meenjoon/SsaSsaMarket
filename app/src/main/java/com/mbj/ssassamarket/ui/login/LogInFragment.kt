@@ -5,10 +5,8 @@ import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import com.mbj.ssassamarket.ui.BaseFragment
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
@@ -25,9 +23,10 @@ import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentLogInBinding
 
-class LogInFragment : BaseFragment<FragmentLogInBinding>() {
+class LogInFragment : BaseFragment() {
 
-    private lateinit var binding: FragmentLogInBinding
+    override val binding get() = _binding as FragmentLogInBinding
+    override val layoutId: Int get() = R.layout.fragment_log_in
 
     private lateinit var oneTapClient: SignInClient
     private lateinit var auth: FirebaseAuth
@@ -38,11 +37,6 @@ class LogInFragment : BaseFragment<FragmentLogInBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeSignInClients()
-    }
-
-    override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentLogInBinding {
-        binding = FragmentLogInBinding.inflate(inflater, container, false)
-        return binding
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

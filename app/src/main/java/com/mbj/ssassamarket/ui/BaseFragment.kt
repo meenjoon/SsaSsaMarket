@@ -4,27 +4,31 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.viewbinding.ViewBinding
 
-abstract class BaseFragment<VB : ViewBinding> : Fragment() {
+open class BaseFragment : Fragment() {
 
-    private var _binding: VB? = null
-    private val binding: VB
-        get() = _binding!!
-
-    abstract fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): VB
+    var _binding: ViewDataBinding? = null
+    open val binding get() = _binding!!
+    open val layoutId: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = inflateBinding(inflater, container)
+    ): View? {
+        _binding = DataBindingUtil.inflate(inflater, layoutId, container, false)
         return binding.root
     }
 
-    final override fun onDestroyView() {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.lifecycleOwner = viewLifecycleOwner
+    }
+
+    override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
