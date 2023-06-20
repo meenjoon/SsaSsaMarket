@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
+        <variable
+            name="viewModel"
+            type="com.mbj.ssassamarket.ui.login.LogInViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -37,7 +39,8 @@
             android:buttonTint="@color/black"
             app:layout_constraintEnd_toStartOf="@+id/auto_log_in_tv"
             app:layout_constraintStart_toEndOf="@id/log_in_bt"
-            app:layout_constraintTop_toBottomOf="@id/log_in_bt" />
+            app:layout_constraintTop_toBottomOf="@id/log_in_bt"
+            android:checked="@={viewModel.autoLoginEnabled}"/>
 
         <TextView
             android:id="@+id/auto_log_in_tv"

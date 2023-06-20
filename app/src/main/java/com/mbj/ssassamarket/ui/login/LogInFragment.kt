@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.GetSignInIntentRequest
@@ -37,6 +38,8 @@ class LogInFragment : BaseFragment() {
     private lateinit var googleOneTabSignInLauncher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var googleSignInLauncherIdentity: ActivityResultLauncher<IntentSenderRequest>
 
+    private val viewModel: LogInViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeSignInClients()
@@ -44,11 +47,12 @@ class LogInFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        initializeAutoLoginPreference()
-        setupAutoLoginCheckboxListener()
+        binding.viewModel = viewModel
         binding.logInBt.setOnClickListener {
             signInWithGoogleOneTap()
+        }
+        viewModel.autoLoginEnabled.observe(viewLifecycleOwner) { isChecked ->
+            SsaSsaMarketApplication.preferenceManager.putBoolean(AUTO_LOGIN, isChecked)
         }
     }
 
@@ -182,21 +186,6 @@ class LogInFragment : BaseFragment() {
     private fun navigateToHomeFragment() {
         val action = LogInFragmentDirections.actionLogInFragmentToSettingNicknameFragment()
         findNavController().navigate(action)
-    }
-
-    private fun initializeAutoLoginPreference() {
-        with(SsaSsaMarketApplication.preferenceManager) {
-            val autoLoginEnabled = getBoolean(AUTO_LOGIN, false)
-            binding.autoLogInCb.isChecked = autoLoginEnabled
-        }
-    }
-
-    private fun setupAutoLoginCheckboxListener() {
-        with(SsaSsaMarketApplication.preferenceManager) {
-            binding.autoLogInCb.setOnCheckedChangeListener { _, isChecked ->
-                putBoolean(AUTO_LOGIN, isChecked)
-            }
-        }
     }
 
     companion object {
