@@ -6,4 +6,6 @@
     <string name="log_in_error_network">네트워크 오류</string>
     <string name="log_in_success">로그인에 성공하셨습니다.</string>
     <string name="log_in_error_firebase">문의글을 남겨주세요</string>
+    <string name="setting_nickname_register">등록</string>
+    <string name="setting_nickname_hint">닉네임을 입력해주세요.</string>
 </resources>
