@@ -22,7 +22,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
+import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.databinding.FragmentLogInBinding
+import com.mbj.ssassamarket.util.Constants.AUTO_LOGIN
 
 class LogInFragment : BaseFragment() {
 
@@ -43,6 +45,8 @@ class LogInFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initializeAutoLoginPreference()
+        setupAutoLoginCheckboxListener()
         binding.logInBt.setOnClickListener {
             signInWithGoogleOneTap()
         }
@@ -178,6 +182,21 @@ class LogInFragment : BaseFragment() {
     private fun navigateToHomeFragment() {
         val action = LogInFragmentDirections.actionLogInFragmentToSettingNicknameFragment()
         findNavController().navigate(action)
+    }
+
+    private fun initializeAutoLoginPreference() {
+        with(SsaSsaMarketApplication.preferenceManager) {
+            val autoLoginEnabled = getBoolean(AUTO_LOGIN, false)
+            binding.autoLogInCb.isChecked = autoLoginEnabled
+        }
+    }
+
+    private fun setupAutoLoginCheckboxListener() {
+        with(SsaSsaMarketApplication.preferenceManager) {
+            binding.autoLogInCb.setOnCheckedChangeListener { _, isChecked ->
+                putBoolean(AUTO_LOGIN, isChecked)
+            }
+        }
     }
 
     companion object {
