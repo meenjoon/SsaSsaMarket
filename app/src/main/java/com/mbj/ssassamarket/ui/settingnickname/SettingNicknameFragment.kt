@@ -77,6 +77,7 @@ class SettingNicknameFragment : BaseFragment() {
             when (message) {
                 SUCCESS -> showToast(R.string.setting_nickname_success)
                 NICKNAME_DUPLICATE -> showToast(R.string.setting_nickname_duplicate)
+                NICKNAME_REQUEST -> showToast(R.string.setting_nickname_request_nickname)
                 NICKNAME_ERROR -> showToast(R.string.setting_nickname_error_nickname)
             }
         })

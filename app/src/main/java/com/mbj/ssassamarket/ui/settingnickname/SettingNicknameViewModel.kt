@@ -43,18 +43,21 @@ class SettingNicknameViewModel(private val repository: UserInfoRepository) : Vie
     fun addUser() {
         viewModelScope.launch {
             _preUploadCompleted.value = false
-            if (validateNickname() && !repository.checkDuplicateUserName(nickname.value.toString())) {
-                _addUserResult.value = repository.addUser(nickname.value.toString())
-            }
-            else if(repository.checkDuplicateUserName(nickname.value.toString())) {
+
+            if (nickname.value.isNullOrEmpty()) {
                 _addUserResult.value = false
                 _preUploadCompleted.value = true
-                _responseToastMessage.value = Event(NICKNAME_DUPLICATE)
-            }
-            else {
+                _responseToastMessage.value = Event(NICKNAME_REQUEST)
+            } else if (!validateNickname()) {
                 _addUserResult.value = false
                 _preUploadCompleted.value = true
                 _responseToastMessage.value = Event(NICKNAME_ERROR)
+            } else if (repository.checkDuplicateUserName(nickname.value.toString())) {
+                _addUserResult.value = false
+                _preUploadCompleted.value = true
+                _responseToastMessage.value = Event(NICKNAME_DUPLICATE)
+            } else {
+                _addUserResult.value = repository.addUser(nickname.value.toString())
             }
         }
     }
