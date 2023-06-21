@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id ("androidx.navigation.safeargs.kotlin")
+    id ("kotlin-kapt")
 }
 
 val properties = Properties()
@@ -78,6 +79,8 @@ dependencies {
 
     //Moshi(Json Converter) 관련
     implementation ("com.squareup.moshi:moshi:1.14.0")
+    implementation ("com.squareup.moshi:moshi-kotlin:1.9.3")
+    kapt ("com.squareup.moshi:moshi-kotlin-codegen:1.14.0")
 
     //OkHttp(네트워크 통신) 관련
     implementation ("com.squareup.okhttp3:okhttp:4.9.1")
