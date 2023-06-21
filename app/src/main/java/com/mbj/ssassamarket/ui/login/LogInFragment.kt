@@ -11,7 +11,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.GetSignInIntentRequest
@@ -100,8 +99,7 @@ class LogInFragment : BaseFragment() {
 
     private fun handleGoogleOneTapSignInResult(resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
-            val intent = data
-            val credential = oneTapClient.getSignInCredentialFromIntent(intent)
+            val credential = oneTapClient.getSignInCredentialFromIntent(data)
             val googleIdToken = credential.googleIdToken
             if (googleIdToken != null) {
                 firebaseAuthWithGoogle(googleIdToken)
