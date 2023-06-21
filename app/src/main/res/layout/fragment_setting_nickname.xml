@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="viewModel"
             type="com.mbj.ssassamarket.ui.settingnickname.SettingNicknameViewModel" />
@@ -45,7 +46,7 @@
                 android:imeOptions="actionNext"
                 android:inputType="text"
                 android:maxLength="8"
-                android:text="@={viewModel.nickname}"/>
+                android:text="@={viewModel.nickname}" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
@@ -53,6 +54,7 @@
             style="@style/ButtonStyle"
             android:layout_width="70dp"
             android:layout_height="50dp"
+            android:onClick="@{() -> viewModel.addUser()}"
             android:text="@string/setting_nickname_register"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -31,9 +31,6 @@ class SettingNicknameFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
-        binding.settingNicknameRegisterBt.setOnClickListener {
-            viewModel.addUser()
-        }
         viewModel.addUserResult.observe(viewLifecycleOwner) { addUserResult ->
             viewModel.handlePostResponse(addUserResult)
         }
