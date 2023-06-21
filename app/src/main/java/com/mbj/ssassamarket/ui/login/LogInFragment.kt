@@ -23,9 +23,14 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.SsaSsaMarketApplication
+import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
 import com.mbj.ssassamarket.databinding.FragmentLogInBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.util.Constants.AUTO_LOGIN
+import com.mbj.ssassamarket.util.Constants.PROGRESS_DIALOG
+import com.mbj.ssassamarket.util.EventObserver
+import com.mbj.ssassamarket.util.ProgressDialogFragment
 
 class LogInFragment : BaseFragment() {
 
@@ -38,7 +43,9 @@ class LogInFragment : BaseFragment() {
     private lateinit var googleOneTapSignInLauncher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var googleSignInLauncherIdentity: ActivityResultLauncher<IntentSenderRequest>
 
-    private val viewModel: LogInViewModel by viewModels()
+    private val viewModel by viewModels<LogInViewModel> {
+        LogInViewModel.provideFactory(UserInfoRepository(FirebaseDataSource()))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +59,22 @@ class LogInFragment : BaseFragment() {
             signInWithGoogleOneTap()
         }
         observeAutoLoginEnabled()
+        viewModel.preUploadCompleted.observe(viewLifecycleOwner) { preUploadCompleted ->
+            if(preUploadCompleted == false) {
+                ProgressDialogFragment().show(childFragmentManager, PROGRESS_DIALOG)
+            }
+        }
+        viewModel.uploadSuccess.observe(viewLifecycleOwner, EventObserver { uploadSuccess ->
+            if (uploadSuccess) {
+                showToast(R.string.setting_nickname_success)
+                navigateToHomeFragment()
+            } else {
+                navigateToSettingNicknameFragment()
+            }
+        })
+        viewModel.addUserResult.observe(viewLifecycleOwner) { addUserResult ->
+            viewModel.handleGetResponse(addUserResult)
+        }
     }
 
     private fun observeAutoLoginEnabled() {
@@ -76,8 +99,7 @@ class LogInFragment : BaseFragment() {
 
     private fun handleGoogleOneTapSignInResult(resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
-            val intent = data
-            val credential = oneTapClient.getSignInCredentialFromIntent(intent)
+            val credential = oneTapClient.getSignInCredentialFromIntent(data)
             val googleIdToken = credential.googleIdToken
             if (googleIdToken != null) {
                 firebaseAuthWithGoogle(googleIdToken)
@@ -175,8 +197,7 @@ class LogInFragment : BaseFragment() {
         auth.signInWithCredential(authCredential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    navigateToHomeFragment()
-                    showToast(R.string.log_in_success)
+                    viewModel.currentUserExists()
                 } else {
                     Log.e(TAG, "Firebase authentication failed", task.exception)
                     when (task.exception?.message) {
@@ -188,8 +209,13 @@ class LogInFragment : BaseFragment() {
             }
     }
 
-    private fun navigateToHomeFragment() {
+    private fun navigateToSettingNicknameFragment() {
         val action = LogInFragmentDirections.actionLogInFragmentToSettingNicknameFragment()
+        findNavController().navigate(action)
+    }
+
+    private fun navigateToHomeFragment() {
+        val action = LogInFragmentDirections.actionLogInFragmentToHomeFragment()
         findNavController().navigate(action)
     }
 
