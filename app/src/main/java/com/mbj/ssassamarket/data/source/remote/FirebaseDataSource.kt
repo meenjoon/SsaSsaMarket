@@ -54,4 +54,29 @@ class FirebaseDataSource() : MarketNetworkDataSource {
 
         return false
     }
+
+    override suspend fun checkDuplicateUserName(nickname: String): Boolean {
+        val user = FirebaseAuth.getInstance().currentUser
+        val idToken = user?.getIdToken(true)?.await()?.token
+
+        if (idToken != null) {
+            try {
+                val response = apiClient.getUser(idToken)
+                if (response.isSuccessful) {
+                    val users = response.body()
+                    if (users != null) {
+                        return users.values.flatMap { it.values }.any { userInfo ->
+                            userInfo.userName == nickname
+                        } ?: false
+                    }
+                } else {
+                    Log.e("checkDuplicateUserName Error", "${Exception(response.code().toString())}")
+                }
+            } catch (e: Exception) {
+                Log.e("checkDuplicateUserName Error", e.toString())
+            }
+        }
+
+        return false
+    }
 }

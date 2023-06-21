@@ -11,7 +11,7 @@ import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
 import com.mbj.ssassamarket.databinding.FragmentSettingNicknameBinding
 import com.mbj.ssassamarket.ui.BaseFragment
-import com.mbj.ssassamarket.util.Constants.FAILURE
+import com.mbj.ssassamarket.util.Constants.NICKNAME_DUPLICATE
 import com.mbj.ssassamarket.util.Constants.NICKNAME_ERROR
 import com.mbj.ssassamarket.util.Constants.NICKNAME_REQUEST
 import com.mbj.ssassamarket.util.Constants.NICKNAME_VALID
@@ -79,7 +79,8 @@ class SettingNicknameFragment : BaseFragment() {
         viewModel.responseToastMessage.observe(viewLifecycleOwner, EventObserver { message ->
             when (message) {
                 SUCCESS -> showToast(R.string.setting_nickname_success)
-                FAILURE -> showToast(R.string.setting_nickname_error_nickname)
+                NICKNAME_DUPLICATE -> showToast(R.string.setting_nickname_duplicate)
+                NICKNAME_ERROR -> showToast(R.string.setting_nickname_error_nickname)
             }
         })
     }

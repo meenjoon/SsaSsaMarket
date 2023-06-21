@@ -8,7 +8,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.util.Constants
-import com.mbj.ssassamarket.util.Constants.FAILURE
+import com.mbj.ssassamarket.util.Constants.NICKNAME_DUPLICATE
 import com.mbj.ssassamarket.util.Constants.NICKNAME_ERROR
 import com.mbj.ssassamarket.util.Constants.NICKNAME_REQUEST
 import com.mbj.ssassamarket.util.Constants.NICKNAME_VALID
@@ -43,11 +43,18 @@ class SettingNicknameViewModel(private val repository: UserInfoRepository) : Vie
     fun addUser() {
         viewModelScope.launch {
             _preUploadCompleted.value = false
-            if (validateNickname()) {
+            if (validateNickname() && !repository.checkDuplicateUserName(nickname.value.toString())) {
                 _addUserResult.value = repository.addUser(nickname.value.toString())
-            } else {
+            }
+            else if(repository.checkDuplicateUserName(nickname.value.toString())) {
                 _addUserResult.value = false
                 _preUploadCompleted.value = true
+                _responseToastMessage.value = Event(NICKNAME_DUPLICATE)
+            }
+            else {
+                _addUserResult.value = false
+                _preUploadCompleted.value = true
+                _responseToastMessage.value = Event(NICKNAME_ERROR)
             }
         }
     }
@@ -77,7 +84,6 @@ class SettingNicknameViewModel(private val repository: UserInfoRepository) : Vie
             _responseToastMessage.value = Event(SUCCESS)
         } else {
             _uploadSuccess.value = Event(false)
-            _responseToastMessage.value = Event(FAILURE)
         }
         _preUploadCompleted.value = true
     }
