@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.login.LogInFragment">
+
+    <ImageView
+        android:id="@+id/log_in_logo_iv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/login_logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/guideline_horizontal_20" />
+
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/log_in_bt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:buttonSize="wide"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_50" />
+
+    <CheckBox
+        android:id="@+id/auto_log_in_cb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:buttonTint="@color/black"
+        app:layout_constraintEnd_toStartOf="@+id/auto_log_in_tv"
+        app:layout_constraintStart_toEndOf="@id/log_in_bt"
+        app:layout_constraintTop_toBottomOf="@id/log_in_bt" />
+
+    <TextView
+        android:id="@+id/auto_log_in_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/auto_log_in_tv"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/auto_log_in_cb"
+        app:layout_constraintEnd_toStartOf="@id/log_in_bt"
+        app:layout_constraintStart_toEndOf="@+id/auto_log_in_cb"
+        app:layout_constraintTop_toTopOf="@+id/auto_log_in_cb" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_horizontal_20"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.2" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_horizontal_50"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.50" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
