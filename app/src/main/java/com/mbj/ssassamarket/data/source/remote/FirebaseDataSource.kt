@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.data.source.remote
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.data.model.User
 import kotlinx.coroutines.tasks.await
@@ -11,16 +12,14 @@ class FirebaseDataSource() : MarketNetworkDataSource {
     private val apiClient = SsaSsaMarketApplication.appContainer.provideApiClient()
 
     override suspend fun currentUserExists(): Boolean {
-        val user = FirebaseAuth.getInstance().currentUser
-        val idToken = user?.getIdToken(true)?.await()?.token
-
+        val (user, idToken) = getUserAndIdToken()
         if (idToken != null) {
             try {
                 val response = apiClient.getUser(idToken)
                 if (response.isSuccessful) {
                     val users = response.body()
                     if (users != null) {
-                        return users.containsKey(user.uid)
+                        return users.containsKey(user?.uid)
                     }
                 } else {
                     Log.d("currentUserExists Error", "${Exception(response.code().toString())}")
@@ -29,18 +28,15 @@ class FirebaseDataSource() : MarketNetworkDataSource {
                 Log.d("currentUserExists Error", e.toString())
             }
         }
-
         return false
     }
 
     override suspend fun addUser(nickname: String): Boolean {
-        val user = FirebaseAuth.getInstance().currentUser
-        val idToken = user?.getIdToken(true)?.await()?.token
+        val (user, idToken) = getUserAndIdToken()
         val userItem = User(user?.uid, nickname, null)
-
         if (idToken != null) {
             try {
-                val response = apiClient.addUser(user.uid, userItem, idToken)
+                val response = apiClient.addUser(user?.uid ?: "", userItem, idToken)
                 if (response.isSuccessful) {
                     Log.d("postUser Success", "${response.body()}")
                     return true
@@ -51,14 +47,11 @@ class FirebaseDataSource() : MarketNetworkDataSource {
                 Log.e("FirebaseDataSource", "postUser Error: $e")
             }
         }
-
         return false
     }
 
     override suspend fun checkDuplicateUserName(nickname: String): Boolean {
-        val user = FirebaseAuth.getInstance().currentUser
-        val idToken = user?.getIdToken(true)?.await()?.token
-
+        val (user, idToken) = getUserAndIdToken()
         if (idToken != null) {
             try {
                 val response = apiClient.getUser(idToken)
@@ -67,7 +60,7 @@ class FirebaseDataSource() : MarketNetworkDataSource {
                     if (users != null) {
                         return users.values.flatMap { it.values }.any { userInfo ->
                             userInfo.userName == nickname
-                        } ?: false
+                        }
                     }
                 } else {
                     Log.e("checkDuplicateUserName Error", "${Exception(response.code().toString())}")
@@ -76,7 +69,12 @@ class FirebaseDataSource() : MarketNetworkDataSource {
                 Log.e("checkDuplicateUserName Error", e.toString())
             }
         }
-
         return false
+    }
+
+    private suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
+        val user = FirebaseAuth.getInstance().currentUser
+        val idToken = user?.getIdToken(true)?.await()?.token
+        return Pair(user, idToken)
     }
 }
