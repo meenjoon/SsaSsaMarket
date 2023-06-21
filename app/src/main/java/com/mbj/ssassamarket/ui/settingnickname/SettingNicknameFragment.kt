@@ -6,7 +6,6 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.mbj.marketapp.util.EventObserver
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
@@ -17,6 +16,7 @@ import com.mbj.ssassamarket.util.Constants.NICKNAME_ERROR
 import com.mbj.ssassamarket.util.Constants.NICKNAME_REQUEST
 import com.mbj.ssassamarket.util.Constants.NICKNAME_VALID
 import com.mbj.ssassamarket.util.Constants.SUCCESS
+import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.ProgressDialogFragment
 
 class SettingNicknameFragment : BaseFragment() {

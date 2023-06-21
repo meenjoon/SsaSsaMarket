@@ -1,4 +1,4 @@
-package com.mbj.marketapp.util
+package com.mbj.ssassamarket.util
 
 import androidx.lifecycle.Observer
 

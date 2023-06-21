@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.mbj.marketapp.util.Event
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.util.Constants
 import com.mbj.ssassamarket.util.Constants.FAILURE
@@ -14,6 +13,7 @@ import com.mbj.ssassamarket.util.Constants.NICKNAME_ERROR
 import com.mbj.ssassamarket.util.Constants.NICKNAME_REQUEST
 import com.mbj.ssassamarket.util.Constants.NICKNAME_VALID
 import com.mbj.ssassamarket.util.Constants.SUCCESS
+import com.mbj.ssassamarket.util.Event
 import kotlinx.coroutines.launch
 
 class SettingNicknameViewModel(private val repository: UserInfoRepository) : ViewModel() {
