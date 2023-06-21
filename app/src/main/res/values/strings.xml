@@ -11,4 +11,5 @@
     <string name="setting_nickname_request_nickname">닉네임을 입력해주세요.</string>
     <string name="setting_nickname_error_nickname">닉네임 형식이 잘못 되었습니다.</string>
     <string name="setting_nickname_success">SsaSsa Market에 오신것을 환영합니다.</string>
+    <string name="dialog_loading_text">잠시 기다려주세요</string>
 </resources>
