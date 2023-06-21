@@ -11,20 +11,23 @@ class FirebaseDataSource() : MarketNetworkDataSource {
     private val apiClient = SsaSsaMarketApplication.appContainer.provideApiClient()
 
     override suspend fun currentUserExists(): Boolean {
-        val uId = FirebaseAuth.getInstance().currentUser?.uid
+        val user = FirebaseAuth.getInstance().currentUser
+        val idToken = user?.getIdToken(true)?.await()?.token
 
-        try {
-            val response = apiClient.getUser()
-            if (response.isSuccessful) {
-                val users = response.body()
-                if (users != null) {
-                    return users.containsKey(uId)
+        if (idToken != null) {
+            try {
+                val response = apiClient.getUser(idToken)
+                if (response.isSuccessful) {
+                    val users = response.body()
+                    if (users != null) {
+                        return users.containsKey(user?.uid)
+                    }
+                } else {
+                    Log.d("currentUserExists Error", "${Exception(response.code().toString())}")
                 }
-            } else {
-                Log.d("currentUserExists Error", "${Exception(response.code().toString())}")
+            } catch (e: Exception) {
+                Log.d("currentUserExists Error", e.toString())
             }
-        } catch (e: Exception) {
-            Log.d("currentUserExists Error", e.toString())
         }
 
         return false

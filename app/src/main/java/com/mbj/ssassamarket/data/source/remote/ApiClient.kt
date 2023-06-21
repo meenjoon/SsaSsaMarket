@@ -21,7 +21,9 @@ interface ApiClient {
     ): Response<Map<String, String>>
 
     @GET("user.json")
-    suspend fun getUser(): Response<Map<String, Map<String, User>>>
+    suspend fun getUser(
+        @Query("auth") auth: String
+    ): Response<Map<String, Map<String, User>>>
 
     companion object {
         private const val FIREBASE_BASE_URL = BuildConfig.FIREBASE_BASE_URL
