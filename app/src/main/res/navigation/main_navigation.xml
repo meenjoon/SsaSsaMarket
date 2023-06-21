@@ -9,5 +9,15 @@
         android:id="@+id/logInFragment"
         android:name="com.mbj.ssassamarket.ui.login.LogInFragment"
         android:label="fragment_log_in"
-        tools:layout="@layout/fragment_log_in" />
+        tools:layout="@layout/fragment_log_in" >
+        <action
+            android:id="@+id/action_logInFragment_to_settingNicknameFragment"
+            app:destination="@id/settingNicknameFragment"
+            app:popUpTo="@id/logInFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingNicknameFragment"
+        android:name="com.mbj.ssassamarket.ui.settingnickname.SettingNicknameFragment"
+        android:label="SettingNicknameFragment" />
 </navigation>
