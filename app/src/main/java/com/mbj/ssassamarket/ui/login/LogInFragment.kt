@@ -200,14 +200,6 @@ class LogInFragment : BaseFragment() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     viewModel.currentUserExists()
-//                    lifecycleScope.launch {
-//                        if (viewModel.currentUserExists()) {
-//                            navigateToHomeFragment()
-//                            showToast(R.string.setting_nickname_success)
-//                        } else {
-//                            navigateToSettingNicknameFragment()
-//                        }
-//                    }
                 } else {
                     Log.e(TAG, "Firebase authentication failed", task.exception)
                     when (task.exception?.message) {
