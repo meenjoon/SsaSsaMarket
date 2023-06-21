@@ -29,7 +29,9 @@ import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
 import com.mbj.ssassamarket.databinding.FragmentLogInBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.util.Constants.AUTO_LOGIN
-import kotlinx.coroutines.launch
+import com.mbj.ssassamarket.util.Constants.PROGRESS_DIALOG
+import com.mbj.ssassamarket.util.EventObserver
+import com.mbj.ssassamarket.util.ProgressDialogFragment
 
 class LogInFragment : BaseFragment() {
 
@@ -58,6 +60,22 @@ class LogInFragment : BaseFragment() {
             signInWithGoogleOneTap()
         }
         observeAutoLoginEnabled()
+        viewModel.preUploadCompleted.observe(viewLifecycleOwner) { preUploadCompleted ->
+            if(preUploadCompleted == false) {
+                ProgressDialogFragment().show(childFragmentManager, PROGRESS_DIALOG)
+            }
+        }
+        viewModel.uploadSuccess.observe(viewLifecycleOwner, EventObserver { uploadSuccess ->
+            if (uploadSuccess) {
+                showToast(R.string.setting_nickname_success)
+                navigateToHomeFragment()
+            } else {
+                navigateToSettingNicknameFragment()
+            }
+        })
+        viewModel.addUserResult.observe(viewLifecycleOwner) { addUserResult ->
+            viewModel.handleGetResponse(addUserResult)
+        }
     }
 
     private fun observeAutoLoginEnabled() {
@@ -181,14 +199,15 @@ class LogInFragment : BaseFragment() {
         auth.signInWithCredential(authCredential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    lifecycleScope.launch {
-                        if (viewModel.currentUserExists()) {
-                            navigateToHomeFragment()
-                            showToast(R.string.setting_nickname_success)
-                        } else {
-                            navigateToSettingNicknameFragment()
-                        }
-                    }
+                    viewModel.currentUserExists()
+//                    lifecycleScope.launch {
+//                        if (viewModel.currentUserExists()) {
+//                            navigateToHomeFragment()
+//                            showToast(R.string.setting_nickname_success)
+//                        } else {
+//                            navigateToSettingNicknameFragment()
+//                        }
+//                    }
                 } else {
                     Log.e(TAG, "Firebase authentication failed", task.exception)
                     when (task.exception?.message) {
