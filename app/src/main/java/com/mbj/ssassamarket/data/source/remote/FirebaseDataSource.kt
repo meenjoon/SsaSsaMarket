@@ -20,7 +20,7 @@ class FirebaseDataSource() : MarketNetworkDataSource {
                 if (response.isSuccessful) {
                     val users = response.body()
                     if (users != null) {
-                        return users.containsKey(user?.uid)
+                        return users.containsKey(user.uid)
                     }
                 } else {
                     Log.d("currentUserExists Error", "${Exception(response.code().toString())}")
