@@ -1,13 +1,20 @@
 package com.mbj.ssassamarket.data.source.remote
 
 import com.mbj.ssassamarket.BuildConfig
+import com.mbj.ssassamarket.data.model.User
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.http.*
 
 interface ApiClient {
+
+    @GET("user.json")
+    suspend fun getUser(): Response<Map<String, Map<String, User>>>
 
     companion object {
         private const val FIREBASE_BASE_URL = BuildConfig.FIREBASE_BASE_URL
@@ -22,6 +29,7 @@ interface ApiClient {
                 .build()
 
             val moshi: Moshi = Moshi.Builder()
+                .add(KotlinJsonAdapterFactory())
                 .build()
 
             return Retrofit.Builder()
