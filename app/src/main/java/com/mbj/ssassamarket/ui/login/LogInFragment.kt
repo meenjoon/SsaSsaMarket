@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.GetSignInIntentRequest
@@ -23,9 +24,12 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.SsaSsaMarketApplication
+import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
 import com.mbj.ssassamarket.databinding.FragmentLogInBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.util.Constants.AUTO_LOGIN
+import kotlinx.coroutines.launch
 
 class LogInFragment : BaseFragment() {
 
@@ -38,7 +42,9 @@ class LogInFragment : BaseFragment() {
     private lateinit var googleOneTapSignInLauncher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var googleSignInLauncherIdentity: ActivityResultLauncher<IntentSenderRequest>
 
-    private val viewModel: LogInViewModel by viewModels()
+    private val viewModel by viewModels<LogInViewModel> {
+        LogInViewModel.provideFactory(UserInfoRepository(FirebaseDataSource()))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -175,8 +181,14 @@ class LogInFragment : BaseFragment() {
         auth.signInWithCredential(authCredential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    navigateToHomeFragment()
-                    showToast(R.string.log_in_success)
+                    lifecycleScope.launch {
+                        if (viewModel.currentUserExists()) {
+                            navigateToHomeFragment()
+                            showToast(R.string.setting_nickname_success)
+                        } else {
+                            navigateToSettingNicknameFragment()
+                        }
+                    }
                 } else {
                     Log.e(TAG, "Firebase authentication failed", task.exception)
                     when (task.exception?.message) {
@@ -188,8 +200,13 @@ class LogInFragment : BaseFragment() {
             }
     }
 
-    private fun navigateToHomeFragment() {
+    private fun navigateToSettingNicknameFragment() {
         val action = LogInFragmentDirections.actionLogInFragmentToSettingNicknameFragment()
+        findNavController().navigate(action)
+    }
+
+    private fun navigateToHomeFragment() {
+        val action = LogInFragmentDirections.actionLogInFragmentToHomeFragment()
         findNavController().navigate(action)
     }
 
