@@ -13,6 +13,13 @@ import retrofit2.http.*
 
 interface ApiClient {
 
+    @POST("user/{uId}.json")
+    suspend fun addUser(
+        @Path("uId") uId: String,
+        @Body user: User,
+        @Query("auth") auth: String
+    ): Response<Map<String, String>>
+
     @GET("user.json")
     suspend fun getUser(): Response<Map<String, Map<String, User>>>
 

@@ -7,4 +7,8 @@ class UserInfoRepository(private val marketNetworkDataSource: MarketNetworkDataS
     suspend fun currentUserExists(): Boolean {
         return marketNetworkDataSource.currentUserExists()
     }
+
+    suspend fun addUser(nickname: String): Boolean {
+        return marketNetworkDataSource.addUser(nickname)
+    }
 }
