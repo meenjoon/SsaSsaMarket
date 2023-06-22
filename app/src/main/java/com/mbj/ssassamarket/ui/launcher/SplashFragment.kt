@@ -25,12 +25,22 @@ class SplashFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel.checkCurrentUserExists()
 
-        viewModel.getUserResult.observe(viewLifecycleOwner) { currentUserExists ->
-            navigateBasedOnUserState(viewModel.autoLoginState, currentUserExists, viewModel.currentUser)
-        }
+        binding.splashLav.postDelayed({
+            viewModel.getUserResult.observe(viewLifecycleOwner) { currentUserExists ->
+                navigateBasedOnUserState(
+                    viewModel.autoLoginState,
+                    currentUserExists,
+                    viewModel.currentUser
+                )
+            }
+        }, 2000)
     }
 
-    private fun navigateBasedOnUserState(autoLoginState: Boolean, currentUserExists: Boolean, currentUser: FirebaseUser?) {
+    private fun navigateBasedOnUserState(
+        autoLoginState: Boolean,
+        currentUserExists: Boolean,
+        currentUser: FirebaseUser?
+    ) {
         val action = if (!autoLoginState || currentUser == null) {
             SplashFragmentDirections.actionSplashFragmentToLogInFragment()
         } else if (autoLoginState && currentUser != null && currentUserExists) {
