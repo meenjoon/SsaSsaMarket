@@ -24,6 +24,7 @@ import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.UserPreferenceRepository
 import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
 import com.mbj.ssassamarket.databinding.FragmentLogInBinding
 import com.mbj.ssassamarket.ui.BaseFragment
@@ -44,7 +45,7 @@ class LogInFragment : BaseFragment() {
     private lateinit var googleSignInLauncherIdentity: ActivityResultLauncher<IntentSenderRequest>
 
     private val viewModel by viewModels<LogInViewModel> {
-        LogInViewModel.provideFactory(UserInfoRepository(FirebaseDataSource()))
+        LogInViewModel.provideFactory(UserInfoRepository(FirebaseDataSource()), UserPreferenceRepository())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +80,7 @@ class LogInFragment : BaseFragment() {
 
     private fun observeAutoLoginEnabled() {
         viewModel.autoLoginEnabled.observe(viewLifecycleOwner) { isChecked ->
-            SsaSsaMarketApplication.preferenceManager.putBoolean(AUTO_LOGIN, isChecked)
+            viewModel.userPreferenceRepository.saveAutoLoginState(isChecked)
         }
     }
 

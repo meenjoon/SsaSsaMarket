@@ -9,16 +9,17 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.UserPreferenceRepository
 import com.mbj.ssassamarket.util.Constants.AUTO_LOGIN
 import kotlinx.coroutines.launch
 
-class SplashViewModel(private val repository: UserInfoRepository) : ViewModel() {
+class SplashViewModel(private val repository: UserInfoRepository, private val userPreferenceRepository: UserPreferenceRepository) : ViewModel() {
 
     private val _getUserResult = MutableLiveData<Boolean>()
     val getUserResult: LiveData<Boolean>
         get() = _getUserResult
 
-    val autoLoginState = SsaSsaMarketApplication.preferenceManager.getBoolean(AUTO_LOGIN, false)
+    val autoLoginState = userPreferenceRepository.getSaveAutoLoginState()
     val currentUser = FirebaseAuth.getInstance().currentUser
 
     fun checkCurrentUserExists() {
@@ -28,9 +29,9 @@ class SplashViewModel(private val repository: UserInfoRepository) : ViewModel() 
     }
 
     companion object {
-        fun provideFactory(repository: UserInfoRepository) = viewModelFactory {
+        fun provideFactory(repository: UserInfoRepository, userPreferenceRepository: UserPreferenceRepository) = viewModelFactory {
             initializer {
-                SplashViewModel(repository)
+                SplashViewModel(repository, userPreferenceRepository)
             }
         }
     }
