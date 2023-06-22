@@ -1,8 +1,9 @@
-package com.mbj.ssassamarket.ui
+package com.mbj.ssassamarket.ui.home
 
 
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentHomeBinding
+import com.mbj.ssassamarket.ui.BaseFragment
 
 class HomeFragment : BaseFragment() {
 

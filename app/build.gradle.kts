@@ -89,4 +89,7 @@ dependencies {
     //네트워크 통신을 위한 retrofit + moshi(Json Converter) 관련
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-moshi:2.9.0") //retrofit의 moshi 관련
+
+    //Lottie(애니메이션) 관련
+    implementation ("com.airbnb.android:lottie:5.2.0")
 }

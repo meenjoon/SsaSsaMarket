@@ -8,13 +8,14 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.UserPreferenceRepository
 import com.mbj.ssassamarket.util.Constants.AUTO_LOGIN
 import com.mbj.ssassamarket.util.Event
 import kotlinx.coroutines.launch
 
-class LogInViewModel(private val userInfoRepository: UserInfoRepository) : ViewModel() {
+class LogInViewModel(private val userInfoRepository: UserInfoRepository, val userPreferenceRepository: UserPreferenceRepository) : ViewModel() {
 
-    var autoLoginEnabled = MutableLiveData<Boolean>(SsaSsaMarketApplication.preferenceManager.getBoolean(AUTO_LOGIN, false))
+    var autoLoginEnabled = MutableLiveData<Boolean>(userPreferenceRepository.getSaveAutoLoginState())
 
     private val _preUploadCompleted = MutableLiveData<Boolean>()
     val preUploadCompleted: LiveData<Boolean>
@@ -45,9 +46,9 @@ class LogInViewModel(private val userInfoRepository: UserInfoRepository) : ViewM
     }
 
     companion object {
-        fun provideFactory(repository: UserInfoRepository) = viewModelFactory {
+        fun provideFactory(repository: UserInfoRepository, userPreferenceRepository: UserPreferenceRepository) = viewModelFactory {
             initializer {
-                LogInViewModel(repository)
+                LogInViewModel(repository, userPreferenceRepository)
             }
         }
     }

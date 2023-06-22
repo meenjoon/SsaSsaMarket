@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_navigation"
-    app:startDestination="@id/logInFragment">
+    app:startDestination="@id/splashFragment">
 
     <fragment
         android:id="@+id/logInFragment"
@@ -19,7 +19,7 @@
             android:id="@+id/action_logInFragment_to_homeFragment"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/logInFragment"
-            app:popUpToInclusive="true"/>
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/settingNicknameFragment"
@@ -33,6 +33,26 @@
     </fragment>
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.mbj.ssassamarket.ui.HomeFragment"
+        android:name="com.mbj.ssassamarket.ui.home.HomeFragment"
         android:label="HomeFragment" />
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.mbj.ssassamarket.ui.launcher.SplashFragment"
+        android:label="SplashFragment">
+        <action
+            android:id="@+id/action_splashFragment_to_logInFragment"
+            app:destination="@id/logInFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_splashFragment_to_settingNicknameFragment"
+            app:destination="@id/settingNicknameFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_splashFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 </navigation>
