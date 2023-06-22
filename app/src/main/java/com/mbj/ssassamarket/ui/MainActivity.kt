@@ -2,6 +2,8 @@ package com.mbj.ssassamarket.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
@@ -23,6 +25,24 @@ class MainActivity : AppCompatActivity() {
     private fun setupBottomNavigation() {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.main_fcv) as NavHostFragment
         val navController = navHostFragment.findNavController()
+        setupNavController(navController)
+    }
+
+    private fun setupNavController(navController: NavController) {
         binding.mainBottomNavigation.setupWithNavController(navController)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            val shouldShowBottomNavigation = when (destination.id) {
+                R.id.logInFragment,
+                R.id.splashFragment,
+                R.id.settingNicknameFragment -> false
+                else -> true
+            }
+            binding.mainBottomNavigation.visibility = if (shouldShowBottomNavigation) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+        }
     }
 }
