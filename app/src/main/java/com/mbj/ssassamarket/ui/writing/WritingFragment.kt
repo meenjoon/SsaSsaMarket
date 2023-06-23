@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.ui.writing
 
 import android.graphics.Color
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -17,6 +18,7 @@ class WritingFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupCategorySpinner()
+        setTouchInterceptHandling()
     }
 
     private fun setupCategorySpinner() {
@@ -69,6 +71,18 @@ class WritingFragment : BaseFragment() {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 binding.writingCategorySpinner.setSelection(0)
             }
+        }
+    }
+
+    private fun setTouchInterceptHandling() {
+        binding.writingContentTiet.setOnTouchListener { view, motionEvent ->
+            if (view.id == R.id.writing_content_tiet) {
+                view.parent.requestDisallowInterceptTouchEvent(true)
+                when (motionEvent.action and MotionEvent.ACTION_MASK) {
+                    MotionEvent.ACTION_UP -> view.parent.requestDisallowInterceptTouchEvent(false)
+                }
+            }
+            false
         }
     }
 }
