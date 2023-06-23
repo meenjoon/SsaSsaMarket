@@ -18,6 +18,7 @@
     <string name="navigation_writing">등록</string>
     <string name="navigation_inventory">마이페이지</string>
     <string name="navigation_setting">설정</string>
+    <string name="category_hint">카테고리를 선택하세요</string>
     <string name="writing_register">등록</string>
     <string name="writing_title_hint">상품명</string>
     <string name="writing_price_hint">가격</string>
