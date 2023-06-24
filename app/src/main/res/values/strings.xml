@@ -23,10 +23,12 @@
     <string name="writing_title_hint">상품명</string>
     <string name="writing_price_hint">가격</string>
     <string name="writing_content_hint">게시할 내용을 작성해주세요.</string>
+    <string name="permission_request">권한 설정 필요</string>
+    <string name="permission_positive">예</string>
+    <string name="permission_negative">아니오</string>
     <string name="gallery_image_max_size">/10</string>
     <string name="gallery_permission_cancel">갤러리 접근 권한을 거부하셨습니다.</string>
-    <string name="gallery_permission_request">권한 설정 필요</string>
-    <string name="gallery_permission_content">앱의 기능을 사용하기 위해 권한 설정이 필요합니다. 설정으로 이동하시겠습니까?</string>
-    <string name="gallery_permission_positive">예</string>
-    <string name="gallery_permission_negative">아니오</string>
+    <string name="gallery_permission_content">갤러리를 접근하기 위해 권한 설정이 필요합니다. 설정으로 이동하시겠습니까?</string>
+    <string name="location_permission_cancel">위치 접근 권한을 거부하셨습니다.</string>
+    <string name="location_permission_content">상품을 등록하기 위해 위치 권한 설정이 필요합니다. 설정으로 이동하시겠습니까?</string>
 </resources>

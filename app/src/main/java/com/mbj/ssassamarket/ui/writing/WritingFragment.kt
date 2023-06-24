@@ -90,8 +90,24 @@ class WritingFragment : BaseFragment() {
                     Manifest.permission.READ_EXTERNAL_STORAGE
                 )
                 if (!shouldShowRationale) {
-                    showPermissionSettingDialog()
+                    showGalleryPermissionDeniedDialog()
                 } else {
+                    showToast(R.string.gallery_permission_cancel)
+                }
+            }
+        }
+
+    private val locationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted.not()) {
+                val shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+                if (!shouldShowRationale) {
+                    showLocationPermissionDeniedDialog()
+                } else {
+                    findNavController().navigateUp()
                     showToast(R.string.gallery_permission_cancel)
                 }
             }
@@ -106,6 +122,7 @@ class WritingFragment : BaseFragment() {
         setupRecyclerView()
         observeSelectedImageContent()
         handleBackButtonClick()
+        checkLocationPermission()
     }
 
     private fun setupAdapters() {
@@ -220,16 +237,16 @@ class WritingFragment : BaseFragment() {
         }
     }
 
-    private fun showPermissionSettingDialog() {
+    private fun showGalleryPermissionDeniedDialog() {
         val builder = MaterialAlertDialogBuilder(requireContext())
-        builder.setTitle(getString(R.string.gallery_permission_request))
+        builder.setTitle(getString(R.string.permission_request))
         builder.setMessage(getString(R.string.gallery_permission_content))
 
-        builder.setPositiveButton(getString(R.string.gallery_permission_positive)) { dialog, _ ->
+        builder.setPositiveButton(getString(R.string.permission_positive)) { dialog, _ ->
             dialog.dismiss()
             openAppSettings()
         }
-        builder.setNegativeButton(getString(R.string.gallery_permission_negative)) { dialog, _ ->
+        builder.setNegativeButton(getString(R.string.permission_negative)) { dialog, _ ->
             dialog.dismiss()
             showToast(R.string.gallery_permission_cancel)
         }
@@ -247,5 +264,31 @@ class WritingFragment : BaseFragment() {
         val uri = Uri.fromParts("package", requireActivity().packageName, null)
         intent.data = uri
         startActivity(intent)
+    }
+
+    private fun checkLocationPermission() {
+        val permission = Manifest.permission.ACCESS_FINE_LOCATION
+        if (ContextCompat.checkSelfPermission(requireContext(), permission) != PackageManager.PERMISSION_GRANTED) {
+            locationPermissionLauncher.launch(permission)
+        }
+    }
+
+    private fun showLocationPermissionDeniedDialog() {
+        val builder = MaterialAlertDialogBuilder(requireContext())
+        builder.setTitle(getString(R.string.permission_request))
+        builder.setMessage(getString(R.string.location_permission_content))
+
+        builder.setPositiveButton(getString(R.string.permission_positive)) { dialog, _ ->
+            dialog.dismiss()
+            openAppSettings()
+        }
+        builder.setNegativeButton(getString(R.string.permission_negative)) { dialog, _ ->
+            dialog.dismiss()
+            findNavController().navigateUp()
+            showToast(R.string.location_permission_cancel)
+        }
+
+        val dialog = builder.create()
+        dialog.show()
     }
 }
