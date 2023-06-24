@@ -35,7 +35,8 @@ class MainActivity : AppCompatActivity() {
             val shouldShowBottomNavigation = when (destination.id) {
                 R.id.logInFragment,
                 R.id.splashFragment,
-                R.id.settingNicknameFragment -> false
+                R.id.settingNicknameFragment,
+                R.id.navigation_writing -> false
                 else -> true
             }
             binding.mainBottomNavigation.visibility = if (shouldShowBottomNavigation) {
