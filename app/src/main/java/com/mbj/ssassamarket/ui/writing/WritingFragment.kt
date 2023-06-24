@@ -18,8 +18,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import android.Manifest
-import android.app.AlertDialog
 import android.widget.Toast
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.ImageContent
 import com.mbj.ssassamarket.databinding.FragmentWritingBinding
@@ -217,7 +217,7 @@ class WritingFragment : BaseFragment() {
     }
 
     private fun showPermissionSettingDialog() {
-        val builder = AlertDialog.Builder(requireContext())
+        val builder = MaterialAlertDialogBuilder(requireContext())
         builder.setTitle(getString(R.string.gallery_permission_request))
         builder.setMessage(getString(R.string.gallery_permission_content))
 
