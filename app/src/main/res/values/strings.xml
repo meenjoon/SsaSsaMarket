@@ -23,4 +23,5 @@
     <string name="writing_title_hint">상품명</string>
     <string name="writing_price_hint">가격</string>
     <string name="writing_content_hint">게시할 내용을 작성해주세요.</string>
+    <string name="gallery_image_max_size">/10</string>
 </resources>

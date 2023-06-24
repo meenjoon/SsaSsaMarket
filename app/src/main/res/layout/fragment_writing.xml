@@ -86,7 +86,8 @@
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:listitem="@layout/recyclerview_item_gallery" />
 
                 <TextView
                     android:id="@+id/writing_location_tv"
