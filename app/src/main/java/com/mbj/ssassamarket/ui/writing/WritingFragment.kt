@@ -168,11 +168,7 @@ class WritingFragment : BaseFragment() {
             ) {
                 val selectedItem = parent?.getItemAtPosition(position) as String
 
-                if (selectedItem == getString(R.string.category_hint)) {
-                    if (view is TextView) {
-                        view.setTextColor(Color.parseColor("#B9B6B6"))
-                    }
-                } else {
+                if (selectedItem != getString(R.string.category_hint)) {
                     if (view is TextView) {
                         view.setTextColor(Color.BLACK)
                     }
