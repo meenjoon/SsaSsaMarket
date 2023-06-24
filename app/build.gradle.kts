@@ -95,4 +95,7 @@ dependencies {
 
     //이미지 로딩 관련
     implementation("io.coil-kt:coil:2.4.0")
+
+    //리사이클러뷰 관련(ConcatAdapter)
+    implementation ("androidx.recyclerview:recyclerview:1.3.0")
 }
