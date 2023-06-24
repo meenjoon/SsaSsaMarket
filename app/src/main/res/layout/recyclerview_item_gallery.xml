@@ -13,6 +13,12 @@
         android:layout_width="64dp"
         android:layout_height="64dp">
 
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/gallery_image_size_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="gallery_image_size_tv, gallery_image_max_size_tv" />
+
         <ImageView
             android:id="@+id/gallery_camera_iv"
             android:layout_width="wrap_content"

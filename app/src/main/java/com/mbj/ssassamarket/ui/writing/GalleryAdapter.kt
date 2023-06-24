@@ -1,6 +1,7 @@
 package com.mbj.ssassamarket.ui.writing
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -37,6 +38,11 @@ class GalleryAdapter(private val galleryClickListener: GalleryClickListener) : R
             binding.galleryCameraIv.setOnClickListener {
                 galleryClickListener.onGalleryClick()
             }
+            updateImageSizeViews(selectedImageContentSize)
+        }
+
+        private fun updateImageSizeViews(selectedImageContentSize: Int) {
+            binding.galleryImageSizeGroup.visibility = if (selectedImageContentSize > 0) View.VISIBLE else View.INVISIBLE
             binding.galleryImageSizeTv.text = selectedImageContentSize.toString()
         }
 
