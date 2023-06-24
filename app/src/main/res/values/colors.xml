@@ -13,4 +13,7 @@
     <color name="orange_700">#F44336</color>
     <color name="grey_100">#D9D9D9</color>
     <color name="grey_300">#B9B6B6</color>
+    <color name="white_grey">#EFE4E4</color>
+    <color name="shrine_pink_900">#ECDDDD</color>
+    <color name="deep_red">#3D1717</color>
 </resources>

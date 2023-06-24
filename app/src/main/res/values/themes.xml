@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.SsaSsaMarket" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.SsaSsaMarket" parent="Theme.Material3.Light.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
@@ -12,6 +12,7 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
     </style>
 
     <style name="ButtonStyle" parent="Widget.MaterialComponents.Button">
@@ -35,5 +36,17 @@
 
     <style name="AppBarLayout">
         <item name="android:background">@color/white</item>
+    </style>
+
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="android:textStyle">bold</item>
+        <item name="colorPrimary">@color/grey_300</item>
+        <item name="colorSecondary">@color/black</item>
+        <item name="colorSurface">@color/shrine_pink_900</item>
+        <item name="colorOnSurface">@color/white_grey</item>
+        <item name="alertDialogStyle">@style/MaterialAlertDialog.App</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.App.Title.Text</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.App.Button</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.App.Button</item>
     </style>
 </resources>
