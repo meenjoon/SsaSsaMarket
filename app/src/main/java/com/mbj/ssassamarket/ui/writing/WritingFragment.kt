@@ -19,6 +19,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import android.Manifest
 import android.widget.Toast
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.ImageContent
@@ -104,6 +105,7 @@ class WritingFragment : BaseFragment() {
         setupAdapters()
         setupRecyclerView()
         observeSelectedImageContent()
+        handleBackButtonClick()
     }
 
     private fun setupAdapters() {
@@ -124,6 +126,12 @@ class WritingFragment : BaseFragment() {
         with(binding.writingCategorySpinner) {
             this.adapter = adapter
             onItemSelectedListener = createItemSelectedListener()
+        }
+    }
+
+    private fun handleBackButtonClick() {
+        binding.writingBackIv.setOnClickListener {
+            findNavController().navigateUp()
         }
     }
 
