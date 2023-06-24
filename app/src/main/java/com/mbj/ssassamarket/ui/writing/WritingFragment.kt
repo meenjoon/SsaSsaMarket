@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.ui.writing
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -12,8 +13,13 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
+import android.Manifest
+import android.app.AlertDialog
+import android.widget.Toast
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.ImageContent
 import com.mbj.ssassamarket.databinding.FragmentWritingBinding
@@ -70,6 +76,22 @@ class WritingFragment : BaseFragment() {
                         }
                     }
                     viewModel.handleGalleryResult(imageList)
+                }
+            }
+        }
+    private val permissionResultLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                openGallery()
+            } else {
+                val shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+                if (!shouldShowRationale) {
+                    showPermissionSettingDialog()
+                } else {
+                    showToast(R.string.gallery_permission_cancel)
                 }
             }
         }
@@ -177,11 +199,49 @@ class WritingFragment : BaseFragment() {
     }
 
     private fun openGallery() {
-        val intent = Intent().apply {
-            type = "image/*"
-            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-            action = Intent.ACTION_PICK
+        val permission = Manifest.permission.READ_EXTERNAL_STORAGE
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                permission
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val intent = Intent().apply {
+                type = "image/*"
+                putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                action = Intent.ACTION_PICK
+            }
+            galleryLauncher.launch(intent)
+        } else {
+            permissionResultLauncher.launch(permission)
         }
-        galleryLauncher.launch(intent)
+    }
+
+    private fun showPermissionSettingDialog() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle(getString(R.string.gallery_permission_request))
+        builder.setMessage(getString(R.string.gallery_permission_content))
+
+        builder.setPositiveButton(getString(R.string.gallery_permission_positive)) { dialog, _ ->
+            dialog.dismiss()
+            openAppSettings()
+        }
+        builder.setNegativeButton(getString(R.string.gallery_permission_negative)) { dialog, _ ->
+            dialog.dismiss()
+            showToast(R.string.gallery_permission_cancel)
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun showToast(messageResId: Int) {
+        Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun openAppSettings() {
+        val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uri = Uri.fromParts("package", requireActivity().packageName, null)
+        intent.data = uri
+        startActivity(intent)
     }
 }
