@@ -18,7 +18,9 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import android.Manifest
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mbj.ssassamarket.R
@@ -78,6 +80,21 @@ class WritingFragment : BaseFragment() {
                     }
                     viewModel.handleGalleryResult(imageList)
                 }
+            }
+        }
+
+    private val pickMultipleVisualMediaLauncher =
+        registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
+            if (uris.isNotEmpty()) {
+                val imageList = mutableListOf<ImageContent>()
+                for (uri in uris) {
+                    val fileName = getFileName(uri)
+                    if (fileName != null) {
+                        val image = ImageContent(uri, fileName)
+                        imageList.add(image)
+                    }
+                }
+                viewModel.handleGalleryResult(imageList)
             }
         }
     private val permissionResultLauncher =
@@ -220,20 +237,22 @@ class WritingFragment : BaseFragment() {
     }
 
     private fun openGallery() {
-        val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                permission
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            val intent = Intent().apply {
-                type = "image/*"
-                putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                action = Intent.ACTION_GET_CONTENT
-            }
-            galleryLauncher.launch(intent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            pickMultipleVisualMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         } else {
-            permissionResultLauncher.launch(permission)
+            val permission = Manifest.permission.READ_EXTERNAL_STORAGE
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    permission
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                val intent = Intent(Intent.ACTION_GET_CONTENT)
+                intent.type = "image/*"
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                galleryLauncher.launch(intent)
+            } else {
+                permissionResultLauncher.launch(permission)
+            }
         }
     }
 
