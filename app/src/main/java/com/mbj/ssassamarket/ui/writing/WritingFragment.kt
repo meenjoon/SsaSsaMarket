@@ -229,7 +229,7 @@ class WritingFragment : BaseFragment() {
             val intent = Intent().apply {
                 type = "image/*"
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                action = Intent.ACTION_PICK
+                action = Intent.ACTION_GET_CONTENT
             }
             galleryLauncher.launch(intent)
         } else {
