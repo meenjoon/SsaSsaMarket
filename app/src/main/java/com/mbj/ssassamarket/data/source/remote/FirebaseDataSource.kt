@@ -3,13 +3,10 @@ package com.mbj.ssassamarket.data.source.remote
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.data.model.User
 import kotlinx.coroutines.tasks.await
 
-class FirebaseDataSource() : MarketNetworkDataSource {
-
-    private val apiClient = SsaSsaMarketApplication.appContainer.provideApiClient()
+class FirebaseDataSource(private val apiClient: ApiClient) : MarketNetworkDataSource {
 
     override suspend fun currentUserExists(): Boolean {
         val (user, idToken) = getUserAndIdToken()

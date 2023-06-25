@@ -7,6 +7,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseUser
 import com.mbj.ssassamarket.R
+import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.UserPreferenceRepository
 import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
@@ -19,7 +20,13 @@ class SplashFragment : BaseFragment() {
     override val layoutId: Int get() = R.layout.fragment_splash_fragement
 
     private val viewModel by viewModels<SplashViewModel> {
-        SplashViewModel.provideFactory(UserInfoRepository(FirebaseDataSource()), UserPreferenceRepository())
+        SplashViewModel.provideFactory(
+            UserInfoRepository(
+                FirebaseDataSource(
+                    SsaSsaMarketApplication.appContainer.provideApiClient()
+                )
+            ), UserPreferenceRepository()
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
