@@ -19,6 +19,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import android.Manifest
 import android.os.Build
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.navigation.fragment.findNavController
@@ -183,11 +184,26 @@ class WritingFragment : BaseFragment() {
     }
 
     private fun createSpinnerAdapter(categories: Array<String>): ArrayAdapter<String> {
-        val adapter = ArrayAdapter(
+        val adapter = object : ArrayAdapter<String>(
             requireActivity(),
             R.layout.spinner_item_category,
             categories
-        )
+        ) {
+            override fun isEnabled(position: Int): Boolean {
+                return position != 0
+            }
+
+            override fun getDropDownView(
+                position: Int,
+                convertView: View?,
+                parent: ViewGroup
+            ): View {
+                val view = super.getDropDownView(position, convertView, parent)
+                val textView = view.findViewById<TextView>(android.R.id.text1)
+                textView.isEnabled = position != 0 // Enable/disable the item in the dropdown view
+                return view
+            }
+        }
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         return adapter
     }
