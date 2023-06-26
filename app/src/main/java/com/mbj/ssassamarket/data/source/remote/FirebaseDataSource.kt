@@ -71,7 +71,13 @@ class FirebaseDataSource(private val apiClient: ApiClient) : MarketNetworkDataSo
 
     private suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
         val user = FirebaseAuth.getInstance().currentUser
-        val idToken = user?.getIdToken(true)?.await()?.token
+        var idToken: String? = null
+
+        try {
+            idToken = user?.getIdToken(true)?.await()?.token
+        } catch (e: Exception) {
+            Log.e("idToken Error", e.toString())
+        }
         return Pair(user, idToken)
     }
 }
