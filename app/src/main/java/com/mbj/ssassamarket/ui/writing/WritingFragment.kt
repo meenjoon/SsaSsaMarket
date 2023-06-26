@@ -116,17 +116,25 @@ class WritingFragment : BaseFragment() {
         }
 
     private val locationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted.not()) {
-                val shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions: Map<String, Boolean> ->
+            val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+            val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+
+            if ((fineLocationGranted || coarseLocationGranted).not()) {
+                val shouldShowRationaleFine = ActivityCompat.shouldShowRequestPermissionRationale(
                     requireActivity(),
                     Manifest.permission.ACCESS_FINE_LOCATION
                 )
-                if (!shouldShowRationale) {
+                val shouldShowRationaleCoarse = ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+
+                if (!shouldShowRationaleFine || !shouldShowRationaleCoarse) {
                     showLocationPermissionDeniedDialog()
                 } else {
                     findNavController().navigateUp()
-                    showToast(R.string.gallery_permission_cancel)
+                    showToast(R.string.location_permission_cancel)
                 }
             }
         }
@@ -302,9 +310,14 @@ class WritingFragment : BaseFragment() {
     }
 
     private fun checkLocationPermission() {
-        val permission = Manifest.permission.ACCESS_FINE_LOCATION
-        if (ContextCompat.checkSelfPermission(requireContext(), permission) != PackageManager.PERMISSION_GRANTED) {
-            locationPermissionLauncher.launch(permission)
+        val fineLocationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+        val coarseLocationPermission = Manifest.permission.ACCESS_COARSE_LOCATION
+        val permissions = arrayOf(fineLocationPermission, coarseLocationPermission)
+        val grantedPermissions = permissions.filter {
+            ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
+        }
+        if (grantedPermissions.size < permissions.size) {
+            locationPermissionLauncher.launch(permissions)
         }
     }
 
