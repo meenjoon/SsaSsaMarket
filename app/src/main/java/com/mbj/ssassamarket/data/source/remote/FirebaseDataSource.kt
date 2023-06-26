@@ -3,13 +3,10 @@ package com.mbj.ssassamarket.data.source.remote
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.data.model.User
 import kotlinx.coroutines.tasks.await
 
-class FirebaseDataSource() : MarketNetworkDataSource {
-
-    private val apiClient = SsaSsaMarketApplication.appContainer.provideApiClient()
+class FirebaseDataSource(private val apiClient: ApiClient) : MarketNetworkDataSource {
 
     override suspend fun currentUserExists(): Boolean {
         val (user, idToken) = getUserAndIdToken()
@@ -74,7 +71,13 @@ class FirebaseDataSource() : MarketNetworkDataSource {
 
     private suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
         val user = FirebaseAuth.getInstance().currentUser
-        val idToken = user?.getIdToken(true)?.await()?.token
+        var idToken: String? = null
+
+        try {
+            idToken = user?.getIdToken(true)?.await()?.token
+        } catch (e: Exception) {
+            Log.e("idToken Error", e.toString())
+        }
         return Pair(user, idToken)
     }
 }

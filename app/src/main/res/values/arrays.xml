@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="category_list">
+        <item>의류</item>
+        <item>가전제품</item>
+        <item>식품</item>
+        <item>가구</item>
+        <item>기타</item>
+    </string-array>
+</resources>

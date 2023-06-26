@@ -13,4 +13,22 @@
     <string name="setting_nickname_success">SsaSsa Market에 오신것을 환영합니다.</string>
     <string name="dialog_loading_text">잠시 기다려주세요</string>
     <string name="setting_nickname_duplicate">중복된 닉네임입니다.</string>
+    <string name="navigation_home">홈</string>
+    <string name="navigation_chat">채팅</string>
+    <string name="navigation_writing">등록</string>
+    <string name="navigation_inventory">마이페이지</string>
+    <string name="navigation_setting">설정</string>
+    <string name="category_hint">카테고리를 선택하세요</string>
+    <string name="writing_register">등록</string>
+    <string name="writing_title_hint">상품명</string>
+    <string name="writing_price_hint">가격</string>
+    <string name="writing_content_hint">게시할 내용을 작성해주세요.</string>
+    <string name="permission_request">권한 설정 필요</string>
+    <string name="permission_positive">예</string>
+    <string name="permission_negative">아니오</string>
+    <string name="gallery_image_max_size">/10</string>
+    <string name="gallery_permission_cancel">갤러리 접근 권한을 거부하셨습니다.</string>
+    <string name="gallery_permission_content">갤러리를 접근하기 위해 권한 설정이 필요합니다. 설정으로 이동하시겠습니까?</string>
+    <string name="location_permission_cancel">위치 접근 권한을 거부하셨습니다.</string>
+    <string name="location_permission_content">상품을 등록하기 위해 위치 권한 설정이 필요합니다. 설정으로 이동하시겠습니까?</string>
 </resources>

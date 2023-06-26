@@ -45,7 +45,10 @@ class LogInFragment : BaseFragment() {
     private lateinit var googleSignInLauncherIdentity: ActivityResultLauncher<IntentSenderRequest>
 
     private val viewModel by viewModels<LogInViewModel> {
-        LogInViewModel.provideFactory(UserInfoRepository(FirebaseDataSource()), UserPreferenceRepository())
+        LogInViewModel.provideFactory(
+            UserInfoRepository(FirebaseDataSource(SsaSsaMarketApplication.appContainer.provideApiClient())),
+            UserPreferenceRepository()
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +64,7 @@ class LogInFragment : BaseFragment() {
         }
         observeAutoLoginEnabled()
         viewModel.preUploadCompleted.observe(viewLifecycleOwner) { preUploadCompleted ->
-            if(preUploadCompleted == false) {
+            if (preUploadCompleted == false) {
                 ProgressDialogFragment().show(childFragmentManager, PROGRESS_DIALOG)
             }
         }

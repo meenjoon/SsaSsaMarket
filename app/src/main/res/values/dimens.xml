@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="app_bar_layout_height">72dp</dimen>
+    <dimen name="material_divider_height">0.7dp</dimen>
+    <dimen name="writing_form">40dp</dimen>
+</resources>

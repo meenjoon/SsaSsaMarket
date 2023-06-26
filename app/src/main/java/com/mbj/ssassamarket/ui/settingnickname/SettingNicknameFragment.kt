@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.mbj.ssassamarket.R
+import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
 import com.mbj.ssassamarket.databinding.FragmentSettingNicknameBinding
@@ -25,7 +26,13 @@ class SettingNicknameFragment : BaseFragment() {
     override val layoutId: Int get() = R.layout.fragment_setting_nickname
     private var loadingProgressDialog: ProgressDialogFragment? = null
     private val viewModel by viewModels<SettingNicknameViewModel> {
-        SettingNicknameViewModel.provideFactory(UserInfoRepository(FirebaseDataSource()))
+        SettingNicknameViewModel.provideFactory(
+            UserInfoRepository(
+                FirebaseDataSource(
+                    SsaSsaMarketApplication.appContainer.provideApiClient()
+                )
+            )
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

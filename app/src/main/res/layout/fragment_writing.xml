@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.writing.WritingFragment">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/writing_abl"
+            style="@style/AppBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/app_bar_layout_height"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.Toolbar
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_scrollFlags="scroll|enterAlways">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/writing_back_iv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/back_icon" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/writing_register_mcv"
+                        style="@style/CardViewButtonStyle"
+                        android:layout_width="55dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="20dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:text="@string/writing_register"
+                            android:textColor="@color/white"
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.card.MaterialCardView>
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.appcompat.widget.Toolbar>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/writing_nsv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/writing_rv"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:listitem="@layout/recyclerview_item_gallery" />
+
+                <TextView
+                    android:id="@+id/writing_location_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:textColor="@color/orange_700"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+                    app:layout_constraintTop_toBottomOf="@id/writing_rv"
+                    tools:text="대전" />
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/writing_title_tiet"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/writing_form"
+                    android:layout_marginTop="20dp"
+                    android:background="@null"
+                    android:hint="@string/writing_title_hint"
+                    android:inputType="text"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
+                    app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+                    app:layout_constraintTop_toBottomOf="@id/writing_location_tv" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:id="@+id/writing_title_md"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/material_divider_height"
+                    android:layout_marginTop="7dp"
+                    app:dividerColor="@color/grey_300"
+                    app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
+                    app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+                    app:layout_constraintTop_toBottomOf="@id/writing_title_tiet" />
+
+                <Spinner
+                    android:id="@+id/writing_category_spinner"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/writing_form"
+                    android:layout_marginTop="10dp"
+                    android:entries="@array/category_list"
+                    app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
+                    app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+                    app:layout_constraintTop_toBottomOf="@id/writing_title_md" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:id="@+id/writing_category_md"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/material_divider_height"
+                    android:layout_marginTop="12dp"
+                    app:dividerColor="@color/grey_300"
+                    app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
+                    app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+                    app:layout_constraintTop_toBottomOf="@id/writing_category_spinner" />
+
+                <ImageView
+                    android:id="@+id/writing_currency_symbol_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="28dp"
+                    app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+                    app:layout_constraintTop_toBottomOf="@id/writing_category_md"
+                    app:srcCompat="@drawable/currency_symbol_icon" />
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/writing_price_tiet"
+                    android:layout_width="164dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="16dp"
+                    android:background="@null"
+                    android:hint="@string/writing_price_hint"
+                    android:inputType="number"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/writing_currency_symbol_iv"
+                    app:layout_constraintStart_toEndOf="@id/writing_currency_symbol_iv"
+                    app:layout_constraintTop_toTopOf="@id/writing_currency_symbol_iv" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:id="@+id/writing_price_md"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/material_divider_height"
+                    android:layout_marginTop="7dp"
+                    app:dividerColor="@color/grey_300"
+                    app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
+                    app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+                    app:layout_constraintTop_toBottomOf="@id/writing_price_tiet" />
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/writing_content_tiet"
+                    android:layout_width="0dp"
+                    android:layout_height="350dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginBottom="20dp"
+                    android:background="@null"
+                    android:gravity="top"
+                    android:hint="@string/writing_content_hint"
+                    android:scrollbars="vertical"
+                    app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
+                    app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+                    app:layout_constraintTop_toBottomOf="@id/writing_price_md" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="30dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/writing_content_tiet" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline_vertical_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.03" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline_vertical_97"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.97" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline_horizontal_98"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintGuide_percent="0.98" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>
