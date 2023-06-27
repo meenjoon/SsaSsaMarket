@@ -30,13 +30,22 @@ import com.mbj.ssassamarket.databinding.FragmentWritingBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.GalleryClickListener
 import com.mbj.ssassamarket.ui.common.ImageRemoveListener
+import com.mbj.ssassamarket.util.LocationManager
 
-class WritingFragment : BaseFragment() {
+class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     override val binding get() = _binding as FragmentWritingBinding
     override val layoutId: Int get() = R.layout.fragment_writing
 
     private lateinit var galleryAdapter: GalleryAdapter
     private lateinit var attachedImageAdapter: AttachedImageAdapter
+
+    private lateinit var locationManager: LocationManager
+
+    private var isLocationPermissionChecked = false
+    private var isSystemSettingsExited = false
+
+    private var latitude: Double? = null
+    private var longitude: Double? = null
 
     private val viewModel: WritingViewModel by viewModels()
 
@@ -50,7 +59,6 @@ class WritingFragment : BaseFragment() {
             viewModel.removeSelectedImage(imageContent)
         }
     }
-
     private val galleryLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -83,7 +91,6 @@ class WritingFragment : BaseFragment() {
                 }
             }
         }
-
     private val pickMultipleVisualMediaLauncher =
         registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
             if (uris.isNotEmpty()) {
@@ -118,9 +125,11 @@ class WritingFragment : BaseFragment() {
     private val locationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions: Map<String, Boolean> ->
             val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
-            val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+            val coarseLocationGranted =
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
 
-            if ((fineLocationGranted || coarseLocationGranted).not()) {
+            if (!(fineLocationGranted || coarseLocationGranted)) {
+                // 위치 권한이 거부된 경우
                 val shouldShowRationaleFine = ActivityCompat.shouldShowRequestPermissionRationale(
                     requireActivity(),
                     Manifest.permission.ACCESS_FINE_LOCATION
@@ -131,13 +140,20 @@ class WritingFragment : BaseFragment() {
                 )
 
                 if (!shouldShowRationaleFine || !shouldShowRationaleCoarse) {
+                    // 권한 요청이 다시 보여지지 않는 경우
                     showLocationPermissionDeniedDialog()
                 } else {
+                    // 권한 요청이 다시 보여지는 경우
                     findNavController().navigateUp()
                     showToast(R.string.location_permission_cancel)
                 }
             }
         }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        locationManager = LocationManager(requireContext(), 10000L, 10000.0F, this)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -148,7 +164,28 @@ class WritingFragment : BaseFragment() {
         setupRecyclerView()
         observeSelectedImageContent()
         handleBackButtonClick()
-        checkLocationPermission()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!isLocationPermissionChecked) {
+            if (isSystemSettingsExited && !locationManager.isAnyLocationPermissionGranted(requireContext())) {
+                // 시스템 설정에서 돌아온 경우이지만 위치 권한이 허용되지 않은 경우
+                findNavController().navigateUp()
+            } else if (isSystemSettingsExited && locationManager.isAnyLocationPermissionGranted(requireContext())) {
+                // 시스템 설정에서 돌아온 경우이고 위치 권한이 허용된 경우
+            } else {
+                // 처음 진입하는 경우 위치 권한 체크
+                locationManager.checkLocationPermission(locationPermissionLauncher)
+                isLocationPermissionChecked = true
+            }
+        }
+        locationManager.startLocationTracking()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        locationManager.stopLocationTracking()
     }
 
     private fun setupAdapters() {
@@ -309,18 +346,6 @@ class WritingFragment : BaseFragment() {
         startActivity(intent)
     }
 
-    private fun checkLocationPermission() {
-        val fineLocationPermission = Manifest.permission.ACCESS_FINE_LOCATION
-        val coarseLocationPermission = Manifest.permission.ACCESS_COARSE_LOCATION
-        val permissions = arrayOf(fineLocationPermission, coarseLocationPermission)
-        val grantedPermissions = permissions.filter {
-            ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
-        }
-        if (grantedPermissions.size < permissions.size) {
-            locationPermissionLauncher.launch(permissions)
-        }
-    }
-
     private fun showLocationPermissionDeniedDialog() {
         val builder = MaterialAlertDialogBuilder(requireContext())
         builder.setTitle(getString(R.string.permission_request))
@@ -329,6 +354,8 @@ class WritingFragment : BaseFragment() {
         builder.setPositiveButton(getString(R.string.permission_positive)) { dialog, _ ->
             dialog.dismiss()
             openAppSettings()
+            isLocationPermissionChecked = false
+            isSystemSettingsExited = true
         }
         builder.setNegativeButton(getString(R.string.permission_negative)) { dialog, _ ->
             dialog.dismiss()
@@ -337,6 +364,12 @@ class WritingFragment : BaseFragment() {
         }
 
         val dialog = builder.create()
+        dialog.setCancelable(false)
         dialog.show()
+    }
+
+    override fun onLocationUpdated(latitude: Double?, longitude: Double?) {
+        this.latitude = latitude
+        this.longitude = longitude
     }
 }
