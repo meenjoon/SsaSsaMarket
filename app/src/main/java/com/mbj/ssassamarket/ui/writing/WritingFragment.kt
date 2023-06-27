@@ -1,36 +1,41 @@
 package com.mbj.ssassamarket.ui.writing
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.ConcatAdapter
-import android.Manifest
-import android.os.Build
-import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ConcatAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.ImageContent
 import com.mbj.ssassamarket.databinding.FragmentWritingBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.GalleryClickListener
 import com.mbj.ssassamarket.ui.common.ImageRemoveListener
+import com.mbj.ssassamarket.util.LocateFormat
 import com.mbj.ssassamarket.util.LocationManager
+import net.daum.mf.map.api.MapPoint
+import net.daum.mf.map.api.MapReverseGeoCoder
 
 class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     override val binding get() = _binding as FragmentWritingBinding
@@ -43,9 +48,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
 
     private var isLocationPermissionChecked = false
     private var isSystemSettingsExited = false
-
-    private var latitude: Double? = null
-    private var longitude: Double? = null
 
     private val viewModel: WritingViewModel by viewModels()
 
@@ -369,7 +371,20 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     }
 
     override fun onLocationUpdated(latitude: Double?, longitude: Double?) {
-        this.latitude = latitude
-        this.longitude = longitude
+        val reverseGeoCodingResultListener = object : MapReverseGeoCoder.ReverseGeoCodingResultListener {
+            override fun onReverseGeoCoderFoundAddress(mapReverseGeoCoder: MapReverseGeoCoder, addressString: String) {
+                binding.writingLocationTv.text = LocateFormat.getSelectedAddress(addressString, 2)
+            }
+
+            override fun onReverseGeoCoderFailedToFindAddress(mapReverseGeoCoder: MapReverseGeoCoder) {
+                Log.e("ReverseGeoCoder", "Failed to find address.")
+            }
+        }
+
+        if(latitude != null && longitude != null) {
+            val mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude)
+            val reverseGeoCoder = MapReverseGeoCoder(BuildConfig.KAKAO_MAP_NATIVE_KEY, mapPoint, reverseGeoCodingResultListener, requireActivity())
+            reverseGeoCoder.startFindingAddress()
+        }
     }
 }
