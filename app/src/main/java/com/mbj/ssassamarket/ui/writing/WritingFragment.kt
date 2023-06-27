@@ -32,8 +32,10 @@ import com.mbj.ssassamarket.databinding.FragmentWritingBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.GalleryClickListener
 import com.mbj.ssassamarket.ui.common.ImageRemoveListener
+import com.mbj.ssassamarket.util.Constants.PROGRESS_DIALOG
 import com.mbj.ssassamarket.util.LocateFormat
 import com.mbj.ssassamarket.util.LocationManager
+import com.mbj.ssassamarket.util.ProgressDialogFragment
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapReverseGeoCoder
 
@@ -48,6 +50,8 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
 
     private var isLocationPermissionChecked = false
     private var isSystemSettingsExited = false
+
+    private var progressDialog: ProgressDialogFragment? = null
 
     private val viewModel: WritingViewModel by viewModels()
 
@@ -170,19 +174,7 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
 
     override fun onResume() {
         super.onResume()
-        if (!isLocationPermissionChecked) {
-            if (isSystemSettingsExited && !locationManager.isAnyLocationPermissionGranted(requireContext())) {
-                // 시스템 설정에서 돌아온 경우이지만 위치 권한이 허용되지 않은 경우
-                findNavController().navigateUp()
-            } else if (isSystemSettingsExited && locationManager.isAnyLocationPermissionGranted(requireContext())) {
-                // 시스템 설정에서 돌아온 경우이고 위치 권한이 허용된 경우
-            } else {
-                // 처음 진입하는 경우 위치 권한 체크
-                locationManager.checkLocationPermission(locationPermissionLauncher)
-                isLocationPermissionChecked = true
-            }
-        }
-        locationManager.startLocationTracking()
+        handleLocationPermissionAndTracking()
     }
 
     override fun onPause() {
@@ -371,20 +363,59 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     }
 
     override fun onLocationUpdated(latitude: Double?, longitude: Double?) {
-        val reverseGeoCodingResultListener = object : MapReverseGeoCoder.ReverseGeoCodingResultListener {
-            override fun onReverseGeoCoderFoundAddress(mapReverseGeoCoder: MapReverseGeoCoder, addressString: String) {
-                binding.writingLocationTv.text = LocateFormat.getSelectedAddress(addressString, 2)
+        val reverseGeoCodingResultListener =
+            object : MapReverseGeoCoder.ReverseGeoCodingResultListener {
+                override fun onReverseGeoCoderFoundAddress(
+                    mapReverseGeoCoder: MapReverseGeoCoder,
+                    addressString: String
+                ) {
+                    binding.writingLocationTv.text = LocateFormat.getSelectedAddress(addressString, 2)
+                    hideLoadingDialog()
+                }
+
+                override fun onReverseGeoCoderFailedToFindAddress(mapReverseGeoCoder: MapReverseGeoCoder) {
+                    Log.e("ReverseGeoCoder", "Failed to find address.")
+                }
             }
 
-            override fun onReverseGeoCoderFailedToFindAddress(mapReverseGeoCoder: MapReverseGeoCoder) {
-                Log.e("ReverseGeoCoder", "Failed to find address.")
-            }
-        }
-
-        if(latitude != null && longitude != null) {
+        if (latitude != null && longitude != null) {
             val mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude)
-            val reverseGeoCoder = MapReverseGeoCoder(BuildConfig.KAKAO_MAP_NATIVE_KEY, mapPoint, reverseGeoCodingResultListener, requireActivity())
+            val reverseGeoCoder = MapReverseGeoCoder(
+                BuildConfig.KAKAO_MAP_NATIVE_KEY,
+                mapPoint,
+                reverseGeoCodingResultListener,
+                requireActivity()
+            )
             reverseGeoCoder.startFindingAddress()
         }
+    }
+
+    private fun handleLocationPermissionAndTracking() {
+        if (!isLocationPermissionChecked) {
+            if (isSystemSettingsExited && !locationManager.isAnyLocationPermissionGranted(requireContext())) {
+                // 시스템 설정에서 돌아온 경우이지만 위치 권한이 허용되지 않은 경우
+                findNavController().navigateUp()
+            } else if (isSystemSettingsExited && locationManager.isAnyLocationPermissionGranted(requireContext())) {
+                // 시스템 설정에서 돌아온 경우이고 위치 권한이 허용된 경우
+            } else {
+                // 처음 진입하는 경우 위치 권한 체크
+                locationManager.checkLocationPermission(locationPermissionLauncher)
+                isLocationPermissionChecked = true
+            }
+        }
+        if (locationManager.isAnyLocationPermissionGranted(requireContext()) && isLocationPermissionChecked) {
+            showLoadingDialog()
+        }
+        locationManager.startLocationTracking()
+    }
+
+    private fun showLoadingDialog() {
+        progressDialog = ProgressDialogFragment()
+        progressDialog?.show(childFragmentManager, PROGRESS_DIALOG)
+    }
+
+    private fun hideLoadingDialog() {
+        progressDialog?.dismiss()
+        progressDialog = null
     }
 }
