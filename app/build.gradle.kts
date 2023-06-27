@@ -11,6 +11,8 @@ plugins {
 val properties = Properties()
 properties.load(rootProject.file("local.properties").inputStream())
 
+val KAKAO_MAP_NATIVE_KEY = properties.getProperty("kakao_map_native_key")
+
 android {
     compileSdkVersion(33)
 
@@ -23,6 +25,9 @@ android {
 
         buildConfigField("String", "GOOGLE_CLIENT_ID", properties.getProperty("google_client_id"))
         buildConfigField("String", "FIREBASE_BASE_URL", properties.getProperty("firebase_base_url"))
+        buildConfigField("String", "KAKAO_MAP_NATIVE_KEY", properties.getProperty("kakao_map_native_key"))
+
+        manifestPlaceholders["KAKAO_MAP_NATIVE_KEY"] = KAKAO_MAP_NATIVE_KEY
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -99,4 +104,8 @@ dependencies {
 
     //리사이클러뷰 관련(ConcatAdapter)
     implementation ("androidx.recyclerview:recyclerview:1.3.0")
+
+    //Kakao Map API
+    implementation(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
+    implementation(files("libs/libDaumMapAndroid.jar"))
 }
