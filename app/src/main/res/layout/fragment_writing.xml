@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="viewModel"
             type="com.mbj.ssassamarket.ui.writing.WritingViewModel" />
@@ -159,7 +158,7 @@
                     android:layout_marginTop="28dp"
                     app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
                     app:layout_constraintTop_toBottomOf="@id/writing_category_md"
-                    app:srcCompat="@drawable/currency_symbol_icon" />
+                    app:symbolSrcCompat="@{viewModel.isPriceNullOrEmpty(viewModel.price)}" />
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/writing_price_tiet"

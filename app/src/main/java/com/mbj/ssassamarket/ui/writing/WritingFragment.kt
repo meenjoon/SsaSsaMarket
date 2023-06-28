@@ -188,7 +188,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         observeProductUploadSuccess()
         observeToastMessage()
         observeProductUploadCompleted()
-        observePrice()
     }
 
     override fun onResume() {
@@ -467,17 +466,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
             if (!productUploadCompleted) {
                 showLoadingDialog()
             }
-        }
-    }
-
-    private fun observePrice() {
-        viewModel.price.observe(viewLifecycleOwner) { price ->
-            val drawableResId = if (viewModel.isPriceNullOrEmpty(price)) {
-                R.drawable.currency_symbol_empty_icon
-            } else {
-                R.drawable.currency_symbol_full_icon
-            }
-            binding.writingCurrencySymbolIv.setImageResource(drawableResId)
         }
     }
 }
