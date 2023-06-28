@@ -89,7 +89,8 @@ class FirebaseDataSource(private val apiClient: ApiClient, private val storage: 
         favoriteList: List<String?>
     ): Boolean = coroutineScope {
         val (user, idToken) = getUserAndIdToken()
-        return@coroutineScope if (idToken != null && user != null) {
+
+        if (idToken != null && user != null) {
             val userUid = user.uid
             val productPostItem = ProductPostItem(
                 userUid,
@@ -106,24 +107,29 @@ class FirebaseDataSource(private val apiClient: ApiClient, private val storage: 
                 latLng,
                 favoriteList
             )
+
             val response = addPostItem(productPostItem, idToken)
             try {
                 if (response.isSuccessful) {
                     Log.d(TAG, "글이 성공적으로 작성되었습니다.")
-                    true
+                    val updateResult = updateMyLatLng(latLng)
+                    if (updateResult) {
+                        return@coroutineScope true
+                    } else {
+                        Log.e(TAG, "위치 정보 업데이트에 실패하였습니다.")
+                    }
                 } else {
                     val statusCode = response.code()
                     Log.e(TAG, "글 작성에 실패하였습니다. (Status Code: $statusCode)")
-                    false
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "글 작성을 추가 하던 중 예외가 발생하였습니다.", e)
-                false
             }
         } else {
             Log.d(TAG, "GoogleIdToken, User가 존재하지 않습니다.")
-            false
         }
+
+        return@coroutineScope false
     }
 
     override suspend fun getMyDataId(): String? {
