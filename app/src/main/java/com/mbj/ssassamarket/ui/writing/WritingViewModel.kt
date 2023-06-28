@@ -154,6 +154,10 @@ class WritingViewModel(private val postItemRepository: PostItemRepository) : Vie
                 categoryRequest
     }
 
+    fun isPriceNullOrEmpty(price: String?): Boolean {
+        return price.isNullOrEmpty()
+    }
+
     companion object {
         fun provideFactory(postItemRepository: PostItemRepository) = viewModelFactory {
             initializer {
