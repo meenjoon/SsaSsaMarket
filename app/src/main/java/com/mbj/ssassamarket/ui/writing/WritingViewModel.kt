@@ -56,6 +56,15 @@ class WritingViewModel(private val postItemRepository: PostItemRepository) : Vie
     val toastMessage: LiveData<Event<String>>
         get() = _toastMessage
 
+    private val _requiredProperty: MutableLiveData<Boolean> = MediatorLiveData<Boolean>().apply {
+        addSource(title) { value = areAllFieldsFilled() }
+        addSource(price) { value = areAllFieldsFilled() }
+        addSource(content) { value = areAllFieldsFilled() }
+        addSource(category) { value = areAllFieldsFilled() }
+    }
+    val requiredProperty: LiveData<Boolean>
+        get() = _requiredProperty
+
     fun handleGalleryResult(result: List<ImageContent>) {
         val currentList = _selectedImageList.value.orEmpty()
         val totalImages = currentList.size + result.size
@@ -137,6 +146,13 @@ class WritingViewModel(private val postItemRepository: PostItemRepository) : Vie
         }
     }
 
+    private fun areAllFieldsFilled(): Boolean {
+        val categoryRequest = category.value != CATEGORY_REQUEST
+        return !title.value.isNullOrEmpty() &&
+                !price.value.isNullOrEmpty() &&
+                !content.value.isNullOrEmpty() &&
+                categoryRequest
+    }
 
     companion object {
         fun provideFactory(postItemRepository: PostItemRepository) = viewModelFactory {
