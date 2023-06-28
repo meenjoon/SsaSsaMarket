@@ -184,7 +184,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         setupRecyclerView()
         observeSelectedImageContent()
         handleBackButtonClick()
-        observeLocation()
         observeProductUploadResponse()
         observeProductUploadSuccess()
         observeToastMessage()
@@ -445,13 +444,7 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         progressDialog?.dismiss()
         progressDialog = null
     }
-
-    private fun observeLocation() {
-        viewModel.location.observe(viewLifecycleOwner) { location ->
-            binding.writingLocationTv.text = location
-        }
-    }
-
+    
     private fun observeProductUploadResponse() {
         viewModel.productUploadResponse.observe(viewLifecycleOwner) { response ->
             viewModel.handlePostResponse(response)

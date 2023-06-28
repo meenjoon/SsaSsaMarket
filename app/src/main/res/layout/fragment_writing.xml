@@ -103,6 +103,7 @@
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
                     app:layout_constraintTop_toBottomOf="@id/writing_rv"
+                    android:text="@{viewModel.location}"
                     tools:text="대전" />
 
                 <com.google.android.material.textfield.TextInputEditText
