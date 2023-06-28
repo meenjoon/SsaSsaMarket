@@ -188,7 +188,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         observeProductUploadSuccess()
         observeToastMessage()
         observeProductUploadCompleted()
-        observeRequiredProperty()
         binding.writingRegisterMcv.setOnClickListener {
             viewModel.registerProductWithValidation()
         }
@@ -444,7 +443,7 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         progressDialog?.dismiss()
         progressDialog = null
     }
-    
+
     private fun observeProductUploadResponse() {
         viewModel.productUploadResponse.observe(viewLifecycleOwner) { response ->
             viewModel.handlePostResponse(response)
@@ -470,17 +469,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
             if (!productUploadCompleted) {
                 showLoadingDialog()
             }
-        }
-    }
-
-    private fun observeRequiredProperty() {
-        viewModel.requiredProperty.observe(viewLifecycleOwner) { requiredProperty ->
-            val backgroundColor = if (requiredProperty) {
-                ContextCompat.getColor(requireContext(), R.color.orange_700)
-            } else {
-                ContextCompat.getColor(requireContext(), R.color.orange_300)
-            }
-            binding.writingRegisterMcv.setCardBackgroundColor(backgroundColor)
         }
     }
 }
