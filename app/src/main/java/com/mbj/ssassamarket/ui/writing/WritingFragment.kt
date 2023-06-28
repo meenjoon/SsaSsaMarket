@@ -182,6 +182,7 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         setupRecyclerView()
         observeSelectedImageContent()
         handleBackButtonClick()
+        observeLocation()
     }
 
     override fun onResume() {
@@ -382,7 +383,8 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
                     mapReverseGeoCoder: MapReverseGeoCoder,
                     addressString: String
                 ) {
-                    binding.writingLocationTv.text = LocateFormat.getSelectedAddress(addressString, 2)
+                    val location = LocateFormat.getSelectedAddress(addressString, 2)
+                    viewModel.setLocation(location)
                     hideLoadingDialog()
                 }
 
@@ -392,6 +394,8 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
             }
 
         if (latitude != null && longitude != null) {
+            val latLngString = "$latitude $longitude"
+            viewModel.setLatLng(latLngString)
             val mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude)
             val reverseGeoCoder = MapReverseGeoCoder(
                 BuildConfig.KAKAO_MAP_NATIVE_KEY,
@@ -430,5 +434,11 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     private fun hideLoadingDialog() {
         progressDialog?.dismiss()
         progressDialog = null
+    }
+
+    private fun observeLocation() {
+        viewModel.location.observe(viewLifecycleOwner) { location ->
+            binding.writingLocationTv.text = location
+        }
     }
 }

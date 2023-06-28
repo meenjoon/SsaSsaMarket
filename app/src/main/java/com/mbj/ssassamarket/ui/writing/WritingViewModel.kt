@@ -17,6 +17,15 @@ class WritingViewModel(private val postItemRepository: PostItemRepository) : Vie
     val category: LiveData<String>
         get() = _category
 
+    private val _latLngString = MutableLiveData<String>()
+    val latLngString: LiveData<String>
+        get() = _latLngString
+
+    private val _location = MutableLiveData<String>()
+    val location: LiveData<String>
+        get() = _location
+
+
     fun handleGalleryResult(result: List<ImageContent>) {
         val currentList = _selectedImageList.value.orEmpty()
         val totalImages = currentList.size + result.size
@@ -39,6 +48,14 @@ class WritingViewModel(private val postItemRepository: PostItemRepository) : Vie
 
     fun setCategoryLabel(category: String) {
         _category.value = getCategoryLabelFromInput(category)
+    }
+
+    fun setLatLng(latLng: String) {
+        _latLngString.value = latLng
+    }
+
+    fun setLocation(location: String) {
+        _location.value = location
     }
 
     companion object {
