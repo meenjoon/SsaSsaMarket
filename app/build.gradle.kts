@@ -74,6 +74,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
     implementation("com.google.firebase:firebase-analytics-ktx") //analytics 관련
     implementation("com.google.firebase:firebase-auth-ktx:22.0.0") //auth 관련
+    implementation("com.google.firebase:firebase-storage-ktx:20.2.1") // storage 관련
 
     //Google Play Services 관련
     implementation("com.google.android.gms:play-services-base:18.2.0") //base 관련
