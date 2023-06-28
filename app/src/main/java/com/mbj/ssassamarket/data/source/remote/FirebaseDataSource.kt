@@ -152,6 +152,47 @@ class FirebaseDataSource(private val apiClient: ApiClient, private val storage: 
         return null
     }
 
+    override suspend fun updateMyLatLng(latLng: String): Boolean {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+
+            if (user?.uid != null && idToken != null) {
+                val dataId = getMyDataId()
+                val existingUserResponse = apiClient.getUser(idToken)
+                val userMap = existingUserResponse.body()
+
+                userMap?.let { users ->
+                    val foundUser = users.values.flatMap { it.values }.find { it.userId == user.uid }
+                    foundUser?.let {
+                        val updatedUser = User(userId = it.userId, userName = it.userName, latLng = latLng)
+
+                        try {
+                            if (dataId != null) {
+                                val response = apiClient.updateMyLatLng(user.uid, dataId, updatedUser)
+                                if (response.isSuccessful) {
+                                    Log.d(TAG, "위치 정보 업데이트 성공")
+                                    return true
+                                } else {
+                                    Log.e(TAG, "위치 정보 업데이트 실패 (Status Code: ${response.code()})")
+                                }
+                            } else {
+                                Log.e(TAG, "데이터 ID가 없습니다.")
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "위치 정보 업데이트 오류", e)
+                        }
+                    }
+                }
+            } else {
+                Log.d(TAG, "GoogleIdToken, User가 존재하지 않습니다.")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "예외 발생", e)
+        }
+
+        return false
+    }
+
     private suspend fun addPostItem(
         ProductPostItem: ProductPostItem,
         idToken: String

@@ -20,4 +20,5 @@ interface MarketNetworkDataSource {
         favoriteList: List<String?>
     ): Boolean
     suspend fun getMyDataId(): String?
+    suspend fun updateMyLatLng(latLng: String): Boolean
 }

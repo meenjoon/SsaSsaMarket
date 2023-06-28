@@ -32,6 +32,13 @@ interface ApiClient {
         @Query("auth") auth: String
     ): Response<Map<String, String>>
 
+    @PATCH("user/{userId}/{dataId}.json")
+    suspend fun updateMyLatLng(
+        @Path("userId") userId: String,
+        @Path("dataId") dataId: String,
+        @Body user: User
+    ) : Response<Unit>
+
     companion object {
         private const val FIREBASE_BASE_URL = BuildConfig.FIREBASE_BASE_URL
 
