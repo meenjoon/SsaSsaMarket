@@ -45,10 +45,11 @@
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/writing_register_mcv"
                         style="@style/CardViewButtonStyle"
-                        app:cardBackgroundColor="@{viewModel.requiredProperty ? @color/orange_700 : @color/orange_300}"
                         android:layout_width="55dp"
                         android:layout_height="40dp"
                         android:layout_marginEnd="20dp"
+                        android:onClick="@{() -> viewModel.registerProductWithValidation()}"
+                        app:cardBackgroundColor="@{viewModel.requiredProperty ? @color/orange_700 : @color/orange_300}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
@@ -99,12 +100,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
+                    android:text="@{viewModel.location}"
                     android:textColor="@color/orange_700"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
                     app:layout_constraintTop_toBottomOf="@id/writing_rv"
-                    android:text="@{viewModel.location}"
                     tools:text="대전" />
 
                 <com.google.android.material.textfield.TextInputEditText

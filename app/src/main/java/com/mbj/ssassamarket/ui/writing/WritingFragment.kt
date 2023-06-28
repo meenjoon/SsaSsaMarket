@@ -188,9 +188,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         observeProductUploadSuccess()
         observeToastMessage()
         observeProductUploadCompleted()
-        binding.writingRegisterMcv.setOnClickListener {
-            viewModel.registerProductWithValidation()
-        }
     }
 
     override fun onResume() {
