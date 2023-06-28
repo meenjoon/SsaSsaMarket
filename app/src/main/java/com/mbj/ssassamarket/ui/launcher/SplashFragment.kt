@@ -7,6 +7,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.storage.FirebaseStorage
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.data.source.UserInfoRepository
@@ -26,8 +27,7 @@ class SplashFragment : BaseFragment() {
         SplashViewModel.provideFactory(
             UserInfoRepository(
                 FirebaseDataSource(
-                    SsaSsaMarketApplication.appContainer.provideApiClient()
-                )
+                    SsaSsaMarketApplication.appContainer.provideApiClient(), FirebaseStorage.getInstance())
             ), UserPreferenceRepository()
         )
     }

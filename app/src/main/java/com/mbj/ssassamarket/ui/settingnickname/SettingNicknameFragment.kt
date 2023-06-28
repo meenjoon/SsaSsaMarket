@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.google.firebase.storage.FirebaseStorage
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.data.source.UserInfoRepository
@@ -29,7 +30,8 @@ class SettingNicknameFragment : BaseFragment() {
         SettingNicknameViewModel.provideFactory(
             UserInfoRepository(
                 FirebaseDataSource(
-                    SsaSsaMarketApplication.appContainer.provideApiClient()
+                    SsaSsaMarketApplication.appContainer.provideApiClient(),
+                    FirebaseStorage.getInstance()
                 )
             )
         )

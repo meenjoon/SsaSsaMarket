@@ -20,6 +20,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.storage.FirebaseStorage
 import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.SsaSsaMarketApplication
@@ -28,7 +29,6 @@ import com.mbj.ssassamarket.data.source.UserPreferenceRepository
 import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
 import com.mbj.ssassamarket.databinding.FragmentLogInBinding
 import com.mbj.ssassamarket.ui.BaseFragment
-import com.mbj.ssassamarket.util.Constants.AUTO_LOGIN
 import com.mbj.ssassamarket.util.Constants.PROGRESS_DIALOG
 import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.ProgressDialogFragment
@@ -46,7 +46,8 @@ class LogInFragment : BaseFragment() {
 
     private val viewModel by viewModels<LogInViewModel> {
         LogInViewModel.provideFactory(
-            UserInfoRepository(FirebaseDataSource(SsaSsaMarketApplication.appContainer.provideApiClient())),
+            UserInfoRepository(FirebaseDataSource(SsaSsaMarketApplication.appContainer.provideApiClient(),
+                FirebaseStorage.getInstance())),
             UserPreferenceRepository()
         )
     }

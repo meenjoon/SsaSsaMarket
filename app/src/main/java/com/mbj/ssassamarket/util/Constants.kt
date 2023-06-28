@@ -9,4 +9,5 @@ object Constants {
     const val NICKNAME_DUPLICATE = "setting_nickname_duplicate"
     const val SUCCESS = "success"
     const val PROGRESS_DIALOG = "progressDialog"
+    const val CURRENT_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss"
 }
