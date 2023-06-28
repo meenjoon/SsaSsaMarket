@@ -25,6 +25,12 @@ class WritingViewModel(private val postItemRepository: PostItemRepository) : Vie
     val location: LiveData<String>
         get() = _location
 
+    val title = MutableLiveData<String>()
+
+    val price = MutableLiveData<String>()
+
+    val content = MutableLiveData<String>()
+
 
     fun handleGalleryResult(result: List<ImageContent>) {
         val currentList = _selectedImageList.value.orEmpty()

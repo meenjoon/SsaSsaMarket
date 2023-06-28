@@ -5,6 +5,9 @@
 
     <data>
 
+        <variable
+            name="viewModel"
+            type="com.mbj.ssassamarket.ui.writing.WritingViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -110,6 +113,7 @@
                     android:background="@null"
                     android:hint="@string/writing_title_hint"
                     android:inputType="text"
+                    android:text="@={viewModel.title}"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
                     app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
@@ -162,6 +166,7 @@
                     android:background="@null"
                     android:hint="@string/writing_price_hint"
                     android:inputType="number"
+                    android:text="@={viewModel.price}"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="@id/writing_currency_symbol_iv"
                     app:layout_constraintStart_toEndOf="@id/writing_currency_symbol_iv"
@@ -187,6 +192,7 @@
                     android:gravity="top"
                     android:hint="@string/writing_content_hint"
                     android:scrollbars="vertical"
+                    android:text="@={viewModel.content}"
                     app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
                     app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
                     app:layout_constraintTop_toBottomOf="@id/writing_price_md" />
