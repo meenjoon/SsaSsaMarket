@@ -37,6 +37,7 @@ import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.GalleryClickListener
 import com.mbj.ssassamarket.ui.common.ImageRemoveListener
 import com.mbj.ssassamarket.util.Constants.PROGRESS_DIALOG
+import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.LocateFormat
 import com.mbj.ssassamarket.util.LocationManager
 import com.mbj.ssassamarket.util.ProgressDialogFragment
@@ -184,6 +185,13 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         observeSelectedImageContent()
         handleBackButtonClick()
         observeLocation()
+        observeProductUploadResponse()
+        observeProductUploadSuccess()
+        observeToastMessage()
+        observeProductUploadCompleted()
+        binding.writingRegisterMcv.setOnClickListener {
+            viewModel.registerProductWithValidation()
+        }
     }
 
     override fun onResume() {
@@ -440,6 +448,34 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     private fun observeLocation() {
         viewModel.location.observe(viewLifecycleOwner) { location ->
             binding.writingLocationTv.text = location
+        }
+    }
+
+    private fun observeProductUploadResponse() {
+        viewModel.productUploadResponse.observe(viewLifecycleOwner) { response ->
+            viewModel.handlePostResponse(response)
+        }
+    }
+
+    private fun observeProductUploadSuccess() {
+        viewModel.productUploadSuccess.observe(viewLifecycleOwner, EventObserver { uploadSuccess ->
+            if (uploadSuccess) {
+                findNavController().navigateUp()
+            }
+        })
+    }
+
+    private fun observeToastMessage() {
+        viewModel.toastMessage.observe(viewLifecycleOwner, EventObserver { message ->
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        })
+    }
+
+    private fun observeProductUploadCompleted() {
+        viewModel.productUploadCompleted.observe(viewLifecycleOwner) { productUploadCompleted ->
+            if (!productUploadCompleted) {
+                showLoadingDialog()
+            }
         }
     }
 }
