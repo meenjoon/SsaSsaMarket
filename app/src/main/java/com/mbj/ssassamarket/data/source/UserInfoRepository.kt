@@ -15,4 +15,7 @@ class UserInfoRepository(private val marketNetworkDataSource: MarketNetworkDataS
     suspend fun checkDuplicateUserName(nickname: String): Boolean {
         return marketNetworkDataSource.checkDuplicateUserName(nickname)
     }
+    suspend fun getMyDataId(): String? {
+        return marketNetworkDataSource.getMyDataId()
+    }
 }

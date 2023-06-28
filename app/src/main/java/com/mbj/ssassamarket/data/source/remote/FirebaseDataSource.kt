@@ -126,6 +126,32 @@ class FirebaseDataSource(private val apiClient: ApiClient, private val storage: 
         }
     }
 
+    override suspend fun getMyDataId(): String? {
+        val (user, idToken) = getUserAndIdToken()
+        if (idToken != null && user?.uid != null) {
+            try {
+                val response = apiClient.getUser(idToken)
+                if (response.isSuccessful) {
+                    val users = response.body()
+                    if (users != null) {
+                        for ((userNode, userDataMap) in users) {
+                            for ((key, foundUser) in userDataMap) {
+                                if (foundUser.userId == user.uid) {
+                                    return key
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "getUserNode Error: API call failed with response code: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "getUserNode Error: $e")
+            }
+        }
+        return null
+    }
+
     private suspend fun addPostItem(
         ProductPostItem: ProductPostItem,
         idToken: String

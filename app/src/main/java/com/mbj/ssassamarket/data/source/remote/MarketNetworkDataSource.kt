@@ -19,4 +19,5 @@ interface MarketNetworkDataSource {
         latLng: String,
         favoriteList: List<String?>
     ): Boolean
+    suspend fun getMyDataId(): String?
 }
