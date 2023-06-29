@@ -2,8 +2,9 @@ package com.mbj.ssassamarket.data.source.remote
 
 import android.util.Log
 import com.mbj.ssassamarket.data.model.ImageContent
+import javax.inject.Inject
 
-class PostItemRepository(private val marketNetworkDataSource: MarketNetworkDataSource) {
+class PostItemRepository @Inject constructor(private val marketNetworkDataSource: MarketNetworkDataSource) {
 
     suspend fun addProductPost(
         content: String,

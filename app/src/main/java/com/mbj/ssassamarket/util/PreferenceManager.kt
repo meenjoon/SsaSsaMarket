@@ -1,13 +1,9 @@
 package com.mbj.ssassamarket.util
 
-import android.content.Context
+import android.content.SharedPreferences
+import javax.inject.Inject
 
-class PreferenceManager(context: Context) {
-
-    private val sharedPreferences = context.getSharedPreferences(
-        "com.mbj.ssassamarket.PREFERENCE_KEY",
-        Context.MODE_PRIVATE
-    )
+class PreferenceManager @Inject constructor(private val sharedPreferences: SharedPreferences) {
 
     fun putBoolean(key: String, value: Boolean) {
         with(sharedPreferences.edit()) {

@@ -4,8 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.util.Constants
 import com.mbj.ssassamarket.util.Constants.NICKNAME_DUPLICATE
@@ -14,9 +12,12 @@ import com.mbj.ssassamarket.util.Constants.NICKNAME_REQUEST
 import com.mbj.ssassamarket.util.Constants.NICKNAME_VALID
 import com.mbj.ssassamarket.util.Constants.SUCCESS
 import com.mbj.ssassamarket.util.Event
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SettingNicknameViewModel(private val repository: UserInfoRepository) : ViewModel() {
+@HiltViewModel
+class SettingNicknameViewModel @Inject constructor(private val repository: UserInfoRepository) : ViewModel() {
 
     val nickname = MutableLiveData<String>()
 
@@ -89,13 +90,5 @@ class SettingNicknameViewModel(private val repository: UserInfoRepository) : Vie
             _uploadSuccess.value = Event(false)
         }
         _preUploadCompleted.value = true
-    }
-
-    companion object {
-        fun provideFactory(repository: UserInfoRepository) = viewModelFactory {
-            initializer {
-                SettingNicknameViewModel(repository)
-            }
-        }
     }
 }

@@ -1,8 +1,9 @@
 package com.mbj.ssassamarket.data.source
 
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
+import javax.inject.Inject
 
-class UserInfoRepository(private val marketNetworkDataSource: MarketNetworkDataSource) {
+class UserInfoRepository @Inject constructor(private val marketNetworkDataSource: MarketNetworkDataSource) {
 
     suspend fun currentUserExists(): Boolean {
         return marketNetworkDataSource.currentUserExists()

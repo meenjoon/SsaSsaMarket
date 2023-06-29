@@ -1,8 +1,6 @@
 package com.mbj.ssassamarket.ui.writing
 
 import androidx.lifecycle.*
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.mbj.ssassamarket.data.model.ImageContent
 import com.mbj.ssassamarket.data.source.remote.PostItemRepository
 import com.mbj.ssassamarket.util.CategoryFormat.getCategoryLabelFromInput
@@ -14,9 +12,12 @@ import com.mbj.ssassamarket.util.Constants.WRITING_POST_REQUEST_PRICE
 import com.mbj.ssassamarket.util.Constants.WRITING_POST_REQUEST_TITLE
 import com.mbj.ssassamarket.util.Constants.WRITING_POST_SUCCESS
 import com.mbj.ssassamarket.util.Event
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class WritingViewModel(private val postItemRepository: PostItemRepository) : ViewModel() {
+@HiltViewModel
+class WritingViewModel @Inject constructor(private val postItemRepository: PostItemRepository) : ViewModel() {
 
     private val _selectedImageList: MutableLiveData<List<ImageContent>> = MutableLiveData()
     val selectedImageList: LiveData<List<ImageContent>>
@@ -156,13 +157,5 @@ class WritingViewModel(private val postItemRepository: PostItemRepository) : Vie
 
     fun isPriceNullOrEmpty(price: String?): Boolean {
         return price.isNullOrEmpty()
-    }
-
-    companion object {
-        fun provideFactory(postItemRepository: PostItemRepository) = viewModelFactory {
-            initializer {
-                WritingViewModel(postItemRepository)
-            }
-        }
     }
 }

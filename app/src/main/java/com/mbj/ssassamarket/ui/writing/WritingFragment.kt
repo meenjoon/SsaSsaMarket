@@ -25,13 +25,9 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.storage.FirebaseStorage
 import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
-import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.data.model.ImageContent
-import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
-import com.mbj.ssassamarket.data.source.remote.PostItemRepository
 import com.mbj.ssassamarket.databinding.FragmentWritingBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.GalleryClickListener
@@ -41,9 +37,11 @@ import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.LocateFormat
 import com.mbj.ssassamarket.util.LocationManager
 import com.mbj.ssassamarket.util.ProgressDialogFragment
+import dagger.hilt.android.AndroidEntryPoint
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapReverseGeoCoder
 
+@AndroidEntryPoint
 class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     override val binding get() = _binding as FragmentWritingBinding
     override val layoutId: Int get() = R.layout.fragment_writing
@@ -58,16 +56,7 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
 
     private var progressDialog: ProgressDialogFragment? = null
 
-    private val viewModel by viewModels<WritingViewModel> {
-        WritingViewModel.provideFactory(
-            PostItemRepository(
-                FirebaseDataSource(
-                    SsaSsaMarketApplication.appContainer.provideApiClient(),
-                    FirebaseStorage.getInstance()
-                )
-            )
-        )
-    }
+    private val viewModel: WritingViewModel by viewModels()
 
     private val onGallerySelectedListener = object : GalleryClickListener {
         override fun onGalleryClick() {
