@@ -67,7 +67,10 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
                         }
                     }
                 } else {
-                    Log.e("checkDuplicateUserName Error", "${Exception(response.code().toString())}")
+                    Log.e(
+                        "checkDuplicateUserName Error",
+                        "${Exception(response.code().toString())}"
+                    )
                 }
             } catch (e: Exception) {
                 Log.e("checkDuplicateUserName Error", e.toString())
@@ -150,7 +153,10 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
                         }
                     }
                 } else {
-                    Log.e(TAG, "getUserNode Error: API call failed with response code: ${response.code()}")
+                    Log.e(
+                        TAG,
+                        "getUserNode Error: API call failed with response code: ${response.code()}"
+                    )
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "getUserNode Error: $e")
@@ -172,7 +178,6 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
                     val foundUser = users.values.flatMap { it.values }.find { it.userId == user.uid }
                     foundUser?.let {
                         val updatedUser = User(userId = it.userId, userName = it.userName, latLng = latLng)
-
                         try {
                             if (dataId != null) {
                                 val response = apiClient.updateMyLatLng(user.uid, dataId, updatedUser)
@@ -198,6 +203,30 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
         }
 
         return false
+    }
+
+    override suspend fun getProduct(): List<ProductPostItem> {
+        val (user, idToken) = getUserAndIdToken()
+        return try {
+            if (idToken != null) {
+                val response = apiClient.getProduct(idToken)
+                if (response.isSuccessful) {
+                    val productMap: Map<String, ProductPostItem>? = response.body()
+                    productMap?.values?.toList() ?: emptyList()
+                } else {
+                    // Handle error
+                    val statusCode = response.code()
+                    Log.e(TAG, "Failed to get product. Status Code: $statusCode")
+                    emptyList()
+                }
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            // Handle exception
+            Log.e(TAG, "Exception while getting product", e)
+            emptyList()
+        }
     }
 
     private suspend fun addPostItem(

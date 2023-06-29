@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.data.source
 
 import android.util.Log
 import com.mbj.ssassamarket.data.model.ImageContent
+import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
 import javax.inject.Inject
 
@@ -37,6 +38,15 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
         } catch (e: Exception) {
             Log.e(TAG, "포스트 추가 중 예외가 발생하였습니다.", e)
             return false
+        }
+    }
+
+    suspend fun getProduct(): List<ProductPostItem> {
+        return try {
+            marketNetworkDataSource.getProduct()
+        } catch (e: Exception) {
+            Log.e(TAG, "Product 가져 오던 중 에외가 발생하였습니다.", e)
+            emptyList()
         }
     }
 

@@ -1,15 +1,8 @@
 package com.mbj.ssassamarket.data.source.remote
 
-import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.model.User
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
 
 interface ApiClient {
@@ -38,5 +31,10 @@ interface ApiClient {
         @Path("dataId") dataId: String,
         @Body user: User
     ) : Response<Unit>
+
+    @GET("posts.json")
+    suspend fun getProduct(
+        @Query("auth") auth: String
+    ): Response<Map<String, ProductPostItem>>
 }
 
