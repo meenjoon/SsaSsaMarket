@@ -7,7 +7,7 @@
 
     </data>
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.home.HomeFragment">
@@ -16,7 +16,9 @@
             android:id="@+id/home_abl"
             style="@style/AppBarLayout"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/app_bar_layout_height">
+            android:layout_height="@dimen/app_bar_layout_height"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <androidx.appcompat.widget.Toolbar
                 android:layout_width="match_parent"
@@ -38,6 +40,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <Spinner
+                        android:id="@+id/home_spinner"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:entries="@array/category_list"
@@ -51,38 +54,20 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.core.widget.NestedScrollView
-            android:id="@+id/home_nsv"
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/home_tl"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            android:layout_height="50dp"
+            app:layout_constraintTop_toBottomOf="@id/home_abl" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/home_vp2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="85dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/home_tl" />
 
-                <com.google.android.material.tabs.TabLayout
-                    android:id="@+id/home_tl"
-                    style="@style/HomeTabLayout"
-                    android:layout_width="0dp"
-                    android:layout_height="50dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <androidx.viewpager2.widget.ViewPager2
-                    android:id="@+id/home_vp2"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/home_tl" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-        </androidx.core.widget.NestedScrollView>
-
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
