@@ -1,44 +1,73 @@
 package com.mbj.ssassamarket.ui.writing
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.ConcatAdapter
-import android.Manifest
-import android.os.Build
-import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ConcatAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.storage.FirebaseStorage
+import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
+import com.mbj.ssassamarket.SsaSsaMarketApplication
 import com.mbj.ssassamarket.data.model.ImageContent
+import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
+import com.mbj.ssassamarket.data.source.remote.PostItemRepository
 import com.mbj.ssassamarket.databinding.FragmentWritingBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.GalleryClickListener
 import com.mbj.ssassamarket.ui.common.ImageRemoveListener
+import com.mbj.ssassamarket.util.Constants.PROGRESS_DIALOG
+import com.mbj.ssassamarket.util.EventObserver
+import com.mbj.ssassamarket.util.LocateFormat
+import com.mbj.ssassamarket.util.LocationManager
+import com.mbj.ssassamarket.util.ProgressDialogFragment
+import net.daum.mf.map.api.MapPoint
+import net.daum.mf.map.api.MapReverseGeoCoder
 
-class WritingFragment : BaseFragment() {
+class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     override val binding get() = _binding as FragmentWritingBinding
     override val layoutId: Int get() = R.layout.fragment_writing
 
     private lateinit var galleryAdapter: GalleryAdapter
     private lateinit var attachedImageAdapter: AttachedImageAdapter
 
-    private val viewModel: WritingViewModel by viewModels()
+    private lateinit var locationManager: LocationManager
+
+    private var isLocationPermissionChecked = false
+    private var isSystemSettingsExited = false
+
+    private var progressDialog: ProgressDialogFragment? = null
+
+    private val viewModel by viewModels<WritingViewModel> {
+        WritingViewModel.provideFactory(
+            PostItemRepository(
+                FirebaseDataSource(
+                    SsaSsaMarketApplication.appContainer.provideApiClient(),
+                    FirebaseStorage.getInstance()
+                )
+            )
+        )
+    }
 
     private val onGallerySelectedListener = object : GalleryClickListener {
         override fun onGalleryClick() {
@@ -50,7 +79,6 @@ class WritingFragment : BaseFragment() {
             viewModel.removeSelectedImage(imageContent)
         }
     }
-
     private val galleryLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -83,7 +111,6 @@ class WritingFragment : BaseFragment() {
                 }
             }
         }
-
     private val pickMultipleVisualMediaLauncher =
         registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
             if (uris.isNotEmpty()) {
@@ -118,9 +145,11 @@ class WritingFragment : BaseFragment() {
     private val locationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions: Map<String, Boolean> ->
             val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
-            val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+            val coarseLocationGranted =
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
 
-            if ((fineLocationGranted || coarseLocationGranted).not()) {
+            if (!(fineLocationGranted || coarseLocationGranted)) {
+                // 위치 권한이 거부된 경우
                 val shouldShowRationaleFine = ActivityCompat.shouldShowRequestPermissionRationale(
                     requireActivity(),
                     Manifest.permission.ACCESS_FINE_LOCATION
@@ -131,24 +160,44 @@ class WritingFragment : BaseFragment() {
                 )
 
                 if (!shouldShowRationaleFine || !shouldShowRationaleCoarse) {
+                    // 권한 요청이 다시 보여지지 않는 경우
                     showLocationPermissionDeniedDialog()
                 } else {
+                    // 권한 요청이 다시 보여지는 경우
                     findNavController().navigateUp()
                     showToast(R.string.location_permission_cancel)
                 }
             }
         }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        locationManager = LocationManager(requireContext(), 10000L, 10000.0F, this)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        binding.viewModel = viewModel
         setupCategorySpinner()
         setTouchInterceptHandling()
         setupAdapters()
         setupRecyclerView()
         observeSelectedImageContent()
         handleBackButtonClick()
-        checkLocationPermission()
+        observeProductUploadResponse()
+        observeProductUploadSuccess()
+        observeToastMessage()
+        observeProductUploadCompleted()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        handleLocationPermissionAndTracking()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        locationManager.stopLocationTracking()
     }
 
     private fun setupAdapters() {
@@ -231,6 +280,7 @@ class WritingFragment : BaseFragment() {
                         view.setTextColor(Color.BLACK)
                     }
                 }
+                viewModel.setCategoryLabel(selectedItem)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -309,18 +359,6 @@ class WritingFragment : BaseFragment() {
         startActivity(intent)
     }
 
-    private fun checkLocationPermission() {
-        val fineLocationPermission = Manifest.permission.ACCESS_FINE_LOCATION
-        val coarseLocationPermission = Manifest.permission.ACCESS_COARSE_LOCATION
-        val permissions = arrayOf(fineLocationPermission, coarseLocationPermission)
-        val grantedPermissions = permissions.filter {
-            ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
-        }
-        if (grantedPermissions.size < permissions.size) {
-            locationPermissionLauncher.launch(permissions)
-        }
-    }
-
     private fun showLocationPermissionDeniedDialog() {
         val builder = MaterialAlertDialogBuilder(requireContext())
         builder.setTitle(getString(R.string.permission_request))
@@ -329,6 +367,8 @@ class WritingFragment : BaseFragment() {
         builder.setPositiveButton(getString(R.string.permission_positive)) { dialog, _ ->
             dialog.dismiss()
             openAppSettings()
+            isLocationPermissionChecked = false
+            isSystemSettingsExited = true
         }
         builder.setNegativeButton(getString(R.string.permission_negative)) { dialog, _ ->
             dialog.dismiss()
@@ -337,6 +377,95 @@ class WritingFragment : BaseFragment() {
         }
 
         val dialog = builder.create()
+        dialog.setCancelable(false)
         dialog.show()
+    }
+
+    override fun onLocationUpdated(latitude: Double?, longitude: Double?) {
+        val reverseGeoCodingResultListener =
+            object : MapReverseGeoCoder.ReverseGeoCodingResultListener {
+                override fun onReverseGeoCoderFoundAddress(
+                    mapReverseGeoCoder: MapReverseGeoCoder,
+                    addressString: String
+                ) {
+                    val location = LocateFormat.getSelectedAddress(addressString, 2)
+                    viewModel.setLocation(location)
+                    hideLoadingDialog()
+                }
+
+                override fun onReverseGeoCoderFailedToFindAddress(mapReverseGeoCoder: MapReverseGeoCoder) {
+                    Log.e("ReverseGeoCoder", "Failed to find address.")
+                }
+            }
+
+        if (latitude != null && longitude != null) {
+            val latLngString = "$latitude $longitude"
+            viewModel.setLatLng(latLngString)
+            val mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude)
+            val reverseGeoCoder = MapReverseGeoCoder(
+                BuildConfig.KAKAO_MAP_NATIVE_KEY,
+                mapPoint,
+                reverseGeoCodingResultListener,
+                requireActivity()
+            )
+            reverseGeoCoder.startFindingAddress()
+        }
+    }
+
+    private fun handleLocationPermissionAndTracking() {
+        if (!isLocationPermissionChecked) {
+            if (isSystemSettingsExited && !locationManager.isAnyLocationPermissionGranted(requireContext())) {
+                // 시스템 설정에서 돌아온 경우이지만 위치 권한이 허용되지 않은 경우
+                findNavController().navigateUp()
+            } else if (isSystemSettingsExited && locationManager.isAnyLocationPermissionGranted(requireContext())) {
+                // 시스템 설정에서 돌아온 경우이고 위치 권한이 허용된 경우
+            } else {
+                // 처음 진입하는 경우 위치 권한 체크
+                locationManager.checkLocationPermission(locationPermissionLauncher)
+                isLocationPermissionChecked = true
+            }
+        }
+        if (locationManager.isAnyLocationPermissionGranted(requireContext()) && isLocationPermissionChecked) {
+            showLoadingDialog()
+        }
+        locationManager.startLocationTracking()
+    }
+
+    private fun showLoadingDialog() {
+        progressDialog = ProgressDialogFragment()
+        progressDialog?.show(childFragmentManager, PROGRESS_DIALOG)
+    }
+
+    private fun hideLoadingDialog() {
+        progressDialog?.dismiss()
+        progressDialog = null
+    }
+
+    private fun observeProductUploadResponse() {
+        viewModel.productUploadResponse.observe(viewLifecycleOwner) { response ->
+            viewModel.handlePostResponse(response)
+        }
+    }
+
+    private fun observeProductUploadSuccess() {
+        viewModel.productUploadSuccess.observe(viewLifecycleOwner, EventObserver { uploadSuccess ->
+            if (uploadSuccess) {
+                findNavController().navigateUp()
+            }
+        })
+    }
+
+    private fun observeToastMessage() {
+        viewModel.toastMessage.observe(viewLifecycleOwner, EventObserver { message ->
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        })
+    }
+
+    private fun observeProductUploadCompleted() {
+        viewModel.productUploadCompleted.observe(viewLifecycleOwner) { productUploadCompleted ->
+            if (!productUploadCompleted) {
+                showLoadingDialog()
+            }
+        }
     }
 }

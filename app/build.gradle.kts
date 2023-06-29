@@ -11,6 +11,8 @@ plugins {
 val properties = Properties()
 properties.load(rootProject.file("local.properties").inputStream())
 
+val KAKAO_MAP_NATIVE_KEY = properties.getProperty("kakao_map_native_key")
+
 android {
     compileSdkVersion(33)
 
@@ -23,6 +25,9 @@ android {
 
         buildConfigField("String", "GOOGLE_CLIENT_ID", properties.getProperty("google_client_id"))
         buildConfigField("String", "FIREBASE_BASE_URL", properties.getProperty("firebase_base_url"))
+        buildConfigField("String", "KAKAO_MAP_NATIVE_KEY", properties.getProperty("kakao_map_native_key"))
+
+        manifestPlaceholders["KAKAO_MAP_NATIVE_KEY"] = KAKAO_MAP_NATIVE_KEY
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -69,10 +74,12 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
     implementation("com.google.firebase:firebase-analytics-ktx") //analytics 관련
     implementation("com.google.firebase:firebase-auth-ktx:22.0.0") //auth 관련
+    implementation("com.google.firebase:firebase-storage-ktx:20.2.1") // storage 관련
 
     //Google Play Services 관련
     implementation("com.google.android.gms:play-services-base:18.2.0") //base 관련
     implementation("com.google.android.gms:play-services-auth:20.5.0") //auth 관련
+    implementation("com.google.android.gms:play-services-location:21.0.1") //location 관련
 
     //Fragment ktx(ViewModel 초기화) 관련
     implementation ("androidx.fragment:fragment-ktx:1.5.7")
@@ -98,4 +105,8 @@ dependencies {
 
     //리사이클러뷰 관련(ConcatAdapter)
     implementation ("androidx.recyclerview:recyclerview:1.3.0")
+
+    //Kakao Map API
+    implementation(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
+    implementation(files("libs/libDaumMapAndroid.jar"))
 }

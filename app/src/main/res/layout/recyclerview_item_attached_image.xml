@@ -15,7 +15,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@drawable/currency_symbol_icon" />
+        tools:srcCompat="@drawable/currency_symbol_empty_icon" />
 
     <ImageView
         android:id="@+id/writing_image_remove_iv"

@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
+        <variable
+            name="viewModel"
+            type="com.mbj.ssassamarket.ui.writing.WritingViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -45,6 +47,8 @@
                         android:layout_width="55dp"
                         android:layout_height="40dp"
                         android:layout_marginEnd="20dp"
+                        android:onClick="@{() -> viewModel.registerProductWithValidation()}"
+                        app:cardBackgroundColor="@{viewModel.requiredProperty ? @color/orange_700 : @color/orange_300}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
@@ -95,6 +99,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
+                    android:text="@{viewModel.location}"
                     android:textColor="@color/orange_700"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -110,6 +115,7 @@
                     android:background="@null"
                     android:hint="@string/writing_title_hint"
                     android:inputType="text"
+                    android:text="@={viewModel.title}"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
                     app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
@@ -152,7 +158,7 @@
                     android:layout_marginTop="28dp"
                     app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
                     app:layout_constraintTop_toBottomOf="@id/writing_category_md"
-                    app:srcCompat="@drawable/currency_symbol_icon" />
+                    app:symbolSrcCompat="@{viewModel.isPriceNullOrEmpty(viewModel.price)}" />
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/writing_price_tiet"
@@ -162,6 +168,7 @@
                     android:background="@null"
                     android:hint="@string/writing_price_hint"
                     android:inputType="number"
+                    android:text="@={viewModel.price}"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="@id/writing_currency_symbol_iv"
                     app:layout_constraintStart_toEndOf="@id/writing_currency_symbol_iv"
@@ -187,6 +194,7 @@
                     android:gravity="top"
                     android:hint="@string/writing_content_hint"
                     android:scrollbars="vertical"
+                    android:text="@={viewModel.content}"
                     app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
                     app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
                     app:layout_constraintTop_toBottomOf="@id/writing_price_md" />

@@ -23,7 +23,6 @@
 
     <style name="CardViewButtonStyle" parent="Widget.MaterialComponents.Button">
         <item name="android:stateListAnimator">@null</item>
-        <item name="cardBackgroundColor">@color/color_state_register_bt</item>
         <item name="cardCornerRadius">8dp</item>
         <item name="cardElevation">0dp</item>
     </style>

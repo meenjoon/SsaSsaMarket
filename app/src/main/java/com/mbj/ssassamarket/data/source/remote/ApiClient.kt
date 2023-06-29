@@ -1,6 +1,7 @@
 package com.mbj.ssassamarket.data.source.remote
 
 import com.mbj.ssassamarket.BuildConfig
+import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.model.User
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -24,6 +25,19 @@ interface ApiClient {
     suspend fun getUser(
         @Query("auth") auth: String
     ): Response<Map<String, Map<String, User>>>
+
+    @POST("posts/.json")
+    suspend fun addProductPost(
+        @Body product: ProductPostItem,
+        @Query("auth") auth: String
+    ): Response<Map<String, String>>
+
+    @PATCH("user/{userId}/{dataId}.json")
+    suspend fun updateMyLatLng(
+        @Path("userId") userId: String,
+        @Path("dataId") dataId: String,
+        @Body user: User
+    ) : Response<Unit>
 
     companion object {
         private const val FIREBASE_BASE_URL = BuildConfig.FIREBASE_BASE_URL
