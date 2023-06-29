@@ -12,7 +12,7 @@ data class ProductPostItem(
     @Json(name = "createdDate")
     val createdDate: String,
     @Json(name = "imageLocations")
-    val imageLocations: List<String?>,
+    val imageLocations: List<String?>? = null,
     @Json(name = "price")
     val price: String,
     @Json(name = "title")
@@ -24,11 +24,11 @@ data class ProductPostItem(
     @Json(name = "favoriteCount")
     val favoriteCount: Int,
     @Json(name = "shoppingList")
-    val shoppingList: List<String?>,
+    val shoppingList: List<String?>? = null,
     @Json(name = "location")
     val location: String,
     @Json(name = "latLng")
     val latLng: String,
     @Json(name = "favoriteList")
-    val favoriteList: List<String?>
+    val favoriteList: List<String?>? = null
 )
