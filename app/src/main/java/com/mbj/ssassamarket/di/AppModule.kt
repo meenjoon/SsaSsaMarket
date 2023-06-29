@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.mbj.ssassamarket.util.Constants.SHARED_PREFERENCE_KEY
 import com.mbj.ssassamarket.util.PreferenceManager
 import dagger.Module
 import dagger.Provides
@@ -18,7 +19,7 @@ object AppModule {
     @Provides
     fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences(
-            "com.mbj.ssassamarket.PREFERENCE_KEY",
+            SHARED_PREFERENCE_KEY,
             Context.MODE_PRIVATE
         )
     }
