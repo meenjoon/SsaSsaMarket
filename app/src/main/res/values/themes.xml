@@ -48,4 +48,14 @@
         <item name="buttonBarPositiveButtonStyle">@style/Widget.App.Button</item>
         <item name="buttonBarNegativeButtonStyle">@style/Widget.App.Button</item>
     </style>
+
+    <style name="HomeTabLayout">
+        <item name="tabTextAppearance">@android:style/TextAppearance.Widget.TabWidget</item>
+        <item name="android:background">@color/white</item>
+        <item name="tabGravity">center</item>
+        <item name="tabIndicatorColor">@color/black</item>
+        <item name="tabMode">scrollable</item>
+        <item name="tabIndicatorHeight">3dp</item>
+        <item name="tabTextColor">@color/black</item>
+    </style>
 </resources>
