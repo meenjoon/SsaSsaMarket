@@ -6,6 +6,7 @@ plugins {
     id("com.google.gms.google-services")
     id ("androidx.navigation.safeargs.kotlin")
     id ("kotlin-kapt")
+    id ("dagger.hilt.android.plugin")
 }
 
 val properties = Properties()
@@ -54,6 +55,9 @@ android {
     buildFeatures {
         viewBinding = true
         dataBinding = true
+    }
+    kapt {
+        correctErrorTypes = true
     }
 }
 
@@ -109,4 +113,8 @@ dependencies {
     //Kakao Map API
     implementation(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
     implementation(files("libs/libDaumMapAndroid.jar"))
+
+    //Hilt 관련
+    implementation ("com.google.dagger:hilt-android:2.44")
+    kapt ("com.google.dagger:hilt-compiler:2.44")
 }

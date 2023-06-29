@@ -7,30 +7,20 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.storage.FirebaseStorage
 import com.mbj.ssassamarket.R
-import com.mbj.ssassamarket.SsaSsaMarketApplication
-import com.mbj.ssassamarket.data.source.UserInfoRepository
-import com.mbj.ssassamarket.data.source.UserPreferenceRepository
-import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
 import com.mbj.ssassamarket.databinding.FragmentSplashFragementBinding
 import com.mbj.ssassamarket.ui.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class SplashFragment : BaseFragment() {
 
     override val binding get() = _binding as FragmentSplashFragementBinding
     override val layoutId: Int get() = R.layout.fragment_splash_fragement
 
-    private val viewModel by viewModels<SplashViewModel> {
-        SplashViewModel.provideFactory(
-            UserInfoRepository(
-                FirebaseDataSource(
-                    SsaSsaMarketApplication.appContainer.provideApiClient(), FirebaseStorage.getInstance())
-            ), UserPreferenceRepository()
-        )
-    }
+    private val viewModel: SplashViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

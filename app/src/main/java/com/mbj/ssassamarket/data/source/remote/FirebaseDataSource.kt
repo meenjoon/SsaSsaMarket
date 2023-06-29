@@ -11,8 +11,9 @@ import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 import retrofit2.Response
+import javax.inject.Inject
 
-class FirebaseDataSource(private val apiClient: ApiClient, private val storage: FirebaseStorage) : MarketNetworkDataSource {
+class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, private val storage: FirebaseStorage) : MarketNetworkDataSource {
 
     override suspend fun currentUserExists(): Boolean {
         val (user, idToken) = getUserAndIdToken()
