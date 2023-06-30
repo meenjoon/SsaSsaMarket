@@ -2,16 +2,16 @@ package com.mbj.ssassamarket.ui.home
 
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.Category
+import com.mbj.ssassamarket.data.model.FilterType
 import com.mbj.ssassamarket.databinding.FragmentHomeProductBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.util.Constants.KEY_HOME_PRODUCT
 import com.mbj.ssassamarket.util.EventObserver
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeProductFragment : BaseFragment() {
@@ -24,6 +24,7 @@ class HomeProductFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setAdapter()
+        setupSpinner()
     }
 
     private fun setAdapter() {
@@ -31,10 +32,31 @@ class HomeProductFragment : BaseFragment() {
         if (category != null) {
             val adapter = HomeAdapter()
             binding.homeProductRv.adapter = adapter
-            viewModel.loadProductByCategory(category)
+            viewModel.updateCategory(category)
             viewModel.items.observe(viewLifecycleOwner, EventObserver { productList ->
-              adapter.submitList(productList)
+                adapter.submitList(productList)
             })
+        }
+    }
+
+    private fun setupSpinner() {
+        binding.homeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                val filter = when (position) {
+                    0 -> FilterType.LATEST
+                    1 -> FilterType.PRICE
+                    else -> FilterType.FAVORITE
+                }
+                viewModel.updateFilterType(filter)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
         }
     }
 
