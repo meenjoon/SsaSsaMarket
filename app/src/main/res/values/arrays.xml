@@ -7,4 +7,10 @@
         <item>가구</item>
         <item>기타</item>
     </string-array>
+
+    <string-array name="filter_list">
+        <item>최신순</item>
+        <item>판매가순</item>
+        <item>좋아요순</item>
+    </string-array>
 </resources>
