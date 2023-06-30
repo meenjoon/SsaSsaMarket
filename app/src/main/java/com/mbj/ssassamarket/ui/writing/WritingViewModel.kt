@@ -119,7 +119,7 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
                     _productUploadResponse.value = postItemRepository.addProductPost(
                         title = title.value!!,
                         category = category.value!!,
-                        price = price.value!!,
+                        price = price.value!!.toInt(),
                         content = content.value!!,
                         imageLocations = selectedImageList.value.orEmpty(),
                         location = location.value!!,

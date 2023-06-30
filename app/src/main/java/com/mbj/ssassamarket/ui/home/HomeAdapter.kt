@@ -30,7 +30,7 @@ class HomeAdapter : ListAdapter<ProductPostItem, HomeAdapter.HomeViewHolder>(hom
             loadFirstImage(productPostItem)
             binding.homeProductTitleTv.text = productPostItem.title
             binding.homeProductTimeTv.text = getFormattedElapsedTime(productPostItem.createdDate)
-            binding.homeProductPriceTv.text = productPostItem.price
+            binding.homeProductPriceTv.text = productPostItem.price.toString()
             binding.homeProductLocation.text = productPostItem.location
         }
 

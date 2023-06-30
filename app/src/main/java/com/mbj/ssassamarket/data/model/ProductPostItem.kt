@@ -14,7 +14,7 @@ data class ProductPostItem(
     @Json(name = "imageLocations")
     val imageLocations: List<String?>? = null,
     @Json(name = "price")
-    val price: String,
+    val price: Int,
     @Json(name = "title")
     val title: String,
     @Json(name = "category")

@@ -12,7 +12,7 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
     suspend fun addProductPost(
         content: String,
         imageLocations: List<ImageContent>,
-        price: String,
+        price: Int,
         title: String,
         category: String,
         soldOut: Boolean,

@@ -82,7 +82,7 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
     override suspend fun addProductPost(
         content: String,
         imageLocations: List<ImageContent>,
-        price: String,
+        price: Int,
         title: String,
         category: String,
         soldOut: Boolean,
