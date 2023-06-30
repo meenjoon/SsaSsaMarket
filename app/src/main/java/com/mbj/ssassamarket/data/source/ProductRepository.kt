@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.data.source
 
 import android.util.Log
 import com.mbj.ssassamarket.data.model.Category
+import com.mbj.ssassamarket.data.model.FilterType
 import com.mbj.ssassamarket.data.model.ImageContent
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
@@ -57,6 +58,27 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
             allProducts.filter { it.category == category.label }
         } catch (e: Exception) {
             Log.e(TAG, "Exception while getting product by category", e)
+            emptyList()
+        }
+    }
+
+    suspend fun filterProductsByCategory(category: Category, filterType: FilterType): List<ProductPostItem> {
+        return try {
+            val allProducts = getProduct()
+            val filteredProducts = allProducts.filter { it.category == category.label }
+            when (filterType) {
+                FilterType.LATEST -> {
+                    filteredProducts.sortedByDescending { it.createdDate }
+                }
+                FilterType.PRICE -> {
+                    filteredProducts.sortedWith(compareBy { it.price })
+                }
+                FilterType.FAVORITE -> {
+                    filteredProducts.sortedWith(compareBy { it.favoriteCount })
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception while filtering products by category", e)
             emptyList()
         }
     }
