@@ -33,4 +33,10 @@
     <string name="location_permission_content">상품을 등록하기 위해 위치 권한 설정이 필요합니다. 설정으로 이동하시겠습니까?</string>
     <string name="product_title_request">상품 검색</string>
     <string name="korean_currency">원</string>
+    <string name="years_ago">년 전</string>
+    <string name="months_ago">달 전</string>
+    <string name="days_ago">일 전</string>
+    <string name="hours_ago">시간 전</string>
+    <string name="minutes_ago">분 전</string>
+    <string name="just_now">방금 전</string>
 </resources>
