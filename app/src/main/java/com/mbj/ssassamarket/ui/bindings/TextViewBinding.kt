@@ -47,10 +47,10 @@ fun TextView.setFormattedElapsedTime(createdDate: String) {
 }
 
 @BindingAdapter("priceFormatted")
-fun setFormattedPrice(view: TextView, price: Int) {
-    val context = view.context
+fun TextView.setFormattedPrice(price: Int) {
+    val context = this.context
     val decimalFormat = DecimalFormat(PATTERN_COMMA_THOUSANDS)
     val formattedPrice = decimalFormat.format(price)
     val currencySymbol = context.getString(R.string.korean_currency)
-    view.text = "$formattedPrice $currencySymbol"
+    text = "$formattedPrice $currencySymbol"
 }
