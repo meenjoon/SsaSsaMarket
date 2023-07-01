@@ -28,6 +28,8 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
     val category: LiveData<Category>
         get() = _category
 
+    val searchText = MutableLiveData<String>()
+
     fun updateFilterType(filterType: FilterType) {
         _filterType.value = filterType
         loadProductByCategory()
