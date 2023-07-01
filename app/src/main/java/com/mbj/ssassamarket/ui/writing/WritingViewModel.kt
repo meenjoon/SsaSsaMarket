@@ -2,7 +2,7 @@ package com.mbj.ssassamarket.ui.writing
 
 import androidx.lifecycle.*
 import com.mbj.ssassamarket.data.model.ImageContent
-import com.mbj.ssassamarket.data.source.remote.PostItemRepository
+import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.util.CategoryFormat.getCategoryLabelFromInput
 import com.mbj.ssassamarket.util.Constants.CATEGORY_REQUEST
 import com.mbj.ssassamarket.util.Constants.WRITING_POST_ERROR
@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class WritingViewModel @Inject constructor(private val postItemRepository: PostItemRepository) : ViewModel() {
+class WritingViewModel @Inject constructor(private val postItemRepository: ProductRepository) : ViewModel() {
 
     private val _selectedImageList: MutableLiveData<List<ImageContent>> = MutableLiveData()
     val selectedImageList: LiveData<List<ImageContent>>
@@ -119,7 +119,7 @@ class WritingViewModel @Inject constructor(private val postItemRepository: PostI
                     _productUploadResponse.value = postItemRepository.addProductPost(
                         title = title.value!!,
                         category = category.value!!,
-                        price = price.value!!,
+                        price = price.value!!.toInt(),
                         content = content.value!!,
                         imageLocations = selectedImageList.value.orEmpty(),
                         location = location.value!!,

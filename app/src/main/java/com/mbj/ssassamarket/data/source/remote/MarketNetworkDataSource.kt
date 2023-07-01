@@ -1,6 +1,7 @@
 package com.mbj.ssassamarket.data.source.remote
 
 import com.mbj.ssassamarket.data.model.ImageContent
+import com.mbj.ssassamarket.data.model.ProductPostItem
 
 interface MarketNetworkDataSource {
     suspend fun currentUserExists(): Boolean
@@ -9,7 +10,7 @@ interface MarketNetworkDataSource {
     suspend fun addProductPost(
         content: String,
         imageLocations: List<ImageContent>,
-        price: String,
+        price: Int,
         title: String,
         category: String,
         soldOut: Boolean,
@@ -21,4 +22,5 @@ interface MarketNetworkDataSource {
     ): Boolean
     suspend fun getMyDataId(): String?
     suspend fun updateMyLatLng(latLng: String): Boolean
+    suspend fun getProduct(): List<ProductPostItem>
 }

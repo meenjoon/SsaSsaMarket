@@ -4,6 +4,9 @@
 
     <data>
 
+        <variable
+            name="viewModel"
+            type="com.mbj.ssassamarket.ui.home.HomeViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -11,15 +14,37 @@
         android:layout_height="match_parent"
         tools:context=".ui.home.HomeFragment">
 
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/home_product_sv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:maxWidth="250dp"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toStartOf="@id/home_spinner"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:queryHint="@string/product_title_request"
+            app:searchText="@{viewModel.searchText}" />
+
+        <Spinner
+            android:id="@+id/home_spinner"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:entries="@array/filter_list"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/home_product_rv"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:layout_marginTop="15dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/home_spinner" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

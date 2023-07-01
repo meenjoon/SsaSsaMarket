@@ -18,4 +18,6 @@ object Constants {
     const val WRITING_POST_SUCCESS = "글이 작성되었습니다."
     const val WRITING_POST_ERROR = "오류로 인해 문의 해주세요."
     const val SHARED_PREFERENCE_KEY = "SsaSsaMarket"
+    const val KEY_HOME_PRODUCT = "key_home_product"
+    const val PATTERN_COMMA_THOUSANDS = "#,###"
 }

@@ -5,17 +5,22 @@
 
     <data>
 
+        <variable
+            name="productPostItem"
+            type="com.mbj.ssassamarket.data.model.ProductPostItem" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp">
+        android:layout_marginBottom="32dp">
 
         <ImageView
             android:id="@+id/home_product_iv"
             android:layout_width="120dp"
             android:layout_height="120dp"
+            app:imageFirstUrl="@{productPostItem.imageLocations}"
             app:layout_constraintStart_toStartOf="@id/guideline_vertical_2"
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@drawable/navigation_writing_selected" />
@@ -28,6 +33,7 @@
             android:layout_marginTop="7dp"
             android:ellipsize="end"
             android:maxLines="1"
+            android:text="@{productPostItem.title}"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/home_product_iv"
@@ -44,6 +50,7 @@
             android:maxLines="1"
             android:textColor="@color/grey_300"
             android:textSize="12sp"
+            app:formattedElapsedTime="@{productPostItem.createdDate}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/home_product_iv"
             app:layout_constraintTop_toBottomOf="@id/home_product_title_tv"
@@ -61,6 +68,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/home_product_iv"
             app:layout_constraintTop_toBottomOf="@id/home_product_time_tv"
+            app:priceFormatted="@{productPostItem.price}"
             tools:text="15,000원" />
 
         <TextView
@@ -69,6 +77,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
+            android:text="@{productPostItem.location}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/home_product_iv"
             app:layout_constraintTop_toBottomOf="@id/home_product_price_tv"
