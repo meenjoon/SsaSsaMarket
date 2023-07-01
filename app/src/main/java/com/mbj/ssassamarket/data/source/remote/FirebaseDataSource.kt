@@ -212,7 +212,20 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
                 val response = apiClient.getProduct(idToken)
                 if (response.isSuccessful) {
                     val productMap: Map<String, ProductPostItem>? = response.body()
-                    productMap?.values?.toList() ?: emptyList()
+                    val productList = productMap?.values?.toList() ?: emptyList()
+
+                    val updatedProductList = productList.map { product ->
+                        val updatedImageLocations = product.imageLocations?.mapNotNull { imageLocation ->
+                            if (imageLocation != null) {
+                                getDownloadUrl(imageLocation)
+                            } else {
+                                null
+                            }
+                        }
+                        product.copy(imageLocations = updatedImageLocations)
+                    }
+
+                    updatedProductList
                 } else {
                     // Handle error
                     val statusCode = response.code()
@@ -227,6 +240,13 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
             Log.e(TAG, "Exception while getting product", e)
             emptyList()
         }
+    }
+
+    suspend fun getDownloadUrl(imageLocation: String): String {
+        return storage.getReference(imageLocation)
+            .downloadUrl
+            .await()
+            .toString()
     }
 
     private suspend fun addPostItem(
