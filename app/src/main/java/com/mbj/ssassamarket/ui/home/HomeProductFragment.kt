@@ -26,6 +26,7 @@ class HomeProductFragment : BaseFragment() {
         binding.viewModel = viewModel
         setAdapter()
         setupSpinner()
+        observeSearchText()
     }
 
     private fun setAdapter() {
@@ -58,6 +59,12 @@ class HomeProductFragment : BaseFragment() {
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
+        }
+    }
+
+    private fun observeSearchText() {
+        viewModel.searchText.observe(viewLifecycleOwner) {
+            viewModel.updateSearchText()
         }
     }
 

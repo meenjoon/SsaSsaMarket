@@ -1,9 +1,6 @@
 package com.mbj.ssassamarket.ui.home
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.mbj.ssassamarket.data.model.Category
 import com.mbj.ssassamarket.data.model.FilterType
 import com.mbj.ssassamarket.data.model.ProductPostItem
@@ -21,7 +18,7 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
         get() = _items
 
     private val _filterType = MutableLiveData<FilterType>()
-    private val filterType: LiveData<FilterType>
+    val filterType: LiveData<FilterType>
         get() = _filterType
 
     private val _category = MutableLiveData<Category>()
@@ -30,27 +27,81 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
 
     val searchText = MutableLiveData<String>()
 
+    private val productList = MediatorLiveData<List<ProductPostItem>>()
+
+    init {
+        loadAllProducts()
+    }
+
+    private fun loadAllProducts() {
+        viewModelScope.launch {
+            val products = productRepository.getProduct()
+            productList.value = products
+            setupProductList()
+        }
+    }
+
+    private fun setupProductList() {
+        val currentCategory = category.value
+        val currentFilterType = filterType.value
+
+        productList.addSource(category) { category ->
+            currentCategory?.let {
+                applyFilters()
+            }
+        }
+
+        productList.addSource(filterType) { filterType ->
+            currentFilterType?.let {
+                applyFilters()
+            }
+        }
+
+        productList.addSource(searchText) {
+            applyFilters()
+        }
+
+        applyFilters()
+    }
+
     fun updateFilterType(filterType: FilterType) {
         _filterType.value = filterType
-        loadProductByCategory()
+        applyFilters()
     }
 
     fun updateCategory(category: Category) {
         _category.value = category
-        loadProductByCategory()
+        applyFilters()
     }
 
-    private fun loadProductByCategory() {
-        val currentFilterType = filterType.value
+    fun updateSearchText() {
+        applyFilters()
+    }
+
+    private fun applyFilters() {
+        val currentFilterType = filterType.value ?: FilterType.LATEST
         val currentCategory = category.value
-        if (currentFilterType != null && currentCategory != null) {
-            viewModelScope.launch {
-                val productList = productRepository.filterProductsByCategory(
-                    currentCategory,
-                    currentFilterType
-                )
-                _items.value = Event(productList)
-            }
+        val currentSearchText = searchText.value
+
+        if (currentCategory == null) {
+            _items.value = Event(emptyList())
+            return
         }
+
+        val filteredProducts = productList.value.orEmpty().filter { product ->
+            product.category == currentCategory.label &&
+                    (currentSearchText.isNullOrBlank() || product.title.contains(
+                        currentSearchText,
+                        ignoreCase = true
+                    ))
+        }.toMutableList()
+
+        when (currentFilterType) {
+            FilterType.LATEST -> filteredProducts.sortByDescending { product -> product.createdDate }
+            FilterType.PRICE -> filteredProducts.sortBy { product -> product.price }
+            FilterType.FAVORITE -> filteredProducts.sortByDescending { product -> product.favoriteCount }
+        }
+
+        _items.value = Event(filteredProducts)
     }
 }
