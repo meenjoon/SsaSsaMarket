@@ -5,8 +5,8 @@ import androidx.databinding.BindingAdapter
 import androidx.lifecycle.MutableLiveData
 
 @BindingAdapter("searchText")
-fun setSearchText(searchView: SearchView, text: MutableLiveData<String>) {
-    searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+fun SearchView.setSearchText(text: MutableLiveData<String>) {
+    setOnQueryTextListener(object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String?): Boolean {
             return false
         }
