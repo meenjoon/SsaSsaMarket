@@ -13,6 +13,7 @@ import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.databinding.RecyclerviewItemHomeProductBinding
 import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
+import com.mbj.ssassamarket.util.PriceFormat.formatPrice
 
 class HomeAdapter : ListAdapter<ProductPostItem, HomeAdapter.HomeViewHolder>(homeDiffCallback) {
 
@@ -30,7 +31,7 @@ class HomeAdapter : ListAdapter<ProductPostItem, HomeAdapter.HomeViewHolder>(hom
             loadFirstImage(productPostItem)
             binding.homeProductTitleTv.text = productPostItem.title
             binding.homeProductTimeTv.text = getFormattedElapsedTime(productPostItem.createdDate)
-            binding.homeProductPriceTv.text = productPostItem.price.toString()
+            binding.homeProductPriceTv.text = formatPrice(binding.root.context, productPostItem.price)
             binding.homeProductLocation.text = productPostItem.location
         }
 
