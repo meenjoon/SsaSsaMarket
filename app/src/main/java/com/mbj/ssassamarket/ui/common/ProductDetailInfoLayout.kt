@@ -25,6 +25,8 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
                     val contentEnabled = getBoolean(R.styleable.ProductDetailInfoLayout_detailContentEnabled, true)
                     val timeTextColor = getColor(R.styleable.ProductDetailInfoLayout_detailTimeTextColor, 0)
                     val nicknameText = getString(R.styleable.ProductDetailInfoLayout_detailNicknameText)
+                    val timeText = getString(R.styleable.ProductDetailInfoLayout_detailNicknameText)
+                    val locationText = getString(R.styleable.ProductDetailInfoLayout_detailNicknameText)
 
                     setDetailTitleText(titleText)
                     getDetailTitleText()
@@ -35,6 +37,8 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
                     setDetailContentEnabled(contentEnabled)
                     setDetailTimeTextColor(timeTextColor)
                     setDetailNicknameText(nicknameText)
+                    setDetailTimeText(timeText)
+                    setLocation(locationText)
                 } finally {
                     recycle()
                 }
@@ -49,33 +53,41 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
         return binding.detailTitleTiev.text.toString()
     }
 
-    private fun setDetailTitleEnabled(enabled: Boolean) {
+    fun setDetailTitleEnabled(enabled: Boolean) {
         binding.detailTitleTiev.isEnabled = enabled
     }
 
-    private fun setDetailPriceText(text: CharSequence?) {
+    fun setDetailPriceText(text: CharSequence?) {
         binding.detailPriceTiev.setText(text)
     }
 
-    private fun setDetailPriceEnabled(enabled: Boolean) {
+    fun setDetailPriceEnabled(enabled: Boolean) {
         binding.detailPriceTiev.isEnabled = enabled
     }
 
-    private fun setDetailContentText(text: CharSequence?) {
+    fun setDetailContentText(text: CharSequence?) {
         binding.detailContentTiev.setText(text)
     }
 
-    private fun setDetailContentEnabled(enabled: Boolean) {
+    fun setDetailContentEnabled(enabled: Boolean) {
         binding.detailContentTiev.isEnabled = enabled
     }
 
-    private fun setDetailTimeTextColor(color: Int) {
+    fun setDetailTimeTextColor(color: Int) {
         if (color != 0) {
             binding.detailTimeTv.setTextColor(color)
         }
     }
 
-    private fun setDetailNicknameText(text: CharSequence?) {
+    fun setDetailNicknameText(text: CharSequence?) {
         binding.detailNicknameTv.setText(text)
+    }
+
+    fun setDetailTimeText(text: CharSequence?) {
+        binding.detailTimeTv.setText(text)
+    }
+
+    fun setLocation(text: CharSequence?) {
+        binding.detailLocationTv.setText(text)
     }
 }

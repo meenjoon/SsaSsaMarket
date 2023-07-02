@@ -42,4 +42,5 @@
     <string name="detail_price">판매가 : </string>
     <string name="detail_location">지역 : </string>
     <string name="seller_edit">수정하기</string>
+    <string name="nickname_response_failure">닉네임을 불러오지 못했습니다.</string>
 </resources>
