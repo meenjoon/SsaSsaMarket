@@ -41,4 +41,5 @@
     <string name="just_now">방금 전</string>
     <string name="detail_price">판매가 : </string>
     <string name="detail_location">지역 : </string>
+    <string name="seller_edit">수정하기</string>
 </resources>

@@ -49,7 +49,6 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
         return binding.detailTitleTiev.text.toString()
     }
 
-
     private fun setDetailTitleEnabled(enabled: Boolean) {
         binding.detailTitleTiev.isEnabled = enabled
     }
