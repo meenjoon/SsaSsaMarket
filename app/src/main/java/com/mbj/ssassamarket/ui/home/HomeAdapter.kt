@@ -7,21 +7,25 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.databinding.RecyclerviewItemHomeProductBinding
+import com.mbj.ssassamarket.ui.common.ProductClickListener
 
-class HomeAdapter : ListAdapter<ProductPostItem, HomeAdapter.HomeViewHolder>(homeDiffCallback) {
+class HomeAdapter(private val productClickListener: ProductClickListener) : ListAdapter<ProductPostItem, HomeAdapter.HomeViewHolder>(homeDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeViewHolder {
         return HomeViewHolder.from(parent)
     }
 
     override fun onBindViewHolder(holder: HomeViewHolder, position: Int) {
-        holder.bind(currentList[position])
+        holder.bind(currentList[position], productClickListener)
     }
 
     class HomeViewHolder(val binding: RecyclerviewItemHomeProductBinding) : ViewHolder(binding.root) {
 
-        fun bind(productPostItem: ProductPostItem) {
+        fun bind(productPostItem: ProductPostItem, productClickListener: ProductClickListener) {
             binding.productPostItem = productPostItem
+            binding.root.setOnClickListener {
+                productClickListener.onProductClick(productPostItem)
+            }
         }
 
         companion object {

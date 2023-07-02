@@ -34,7 +34,11 @@
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.mbj.ssassamarket.ui.home.HomeFragment"
-        android:label="HomeFragment" />
+        android:label="HomeFragment" >
+        <action
+            android:id="@+id/action_navigation_home_to_sellerFragment"
+            app:destination="@id/sellerFragment" />
+    </fragment>
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.mbj.ssassamarket.ui.launcher.SplashFragment"
@@ -71,4 +75,12 @@
         android:id="@+id/navigation_writing"
         android:name="com.mbj.ssassamarket.ui.writing.WritingFragment"
         android:label="WritingFragment" />
+    <fragment
+        android:id="@+id/sellerFragment"
+        android:name="com.mbj.ssassamarket.ui.detail.seller.SellerFragment"
+        android:label="SellerFragment" >
+        <argument
+            android:name="product"
+            app:argType="com.mbj.ssassamarket.data.model.ProductPostItem" />
+    </fragment>
 </navigation>

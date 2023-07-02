@@ -1,5 +1,6 @@
 package com.mbj.ssassamarket.data.source
 
+import com.google.firebase.auth.FirebaseUser
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
 import javax.inject.Inject
 
@@ -24,4 +25,9 @@ class UserInfoRepository @Inject constructor(private val marketNetworkDataSource
     suspend fun updateMyLatLng(latLng: String): Boolean {
         return marketNetworkDataSource.updateMyLatLng(latLng)
     }
+
+    suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
+        return marketNetworkDataSource.getUserAndIdToken()
+    }
+
 }

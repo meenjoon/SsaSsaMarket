@@ -206,7 +206,7 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
     }
 
     override suspend fun getProduct(): List<ProductPostItem> {
-        val (user, idToken) = getUserAndIdToken()
+        val (현user, idToken) = getUserAndIdToken()
         return try {
             if (idToken != null) {
                 val response = apiClient.getProduct(idToken)
@@ -272,7 +272,7 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
         return location
     }
 
-    private suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
+    override suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
         val user = FirebaseAuth.getInstance().currentUser
         var idToken: String? = null
 

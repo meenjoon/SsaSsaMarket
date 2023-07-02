@@ -1,5 +1,6 @@
 package com.mbj.ssassamarket.data.source.remote
 
+import com.google.firebase.auth.FirebaseUser
 import com.mbj.ssassamarket.data.model.ImageContent
 import com.mbj.ssassamarket.data.model.ProductPostItem
 
@@ -23,4 +24,5 @@ interface MarketNetworkDataSource {
     suspend fun getMyDataId(): String?
     suspend fun updateMyLatLng(latLng: String): Boolean
     suspend fun getProduct(): List<ProductPostItem>
+    suspend fun getUserAndIdToken() : Pair<FirebaseUser?, String?>
 }

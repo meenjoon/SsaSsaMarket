@@ -4,14 +4,16 @@ import androidx.lifecycle.*
 import com.mbj.ssassamarket.data.model.Category
 import com.mbj.ssassamarket.data.model.FilterType
 import com.mbj.ssassamarket.data.model.ProductPostItem
+import com.mbj.ssassamarket.data.model.UserType
 import com.mbj.ssassamarket.data.source.ProductRepository
+import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val productRepository: ProductRepository) : ViewModel() {
+class HomeViewModel @Inject constructor(private val productRepository: ProductRepository, private val userInfoRepository: UserInfoRepository) : ViewModel() {
 
     private val _items = MutableLiveData<Event<List<ProductPostItem>>>()
     val items: LiveData<Event<List<ProductPostItem>>>
@@ -103,5 +105,15 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
         }
 
         _items.value = Event(filteredProducts)
+    }
+
+    fun navigateBasedOnUserType(productIdToken: String, callback: (UserType) -> Unit) {
+        viewModelScope.launch {
+            val response = userInfoRepository.getUserAndIdToken()
+            val idToken = response.first?.uid
+            val userType = if (productIdToken == idToken) UserType.SELLER else UserType.BUYER
+
+            callback(userType)
+        }
     }
 }

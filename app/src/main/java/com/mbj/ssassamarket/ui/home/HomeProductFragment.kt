@@ -4,17 +4,21 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.Category
 import com.mbj.ssassamarket.data.model.FilterType
+import com.mbj.ssassamarket.data.model.ProductPostItem
+import com.mbj.ssassamarket.data.model.UserType
 import com.mbj.ssassamarket.databinding.FragmentHomeProductBinding
 import com.mbj.ssassamarket.ui.BaseFragment
+import com.mbj.ssassamarket.ui.common.ProductClickListener
 import com.mbj.ssassamarket.util.Constants.KEY_HOME_PRODUCT
 import com.mbj.ssassamarket.util.EventObserver
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class HomeProductFragment : BaseFragment() {
+class HomeProductFragment : BaseFragment(), ProductClickListener {
 
     override val binding get() = _binding as FragmentHomeProductBinding
     override val layoutId: Int get() = R.layout.fragment_home_product
@@ -32,7 +36,7 @@ class HomeProductFragment : BaseFragment() {
     private fun setAdapter() {
         val category = arguments?.getSerializable(KEY_HOME_PRODUCT) as? Category
         if (category != null) {
-            val adapter = HomeAdapter()
+            val adapter = HomeAdapter(this)
             binding.homeProductRv.adapter = adapter
             viewModel.updateCategory(category)
             viewModel.items.observe(viewLifecycleOwner, EventObserver { productList ->
@@ -65,6 +69,19 @@ class HomeProductFragment : BaseFragment() {
     private fun observeSearchText() {
         viewModel.searchText.observe(viewLifecycleOwner) {
             viewModel.updateSearchText()
+        }
+    }
+
+    override fun onProductClick(productPostItem: ProductPostItem) {
+        viewModel.navigateBasedOnUserType(productPostItem.id) { userType ->
+            when (userType) {
+                UserType.SELLER -> {
+                    val action = HomeFragmentDirections.actionNavigationHomeToSellerFragment(productPostItem)
+                    findNavController().navigate(action)
+                }
+                UserType.BUYER -> {
+                }
+            }
         }
     }
 
