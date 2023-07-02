@@ -168,7 +168,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
         setupCategorySpinner()
-        setTouchInterceptHandling()
         setupAdapters()
         setupRecyclerView()
         observeSelectedImageContent()
@@ -275,18 +274,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 binding.writingCategorySpinner.setSelection(0)
             }
-        }
-    }
-
-    private fun setTouchInterceptHandling() {
-        binding.writingContentTiet.setOnTouchListener { view, motionEvent ->
-            if (view.id == R.id.writing_content_tiet) {
-                view.parent.requestDisallowInterceptTouchEvent(true)
-                when (motionEvent.action and MotionEvent.ACTION_MASK) {
-                    MotionEvent.ACTION_UP -> view.parent.requestDisallowInterceptTouchEvent(false)
-                }
-            }
-            false
         }
     }
 

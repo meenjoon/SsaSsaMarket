@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="viewModel"
             type="com.mbj.ssassamarket.ui.writing.WritingViewModel" />
@@ -187,14 +188,17 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/writing_content_tiet"
                     android:layout_width="0dp"
-                    android:layout_height="350dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="32dp"
                     android:layout_marginBottom="20dp"
                     android:background="@null"
-                    android:gravity="top"
+                    android:gravity="start"
                     android:hint="@string/writing_content_hint"
+                    android:inputType="textMultiLine"
+                    android:minHeight="180dp"
                     android:scrollbars="vertical"
                     android:text="@={viewModel.content}"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
                     app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
                     app:layout_constraintTop_toBottomOf="@id/writing_price_md" />

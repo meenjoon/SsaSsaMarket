@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+        <declare-styleable name="ProductDetailInfoLayout">
+            <attr name="detailTitleEnabled" format="boolean" />
+            <attr name="detailTitleText" format="string" />
+            <attr name="detailPriceEnabled" format="boolean" />
+            <attr name="detailPriceText" format="string" />
+            <attr name="detailContentEnabled" format="boolean" />
+            <attr name="detailContentText" format="string" />
+            <attr name="detailTimeTextColor" format="color" />
+            <attr name="detailNicknameText" format="string" />
+        </declare-styleable>
+</resources>

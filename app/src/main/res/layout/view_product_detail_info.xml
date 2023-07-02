@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/detail_title_tiev"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:ellipsize="end"
+        android:enabled="false"
+        android:inputType="text"
+        android:textColor="@drawable/edit_text_enabled_selector"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
+        app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="유니클로 린넨 바지 M사이즈" />
+
+    <TextView
+        android:id="@+id/detail_nickname_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/detail_product_top_margin"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+        app:layout_constraintTop_toBottomOf="@id/detail_title_tiev"
+        tools:text="슈퍼맨" />
+
+    <TextView
+        android:id="@+id/detail_time_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:enabled="false"
+        android:textColor="@color/grey_300"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@id/detail_nickname_tv"
+        app:layout_constraintStart_toEndOf="@id/detail_nickname_tv"
+        app:layout_constraintTop_toTopOf="@id/detail_nickname_tv"
+        tools:text="1분 전" />
+
+    <TextView
+        android:id="@+id/detail_price"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/detail_product_top_margin"
+        android:text="@string/detail_price"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+        app:layout_constraintTop_toBottomOf="@id/detail_time_tv" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/detail_price_tiev"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:background="@null"
+        android:ellipsize="end"
+        android:enabled="false"
+        android:inputType="number"
+        android:textColor="@drawable/edit_text_enabled_selector"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/detail_price"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/detail_price"
+        app:layout_constraintTop_toTopOf="@id/detail_price"
+        tools:text="35,000원" />
+
+    <TextView
+        android:id="@+id/detail_location"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/detail_product_top_margin"
+        android:text="@string/detail_location"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+        app:layout_constraintTop_toBottomOf="@id/detail_price_tiev" />
+
+    <TextView
+        android:id="@+id/detail_location_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/detail_location"
+        app:layout_constraintStart_toEndOf="@id/detail_location"
+        app:layout_constraintTop_toTopOf="@id/detail_location"
+        tools:text="대전" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="32dp"
+        android:minHeight="180dp"
+        app:cardBackgroundColor="@color/orange_100"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
+        app:cardUseCompatPadding="false"
+        app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
+        app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+        app:layout_constraintTop_toBottomOf="@id/detail_location_tv">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/detail_content_tiev"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:enabled="false"
+            android:gravity="start"
+            android:inputType="textMultiLine"
+            android:padding="13dp"
+            android:textColor="@drawable/edit_text_enabled_selector"
+            app:layout_constraintEnd_toEndOf="@id/guideline_vertical_97"
+            app:layout_constraintStart_toStartOf="@id/guideline_vertical_3"
+            app:layout_constraintTop_toBottomOf="@id/detail_location_tv"
+            tools:text="한번 입은거 싸게 팝니다~" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_vertical_3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.03" />
+
+    <androidx.constraintlayout.widget.Guideline
+
+        android:id="@+id/guideline_vertical_97"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.97" />
+
+</merge>
