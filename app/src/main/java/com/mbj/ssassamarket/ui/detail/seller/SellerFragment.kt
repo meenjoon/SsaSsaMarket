@@ -6,10 +6,12 @@ import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.tabs.TabLayoutMediator
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.EditMode
 import com.mbj.ssassamarket.databinding.FragmentSellerBinding
 import com.mbj.ssassamarket.ui.BaseFragment
+import com.mbj.ssassamarket.ui.detail.BannerAdapter
 import com.mbj.ssassamarket.util.Constants
 import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.ProgressDialogFragment
@@ -25,24 +27,25 @@ class SellerFragment : BaseFragment() {
     private val viewModel: SellerViewModel by viewModels()
 
     private var progressDialog: ProgressDialogFragment? = null
+    private lateinit var bannerAdapter: BannerAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        initViewModel()
         setupUI()
+        initViewModel()
         observeData()
-    }
-
-    private fun initViewModel() {
-        viewModel.setProduct(args.product)
-        viewModel.setEditMode(EditMode.READ_ONLY)
+        setupViewPager()
     }
 
     private fun setupUI() {
         binding.detailBackIv.setOnClickListener {
             findNavController().navigateUp()
         }
+    }
+
+    private fun initViewModel() {
+        viewModel.setProduct(args.product)
+        viewModel.setEditMode(EditMode.READ_ONLY)
     }
 
     private fun observeData() {
@@ -71,10 +74,28 @@ class SellerFragment : BaseFragment() {
         }
 
         viewModel.productNicknameSuccess.observe(viewLifecycleOwner, EventObserver { productNicknameSuccess ->
-            if (!productNicknameSuccess) {
-                showToast(R.string.nickname_response_failure)
-            }
-        })
+                if (!productNicknameSuccess) {
+                    showToast(R.string.nickname_response_failure)
+                }
+            })
+    }
+
+    private fun setupViewPager() {
+        bannerAdapter = BannerAdapter()
+        binding.detailVp2.adapter = bannerAdapter
+
+        val pageWidth = resources.getDimension(R.dimen.viewpager_item_width)
+        val pageMargin = resources.getDimension(R.dimen.viewpager_item_margin)
+        val screenWidth = resources.displayMetrics.widthPixels
+        val offset = screenWidth - pageWidth - pageMargin
+
+        binding.detailVp2.offscreenPageLimit = 2
+        binding.detailVp2.setPageTransformer { page, position ->
+            page.translationX = position * -offset
+        }
+
+        TabLayoutMediator(binding.detailTl, binding.detailVp2) { tab, position ->
+        }.attach()
     }
 
     private fun showLoadingDialog() {
@@ -93,6 +114,7 @@ class SellerFragment : BaseFragment() {
 
     private fun setReadOnly() {
         val product = viewModel.product.value
+        bannerAdapter.submitList(product?.imageLocations)
         binding.detailReceiver.apply {
             setDetailContentEnabled(false)
             setDetailPriceEnabled(false)
