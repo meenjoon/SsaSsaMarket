@@ -206,7 +206,7 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
     }
 
     override suspend fun getProduct(): List<ProductPostItem> {
-        val (현user, idToken) = getUserAndIdToken()
+        val (user, idToken) = getUserAndIdToken()
         return try {
             if (idToken != null) {
                 val response = apiClient.getProduct(idToken)
@@ -242,6 +242,42 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
         }
     }
 
+    override suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
+        val user = FirebaseAuth.getInstance().currentUser
+        var idToken: String? = null
+
+        try {
+            idToken = user?.getIdToken(true)?.await()?.token
+        } catch (e: Exception) {
+            Log.e("idToken Error", e.toString())
+        }
+        return Pair(user, idToken)
+    }
+
+    override suspend fun getUserNameByUserId(userIdToken: String): String? {
+        val (user, idToken) = getUserAndIdToken()
+        if (idToken != null) {
+            try {
+                val response = apiClient.getUser(idToken)
+                if (response.isSuccessful) {
+                    val users = response.body()
+                    if (users != null) {
+                        val matchingUser = users.values.flatMap { it.values }.find { userInfo ->
+                            userInfo.userId == userIdToken
+                        }
+                        return matchingUser?.userName
+                    }
+                } else {
+                    val statusCode = response.code()
+                    Log.e(TAG, "getUserNameByUserId Error, Status Code: $statusCode")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG ,"getUserNameByUserId Error", e)
+            }
+        }
+        return null
+    }
+
     suspend fun getDownloadUrl(imageLocation: String): String {
         return storage.getReference(imageLocation)
             .downloadUrl
@@ -270,18 +306,6 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
             .putFile(image.uri)
             .await()
         return location
-    }
-
-    override suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
-        val user = FirebaseAuth.getInstance().currentUser
-        var idToken: String? = null
-
-        try {
-            idToken = user?.getIdToken(true)?.await()?.token
-        } catch (e: Exception) {
-            Log.e("idToken Error", e.toString())
-        }
-        return Pair(user, idToken)
     }
 
     companion object {

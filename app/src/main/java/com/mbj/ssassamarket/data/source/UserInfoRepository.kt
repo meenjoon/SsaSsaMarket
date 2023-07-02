@@ -30,4 +30,7 @@ class UserInfoRepository @Inject constructor(private val marketNetworkDataSource
         return marketNetworkDataSource.getUserAndIdToken()
     }
 
+    suspend fun getUserNameByUserId(userIdToken: String) : String? {
+        return marketNetworkDataSource.getUserNameByUserId(userIdToken)
+    }
 }
