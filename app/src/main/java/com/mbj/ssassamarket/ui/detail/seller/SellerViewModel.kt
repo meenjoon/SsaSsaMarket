@@ -95,4 +95,31 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
 
         return false
     }
+
+    fun isTitleMatch(): Boolean {
+        if (originalProduct == null || editMode.value?.peekContent() == EditMode.READ_ONLY) {
+            return false
+        }
+
+        val currentProduct = product.value?.peekContent()
+        return currentProduct?.title == originalProduct!!.title
+    }
+
+    fun isPriceMatch(): Boolean {
+        if (originalProduct == null || editMode.value?.peekContent() == EditMode.READ_ONLY) {
+            return false
+        }
+
+        val currentProduct = product.value?.peekContent()
+        return currentProduct?.price == originalProduct!!.price
+    }
+
+    fun isContentMatch(): Boolean {
+        if (originalProduct == null || editMode.value?.peekContent() == EditMode.READ_ONLY) {
+            return false
+        }
+
+        val currentProduct = product.value?.peekContent()
+        return currentProduct?.content == originalProduct!!.content
+    }
 }

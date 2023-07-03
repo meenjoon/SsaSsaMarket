@@ -28,6 +28,9 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
                     val nicknameText = getString(R.styleable.ProductDetailInfoLayout_detailNicknameText)
                     val timeText = getString(R.styleable.ProductDetailInfoLayout_detailNicknameText)
                     val locationText = getString(R.styleable.ProductDetailInfoLayout_detailNicknameText)
+                    val titleTextColor = getColor(R.styleable.ProductDetailInfoLayout_detailTimeTextColor, 0)
+                    val priceTextColor = getColor(R.styleable.ProductDetailInfoLayout_detailTimeTextColor, 0)
+                    val contentTextColor = getColor(R.styleable.ProductDetailInfoLayout_detailTimeTextColor, 0)
 
                     setDetailTitleText(titleText)
                     setDetailTitleEnabled(titleEnabled)
@@ -39,6 +42,9 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
                     setDetailNicknameText(nicknameText)
                     setDetailTimeText(timeText)
                     setLocation(locationText)
+                    setDetailTitleTextColor(titleTextColor)
+                    setDetailPriceTextColor(priceTextColor)
+                    setDetailContentTextColor(contentTextColor)
                 } finally {
                     recycle()
                 }
@@ -97,5 +103,23 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
 
     fun setDetailContentTextChangeListener(textWatcher: TextWatcher) {
         binding.detailContentTiev.addTextChangedListener(textWatcher)
+    }
+
+    fun setDetailTitleTextColor(colorResourceId: Int) {
+        if (colorResourceId != 0) {
+            binding.detailTitleTiev.setTextColor(colorResourceId)
+        }
+    }
+
+    fun setDetailPriceTextColor(colorResourceId: Int) {
+        if (colorResourceId != 0) {
+            binding.detailPriceTiev.setTextColor(colorResourceId)
+        }
+    }
+
+    fun setDetailContentTextColor(colorResourceId: Int) {
+        if (colorResourceId != 0) {
+            binding.detailContentTiev.setTextColor(colorResourceId)
+        }
     }
 }

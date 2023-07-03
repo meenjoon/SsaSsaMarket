@@ -80,6 +80,9 @@ class SellerFragment : BaseFragment() {
 
         viewModel.product.observe(viewLifecycleOwner, EventObserver {
             binding.detailSubmitTv.setTextColorRes(if (viewModel.isProductModified()) R.color.orange_700 else R.color.grey_300)
+            setDetailTitleTextColor(viewModel.isTitleMatch())
+            setDetailPriceTextColor(viewModel.isPriceMatch())
+            setDetailContentTextColor(viewModel.isContentMatch())
         })
     }
 
@@ -204,5 +207,23 @@ class SellerFragment : BaseFragment() {
     private fun TextView.setTextColorRes(@ColorRes colorResId: Int) {
         val color = ContextCompat.getColor(context, colorResId)
         setTextColor(color)
+    }
+
+    private fun setDetailTitleTextColor(isMatch: Boolean) {
+        val colorResourceId = if (isMatch) R.color.grey_100 else R.color.black
+        val textColor = ContextCompat.getColor(requireContext(), colorResourceId)
+        binding.detailReceiver.setDetailTitleTextColor(textColor)
+    }
+
+    private fun setDetailPriceTextColor(isMatch: Boolean) {
+        val colorResourceId = if (isMatch) R.color.grey_100 else R.color.black
+        val textColor = ContextCompat.getColor(requireContext(), colorResourceId)
+        binding.detailReceiver.setDetailPriceTextColor(textColor)
+    }
+
+    private fun setDetailContentTextColor(isMatch: Boolean) {
+        val colorResourceId = if (isMatch) R.color.grey_100 else R.color.black
+        val textColor = ContextCompat.getColor(requireContext(), colorResourceId)
+        binding.detailReceiver.setDetailContentTextColor(textColor)
     }
 }
