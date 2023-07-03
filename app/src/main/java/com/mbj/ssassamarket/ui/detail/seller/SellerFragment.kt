@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.ColorRes
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
@@ -23,7 +25,6 @@ import com.mbj.ssassamarket.util.Constants.TITLE
 import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
 import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.ProgressDialogFragment
-import com.mbj.ssassamarket.util.TextFormat.convertToCurrencyFormat
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -41,7 +42,6 @@ class SellerFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViewModel()
-        setupUI()
         observeData()
         setupViewPager()
         setupClickListeners()
@@ -50,12 +50,6 @@ class SellerFragment : BaseFragment() {
 
     private fun initViewModel() {
         viewModel.initializeProduct(args.product)
-    }
-
-    private fun setupUI() {
-        binding.detailBackIv.setOnClickListener {
-            findNavController().navigateUp()
-        }
     }
 
     private fun observeData() {
@@ -83,6 +77,10 @@ class SellerFragment : BaseFragment() {
                     showToast(R.string.nickname_response_failure)
                 }
             })
+
+        viewModel.product.observe(viewLifecycleOwner, EventObserver {
+            binding.detailSubmitTv.setTextColorRes(if (viewModel.isProductModified()) R.color.orange_700 else R.color.grey_300)
+        })
     }
 
     private fun setupViewPager() {
@@ -135,7 +133,7 @@ class SellerFragment : BaseFragment() {
             setDetailTitleEnabled(editMode == EditMode.EDIT)
             setDetailTitleText(product?.peekContent()?.title)
             setDetailTimeText(product?.peekContent()?.createdDate?.let { getFormattedElapsedTime(it) })
-            setDetailPriceText(product?.peekContent()?.price?.let { convertToCurrencyFormat(it, requireContext()) })
+            setDetailPriceText(product?.peekContent()?.price.toString())
             setLocation(product?.peekContent()?.location)
             setDetailContentText(product?.peekContent()?.content)
         }
@@ -146,7 +144,6 @@ class SellerFragment : BaseFragment() {
             showConfirmationDialog()
         }
         binding.detailSubmitTv.setOnClickListener {
-            TODO("상품 정보 수정 네트워크 통신 구현")
         }
     }
 
@@ -202,5 +199,10 @@ class SellerFragment : BaseFragment() {
 
             override fun afterTextChanged(s: Editable?) {}
         }
+    }
+
+    private fun TextView.setTextColorRes(@ColorRes colorResId: Int) {
+        val color = ContextCompat.getColor(context, colorResId)
+        setTextColor(color)
     }
 }

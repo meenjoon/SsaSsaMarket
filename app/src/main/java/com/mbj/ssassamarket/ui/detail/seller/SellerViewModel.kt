@@ -78,4 +78,21 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
 
         setEditMode(newEditMode)
     }
+
+    fun isProductModified(): Boolean {
+        if (originalProduct == null) {
+            return false
+        }
+
+        val currentProduct = product.value?.peekContent()
+
+        if (currentProduct != null) {
+            val isTitleModified = currentProduct.title != originalProduct!!.title
+            val isPriceModified = currentProduct.price != originalProduct!!.price
+            val isContentModified = currentProduct.content != originalProduct!!.content
+            return isTitleModified && isPriceModified && isContentModified
+        }
+
+        return false
+    }
 }
