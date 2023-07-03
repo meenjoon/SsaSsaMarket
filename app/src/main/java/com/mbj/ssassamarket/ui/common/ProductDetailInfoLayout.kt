@@ -1,6 +1,7 @@
 package com.mbj.ssassamarket.ui.common
 
 import android.content.Context
+import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -29,7 +30,6 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
                     val locationText = getString(R.styleable.ProductDetailInfoLayout_detailNicknameText)
 
                     setDetailTitleText(titleText)
-                    getDetailTitleText()
                     setDetailTitleEnabled(titleEnabled)
                     setDetailPriceText(priceText)
                     setDetailPriceEnabled(priceEnabled)
@@ -47,10 +47,6 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
 
     fun setDetailTitleText(text: CharSequence?) {
         binding.detailTitleTiev.setText(text)
-    }
-
-    fun getDetailTitleText(): String? {
-        return binding.detailTitleTiev.text.toString()
     }
 
     fun setDetailTitleEnabled(enabled: Boolean) {
@@ -89,5 +85,17 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
 
     fun setLocation(text: CharSequence?) {
         binding.detailLocationTv.setText(text)
+    }
+
+    fun setDetailTitleTextChangeListener(textWatcher: TextWatcher) {
+        binding.detailTitleTiev.addTextChangedListener(textWatcher)
+    }
+
+    fun setDetailPriceTextChangeListener(textWatcher: TextWatcher) {
+        binding.detailPriceTiev.addTextChangedListener(textWatcher)
+    }
+
+    fun setDetailContentTextChangeListener(textWatcher: TextWatcher) {
+        binding.detailContentTiev.addTextChangedListener(textWatcher)
     }
 }
