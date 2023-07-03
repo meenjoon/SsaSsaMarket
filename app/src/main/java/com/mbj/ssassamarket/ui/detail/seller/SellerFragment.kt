@@ -23,6 +23,7 @@ import com.mbj.ssassamarket.util.Constants.TITLE
 import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
 import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.ProgressDialogFragment
+import com.mbj.ssassamarket.util.TextFormat.convertToCurrencyFormat
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -134,7 +135,7 @@ class SellerFragment : BaseFragment() {
             setDetailTitleEnabled(editMode == EditMode.EDIT)
             setDetailTitleText(product?.peekContent()?.title)
             setDetailTimeText(product?.peekContent()?.createdDate?.let { getFormattedElapsedTime(it) })
-            setDetailPriceText(product?.peekContent()?.price.toString())
+            setDetailPriceText(product?.peekContent()?.price?.let { convertToCurrencyFormat(it, requireContext()) })
             setLocation(product?.peekContent()?.location)
             setDetailContentText(product?.peekContent()?.content)
         }
