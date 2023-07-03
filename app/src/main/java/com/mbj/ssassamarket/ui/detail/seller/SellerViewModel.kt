@@ -15,27 +15,36 @@ import javax.inject.Inject
 @HiltViewModel
 class SellerViewModel @Inject constructor(private val userInfoRepository: UserInfoRepository) : ViewModel() {
 
-    private val _product = MutableLiveData<ProductPostItem>()
-    val product: LiveData<ProductPostItem> get() = _product
+    private val _product = MutableLiveData<Event<ProductPostItem?>>()
+    val product: LiveData<Event<ProductPostItem?>> get() = _product
 
-    private val _editMode = MutableLiveData<Event<EditMode>>()
+    private val _editMode = MutableLiveData(Event(EditMode.READ_ONLY))
     val editMode: LiveData<Event<EditMode>> get() = _editMode
 
     private val _nickname = MutableLiveData<Event<String?>>()
     val nickname: LiveData<Event<String?>> get() = _nickname
 
-    private val _productNicknameCompleted = MutableLiveData<Boolean>()
-    val productNicknameCompleted: LiveData<Boolean> get() = _productNicknameCompleted
+    private val _productNicknameCompleted = MutableLiveData<Event<Boolean>>(Event(false))
+    val productNicknameCompleted: LiveData<Event<Boolean>> get() = _productNicknameCompleted
 
     private val _productNicknameSuccess = MutableLiveData<Event<Boolean>>()
     val productNicknameSuccess: LiveData<Event<Boolean>> get() = _productNicknameSuccess
 
-    init {
-        _productNicknameCompleted.value = false
+    private var originalProduct: ProductPostItem? = null
+
+    fun initializeProduct(productPostItem: ProductPostItem) {
+        if (_product.value == null) {
+            _product.value = Event(productPostItem)
+            if (originalProduct == null) {
+                originalProduct = productPostItem
+            }
+        }
     }
 
-    fun setProduct(productPostItem: ProductPostItem) {
-        _product.value = productPostItem
+    fun updateProduct(productPostItem: ProductPostItem) {
+        if (editMode.value?.peekContent() == EditMode.EDIT) {
+            _product.value = Event(productPostItem)
+        }
     }
 
     fun setEditMode(editMode: EditMode) {
@@ -44,17 +53,29 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
 
     fun getProductNickname() {
         viewModelScope.launch {
-            val productUid = product.value?.id
+            val productUid = product.value?.peekContent()?.id
             if (productUid != null) {
                 val nickname = userInfoRepository.getUserNameByUserId(productUid)
                 _nickname.value = Event(nickname)
             }
-            _productNicknameCompleted.value = true
+            _productNicknameCompleted.value = Event(true)
         }
     }
 
     fun handlePostResponse(nickName: String?) {
         val isSuccess = nickName != null
         _productNicknameSuccess.value = Event(isSuccess)
+    }
+
+    fun toggleEditMode() {
+        val currentEditMode = editMode.value?.peekContent()
+        val newEditMode =
+            if (currentEditMode == EditMode.EDIT) EditMode.READ_ONLY else EditMode.EDIT
+
+        if (newEditMode == EditMode.READ_ONLY) {
+            _product.value = Event(originalProduct)
+        }
+
+        setEditMode(newEditMode)
     }
 }

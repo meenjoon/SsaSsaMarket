@@ -20,4 +20,7 @@ object Constants {
     const val SHARED_PREFERENCE_KEY = "SsaSsaMarket"
     const val KEY_HOME_PRODUCT = "key_home_product"
     const val PATTERN_COMMA_THOUSANDS = "#,###"
+    const val TITLE = "title"
+    const val PRICE = "price"
+    const val CONTENT = "content"
 }

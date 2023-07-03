@@ -42,5 +42,11 @@
     <string name="detail_price">판매가 : </string>
     <string name="detail_location">지역 : </string>
     <string name="seller_edit">수정하기</string>
+    <string name="seller_edit_cancel">취소하기</string>
     <string name="nickname_response_failure">닉네임을 불러오지 못했습니다.</string>
+    <string name="edit_text">글 수정하기</string>
+    <string name="success">완료</string>
+    <string name="confirmation_dialog_message_edit">정말로 수정을 취소하시겠습니까??</string>
+    <string name="confirmation_dialog_message_cancel">정말로 수정을 하시겠습니까??</string>
+    <string name="confirmation_dialog_title">"재확인"</string>
 </resources>
