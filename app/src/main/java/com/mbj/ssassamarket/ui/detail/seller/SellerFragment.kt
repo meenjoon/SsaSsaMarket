@@ -20,6 +20,7 @@ import com.mbj.ssassamarket.util.Constants
 import com.mbj.ssassamarket.util.Constants.CONTENT
 import com.mbj.ssassamarket.util.Constants.PRICE
 import com.mbj.ssassamarket.util.Constants.TITLE
+import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
 import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.ProgressDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -132,7 +133,7 @@ class SellerFragment : BaseFragment() {
             setDetailPriceEnabled(editMode == EditMode.EDIT)
             setDetailTitleEnabled(editMode == EditMode.EDIT)
             setDetailTitleText(product?.peekContent()?.title)
-            setDetailTimeText(product?.peekContent()?.createdDate)
+            setDetailTimeText(product?.peekContent()?.createdDate?.let { getFormattedElapsedTime(it) })
             setDetailPriceText(product?.peekContent()?.price.toString())
             setLocation(product?.peekContent()?.location)
             setDetailContentText(product?.peekContent()?.content)
