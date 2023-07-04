@@ -61,8 +61,8 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_chat"
-        android:name="com.mbj.ssassamarket.ui.chat.ChatFragment"
-        android:label="ChatFragment" />
+        android:name="com.mbj.ssassamarket.ui.chat.list.ChatListFragment"
+        android:label="ChatListFragment" />
     <fragment
         android:id="@+id/navigation_inventory"
         android:name="com.mbj.ssassamarket.ui.inventory.InventoryFragment"
