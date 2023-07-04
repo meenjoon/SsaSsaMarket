@@ -15,8 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(private val productRepository: ProductRepository, private val userInfoRepository: UserInfoRepository) : ViewModel() {
 
-    private val _items = MutableLiveData<Event<List<ProductPostItem>>>()
-    val items: LiveData<Event<List<ProductPostItem>>>
+    private val _items = MutableLiveData<Event<List<Pair<String, ProductPostItem>>>>()
+    val items: LiveData<Event<List<Pair<String, ProductPostItem>>>>
         get() = _items
 
     private val _filterType = MutableLiveData<FilterType>()
@@ -29,7 +29,7 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
 
     val searchText = MutableLiveData<String>()
 
-    private val productList = MediatorLiveData<List<ProductPostItem>>()
+    private val productList = MediatorLiveData<List<Pair<String, ProductPostItem>>>()
 
     init {
         loadAllProducts()
@@ -90,7 +90,7 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
             return
         }
 
-        val filteredProducts = productList.value.orEmpty().filter { product ->
+        val filteredProducts = productList.value.orEmpty().filter { (_, product) ->
             product.category == currentCategory.label &&
                     (currentSearchText.isNullOrBlank() || product.title.contains(
                         currentSearchText,
@@ -99,9 +99,9 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
         }.toMutableList()
 
         when (currentFilterType) {
-            FilterType.LATEST -> filteredProducts.sortByDescending { product -> product.createdDate }
-            FilterType.PRICE -> filteredProducts.sortBy { product -> product.price }
-            FilterType.FAVORITE -> filteredProducts.sortByDescending { product -> product.favoriteCount }
+            FilterType.LATEST -> filteredProducts.sortByDescending { (_, product) -> product.createdDate }
+            FilterType.PRICE -> filteredProducts.sortBy { (_, product) -> product.price }
+            FilterType.FAVORITE -> filteredProducts.sortByDescending { (_, product) -> product.favoriteCount }
         }
 
         _items.value = Event(filteredProducts)

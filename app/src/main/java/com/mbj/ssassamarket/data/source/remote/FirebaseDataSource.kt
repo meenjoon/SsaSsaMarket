@@ -205,16 +205,16 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
         return false
     }
 
-    override suspend fun getProduct(): List<ProductPostItem> {
+    override suspend fun getProduct(): List<Pair<String, ProductPostItem>> {
         val (user, idToken) = getUserAndIdToken()
         return try {
             if (idToken != null) {
                 val response = apiClient.getProduct(idToken)
                 if (response.isSuccessful) {
                     val productMap: Map<String, ProductPostItem>? = response.body()
-                    val productList = productMap?.values?.toList() ?: emptyList()
-
-                    val updatedProductList = productList.map { product ->
+                    val productList = productMap?.entries?.map { entry ->
+                        val key = entry.key
+                        val product = entry.value
                         val updatedImageLocations = product.imageLocations?.mapNotNull { imageLocation ->
                             if (imageLocation != null) {
                                 getDownloadUrl(imageLocation)
@@ -222,12 +222,11 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
                                 null
                             }
                         }
-                        product.copy(imageLocations = updatedImageLocations)
-                    }
+                        key to product.copy(imageLocations = updatedImageLocations)
+                    } ?: emptyList()
 
-                    updatedProductList
+                    productList
                 } else {
-                    // Handle error
                     val statusCode = response.code()
                     Log.e(TAG, "Failed to get product. Status Code: $statusCode")
                     emptyList()
@@ -236,7 +235,6 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
                 emptyList()
             }
         } catch (e: Exception) {
-            // Handle exception
             Log.e(TAG, "Exception while getting product", e)
             emptyList()
         }

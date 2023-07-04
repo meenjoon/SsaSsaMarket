@@ -72,11 +72,11 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
         }
     }
 
-    override fun onProductClick(productPostItem: ProductPostItem) {
-        viewModel.navigateBasedOnUserType(productPostItem.id) { userType ->
+    override fun onProductClick(productPostItem: Pair<String,ProductPostItem>) {
+        viewModel.navigateBasedOnUserType(productPostItem.second.id) { userType ->
             when (userType) {
                 UserType.SELLER -> {
-                    val action = HomeFragmentDirections.actionNavigationHomeToSellerFragment(productPostItem)
+                    val action = HomeFragmentDirections.actionNavigationHomeToSellerFragment(productPostItem.first, productPostItem.second)
                     findNavController().navigate(action)
                 }
                 UserType.BUYER -> {

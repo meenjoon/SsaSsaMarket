@@ -4,5 +4,5 @@ import com.mbj.ssassamarket.data.model.ProductPostItem
 
 interface ProductClickListener {
 
-    fun onProductClick(productPostItem: ProductPostItem)
+    fun onProductClick(productPostItem: Pair<String,ProductPostItem>)
 }

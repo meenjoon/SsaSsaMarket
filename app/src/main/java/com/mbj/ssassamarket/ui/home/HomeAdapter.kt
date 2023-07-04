@@ -9,7 +9,7 @@ import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.databinding.RecyclerviewItemHomeProductBinding
 import com.mbj.ssassamarket.ui.common.ProductClickListener
 
-class HomeAdapter(private val productClickListener: ProductClickListener) : ListAdapter<ProductPostItem, HomeAdapter.HomeViewHolder>(homeDiffCallback) {
+class HomeAdapter(private val productClickListener: ProductClickListener) : ListAdapter<Pair<String,ProductPostItem>, HomeAdapter.HomeViewHolder>(homeDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeViewHolder {
         return HomeViewHolder.from(parent)
@@ -21,8 +21,8 @@ class HomeAdapter(private val productClickListener: ProductClickListener) : List
 
     class HomeViewHolder(val binding: RecyclerviewItemHomeProductBinding) : ViewHolder(binding.root) {
 
-        fun bind(productPostItem: ProductPostItem, productClickListener: ProductClickListener) {
-            binding.productPostItem = productPostItem
+        fun bind(productPostItem: Pair<String, ProductPostItem>, productClickListener: ProductClickListener) {
+            binding.productPostItem = productPostItem.second
             binding.root.setOnClickListener {
                 productClickListener.onProductClick(productPostItem)
             }
@@ -43,17 +43,17 @@ class HomeAdapter(private val productClickListener: ProductClickListener) : List
     }
 
     companion object {
-        private val homeDiffCallback = object : DiffUtil.ItemCallback<ProductPostItem>() {
+        private val homeDiffCallback = object : DiffUtil.ItemCallback<Pair<String,ProductPostItem>>() {
             override fun areItemsTheSame(
-                oldItem: ProductPostItem,
-                newItem: ProductPostItem
+                oldItem: Pair<String,ProductPostItem>,
+                newItem: Pair<String,ProductPostItem>
             ): Boolean {
-                return oldItem == newItem
+                return oldItem.first == newItem.first
             }
 
             override fun areContentsTheSame(
-                oldItem: ProductPostItem,
-                newItem: ProductPostItem
+                oldItem: Pair<String,ProductPostItem>,
+                newItem: Pair<String,ProductPostItem>
             ): Boolean {
                 return oldItem == newItem
             }
