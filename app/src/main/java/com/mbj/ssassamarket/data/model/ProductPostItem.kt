@@ -32,3 +32,9 @@ data class ProductPostItem(
     @Json(name = "favoriteList")
     val favoriteList: List<String?>? = null
 ) : java.io.Serializable
+
+data class PatchProductRequest(
+    val title: String,
+    val price: Int,
+    val content: String
+)
