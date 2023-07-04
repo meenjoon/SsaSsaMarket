@@ -38,6 +38,9 @@
         <action
             android:id="@+id/action_navigation_home_to_sellerFragment"
             app:destination="@id/sellerFragment" />
+        <action
+            android:id="@+id/action_navigation_home_to_buyerFragment"
+            app:destination="@id/buyerFragment" />
     </fragment>
     <fragment
         android:id="@+id/splashFragment"
@@ -79,6 +82,17 @@
         android:id="@+id/sellerFragment"
         android:name="com.mbj.ssassamarket.ui.detail.seller.SellerFragment"
         android:label="SellerFragment">
+        <argument
+            android:name="postId"
+            app:argType="string" />
+        <argument
+            android:name="product"
+            app:argType="com.mbj.ssassamarket.data.model.ProductPostItem" />
+    </fragment>
+    <fragment
+        android:id="@+id/buyerFragment"
+        android:name="com.mbj.ssassamarket.ui.detail.buyer.BuyerFragment"
+        android:label="BuyerFragment">
         <argument
             android:name="postId"
             app:argType="string" />

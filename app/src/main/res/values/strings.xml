@@ -51,4 +51,5 @@
     <string name="confirmation_dialog_title">"재확인"</string>
     <string name="product_update_failed">"상품 업데이트에 실패하셨습니다."</string>
     <string name="product_update_success">"상품을 업데이트 하셨습니다."</string>
+    <string name="buyer_chat">채팅하기</string>
 </resources>
