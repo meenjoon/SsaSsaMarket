@@ -1,6 +1,7 @@
 package com.mbj.ssassamarket.ui.common
 
 import android.content.Context
+import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -25,9 +26,13 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
                     val contentEnabled = getBoolean(R.styleable.ProductDetailInfoLayout_detailContentEnabled, true)
                     val timeTextColor = getColor(R.styleable.ProductDetailInfoLayout_detailTimeTextColor, 0)
                     val nicknameText = getString(R.styleable.ProductDetailInfoLayout_detailNicknameText)
+                    val timeText = getString(R.styleable.ProductDetailInfoLayout_detailNicknameText)
+                    val locationText = getString(R.styleable.ProductDetailInfoLayout_detailNicknameText)
+                    val titleTextColor = getColor(R.styleable.ProductDetailInfoLayout_detailTimeTextColor, 0)
+                    val priceTextColor = getColor(R.styleable.ProductDetailInfoLayout_detailTimeTextColor, 0)
+                    val contentTextColor = getColor(R.styleable.ProductDetailInfoLayout_detailTimeTextColor, 0)
 
                     setDetailTitleText(titleText)
-                    getDetailTitleText()
                     setDetailTitleEnabled(titleEnabled)
                     setDetailPriceText(priceText)
                     setDetailPriceEnabled(priceEnabled)
@@ -35,6 +40,11 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
                     setDetailContentEnabled(contentEnabled)
                     setDetailTimeTextColor(timeTextColor)
                     setDetailNicknameText(nicknameText)
+                    setDetailTimeText(timeText)
+                    setLocation(locationText)
+                    setDetailTitleTextColor(titleTextColor)
+                    setDetailPriceTextColor(priceTextColor)
+                    setDetailContentTextColor(contentTextColor)
                 } finally {
                     recycle()
                 }
@@ -45,37 +55,71 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
         binding.detailTitleTiev.setText(text)
     }
 
-    fun getDetailTitleText(): String? {
-        return binding.detailTitleTiev.text.toString()
-    }
-
-    private fun setDetailTitleEnabled(enabled: Boolean) {
+    fun setDetailTitleEnabled(enabled: Boolean) {
         binding.detailTitleTiev.isEnabled = enabled
     }
 
-    private fun setDetailPriceText(text: CharSequence?) {
+    fun setDetailPriceText(text: CharSequence?) {
         binding.detailPriceTiev.setText(text)
     }
 
-    private fun setDetailPriceEnabled(enabled: Boolean) {
+    fun setDetailPriceEnabled(enabled: Boolean) {
         binding.detailPriceTiev.isEnabled = enabled
     }
 
-    private fun setDetailContentText(text: CharSequence?) {
+    fun setDetailContentText(text: CharSequence?) {
         binding.detailContentTiev.setText(text)
     }
 
-    private fun setDetailContentEnabled(enabled: Boolean) {
+    fun setDetailContentEnabled(enabled: Boolean) {
         binding.detailContentTiev.isEnabled = enabled
     }
 
-    private fun setDetailTimeTextColor(color: Int) {
+    fun setDetailTimeTextColor(color: Int) {
         if (color != 0) {
             binding.detailTimeTv.setTextColor(color)
         }
     }
 
-    private fun setDetailNicknameText(text: CharSequence?) {
+    fun setDetailNicknameText(text: CharSequence?) {
         binding.detailNicknameTv.setText(text)
+    }
+
+    fun setDetailTimeText(text: CharSequence?) {
+        binding.detailTimeTv.setText(text)
+    }
+
+    fun setLocation(text: CharSequence?) {
+        binding.detailLocationTv.setText(text)
+    }
+
+    fun setDetailTitleTextChangeListener(textWatcher: TextWatcher) {
+        binding.detailTitleTiev.addTextChangedListener(textWatcher)
+    }
+
+    fun setDetailPriceTextChangeListener(textWatcher: TextWatcher) {
+        binding.detailPriceTiev.addTextChangedListener(textWatcher)
+    }
+
+    fun setDetailContentTextChangeListener(textWatcher: TextWatcher) {
+        binding.detailContentTiev.addTextChangedListener(textWatcher)
+    }
+
+    fun setDetailTitleTextColor(colorResourceId: Int) {
+        if (colorResourceId != 0) {
+            binding.detailTitleTiev.setTextColor(colorResourceId)
+        }
+    }
+
+    fun setDetailPriceTextColor(colorResourceId: Int) {
+        if (colorResourceId != 0) {
+            binding.detailPriceTiev.setTextColor(colorResourceId)
+        }
+    }
+
+    fun setDetailContentTextColor(colorResourceId: Int) {
+        if (colorResourceId != 0) {
+            binding.detailContentTiev.setTextColor(colorResourceId)
+        }
     }
 }

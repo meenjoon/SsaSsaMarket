@@ -31,4 +31,4 @@ data class ProductPostItem(
     val latLng: String,
     @Json(name = "favoriteList")
     val favoriteList: List<String?>? = null
-)
+) : java.io.Serializable
