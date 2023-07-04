@@ -3,12 +3,14 @@ package com.mbj.ssassamarket.ui.detail.seller
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
@@ -125,20 +127,24 @@ class SellerFragment : BaseFragment() {
             if (editMode == EditMode.EDIT) View.VISIBLE else View.INVISIBLE
         binding.detailSubmitTv.visibility =
             if (editMode == EditMode.EDIT) View.VISIBLE else View.INVISIBLE
-        binding.detailEditBt.text = if (editMode == EditMode.EDIT) {
-            getString(R.string.seller_edit_cancel)
-        } else {
-            getString(R.string.seller_edit)
-        }
+        binding.detailEditBt.visibility =
+            if(editMode == EditMode.READ_ONLY) View.VISIBLE else View.INVISIBLE
+
         binding.detailReceiver.apply {
-            setDetailContentEnabled(editMode == EditMode.EDIT)
-            setDetailPriceEnabled(editMode == EditMode.EDIT)
-            setDetailTitleEnabled(editMode == EditMode.EDIT)
+            val isEditMode = editMode == EditMode.EDIT
+            setDetailContentEnabled(isEditMode)
+            setDetailPriceEnabled(isEditMode)
+            setDetailTitleEnabled(isEditMode)
             setDetailTitleText(product?.peekContent()?.title)
             setDetailTimeText(product?.peekContent()?.createdDate?.let { getFormattedElapsedTime(it) })
             setDetailPriceText(product?.peekContent()?.price.toString())
             setLocation(product?.peekContent()?.location)
             setDetailContentText(product?.peekContent()?.content)
+            if (editMode == EditMode.READ_ONLY) {
+                setDetailContentTextColor(ContextCompat.getColor(context, R.color.black))
+                setDetailPriceTextColor(ContextCompat.getColor(context, R.color.black))
+                setDetailTitleTextColor(ContextCompat.getColor(context, R.color.black))
+            }
         }
     }
 
@@ -147,6 +153,13 @@ class SellerFragment : BaseFragment() {
             showConfirmationDialog()
         }
         binding.detailSubmitTv.setOnClickListener {
+        }
+        binding.detailBackIv.setOnClickListener {
+            if (viewModel.isReadOnlyMode()) {
+                findNavController().navigateUp()
+            } else {
+                showConfirmationDialog()
+            }
         }
     }
 
@@ -157,8 +170,7 @@ class SellerFragment : BaseFragment() {
     }
 
     private fun showConfirmationDialog() {
-        val currentEditMode = viewModel.editMode.value?.peekContent()
-        val dialogMessage = if (currentEditMode == EditMode.EDIT) {
+        val dialogMessage = if (viewModel.isReadOnlyMode().not()) {
             getString(R.string.confirmation_dialog_message_edit)
         } else {
             getString(R.string.confirmation_dialog_message_cancel)

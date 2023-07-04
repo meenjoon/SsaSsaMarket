@@ -122,4 +122,8 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
         val currentProduct = product.value?.peekContent()
         return currentProduct?.content == originalProduct!!.content
     }
+
+    fun isReadOnlyMode(): Boolean {
+        return editMode.value?.peekContent() == EditMode.READ_ONLY
+    }
 }

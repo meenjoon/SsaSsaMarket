@@ -36,23 +36,23 @@
 
                     <TextView
                         android:id="@+id/detail_edit_abl_tv"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="0dp"
+                        android:layout_marginStart="30dp"
                         android:gravity="center"
                         android:text="@string/edit_text"
-                        android:textSize="35sp"
+                        android:textColor="@color/orange_300"
+                        android:textSize="25sp"
                         android:textStyle="bold"
                         android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/detail_back_iv"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:id="@+id/detail_submit_tv"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="0dp"
-                        android:layout_marginEnd="25dp"
                         android:gravity="end|center"
                         android:text="@string/success"
                         android:textColor="@color/grey_300"
@@ -60,9 +60,15 @@
                         android:textStyle="bold"
                         android:visibility="invisible"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="@id/guideline_vertical_93"
                         app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.constraintlayout.widget.Guideline
+                        android:id="@+id/guideline_vertical_93"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        app:layout_constraintGuide_percent="0.93" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
