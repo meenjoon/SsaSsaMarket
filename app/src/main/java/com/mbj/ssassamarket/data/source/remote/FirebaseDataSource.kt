@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.storage.FirebaseStorage
 import com.mbj.ssassamarket.data.model.ImageContent
+import com.mbj.ssassamarket.data.model.PatchProductRequest
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
@@ -13,7 +14,10 @@ import kotlinx.coroutines.tasks.await
 import retrofit2.Response
 import javax.inject.Inject
 
-class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, private val storage: FirebaseStorage) : MarketNetworkDataSource {
+class FirebaseDataSource @Inject constructor(
+    private val apiClient: ApiClient,
+    private val storage: FirebaseStorage
+) : MarketNetworkDataSource {
 
     override suspend fun currentUserExists(): Boolean {
         val (user, idToken) = getUserAndIdToken()
@@ -205,16 +209,16 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
         return false
     }
 
-    override suspend fun getProduct(): List<ProductPostItem> {
+    override suspend fun getProduct(): List<Pair<String, ProductPostItem>> {
         val (user, idToken) = getUserAndIdToken()
         return try {
             if (idToken != null) {
                 val response = apiClient.getProduct(idToken)
                 if (response.isSuccessful) {
                     val productMap: Map<String, ProductPostItem>? = response.body()
-                    val productList = productMap?.values?.toList() ?: emptyList()
-
-                    val updatedProductList = productList.map { product ->
+                    val productList = productMap?.entries?.map { entry ->
+                        val key = entry.key
+                        val product = entry.value
                         val updatedImageLocations = product.imageLocations?.mapNotNull { imageLocation ->
                             if (imageLocation != null) {
                                 getDownloadUrl(imageLocation)
@@ -222,12 +226,11 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
                                 null
                             }
                         }
-                        product.copy(imageLocations = updatedImageLocations)
-                    }
+                        key to product.copy(imageLocations = updatedImageLocations)
+                    } ?: emptyList()
 
-                    updatedProductList
+                    productList
                 } else {
-                    // Handle error
                     val statusCode = response.code()
                     Log.e(TAG, "Failed to get product. Status Code: $statusCode")
                     emptyList()
@@ -236,7 +239,6 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
                 emptyList()
             }
         } catch (e: Exception) {
-            // Handle exception
             Log.e(TAG, "Exception while getting product", e)
             emptyList()
         }
@@ -272,10 +274,26 @@ class FirebaseDataSource @Inject constructor(private val apiClient: ApiClient, p
                     Log.e(TAG, "getUserNameByUserId Error, Status Code: $statusCode")
                 }
             } catch (e: Exception) {
-                Log.e(TAG ,"getUserNameByUserId Error", e)
+                Log.e(TAG, "getUserNameByUserId Error", e)
             }
         }
         return null
+    }
+
+    override suspend fun updateProduct(postId: String, request: PatchProductRequest) {
+        val (user, idToken) = getUserAndIdToken()
+        if (idToken != null) {
+            try {
+                val response = apiClient.updateProduct(postId, request, idToken)
+                if (response.isSuccessful) {
+                    Log.d(TAG, "상품 업데이트 성공")
+                } else {
+                    Log.e(TAG, "상품 업데이트 실패 (Status Code: ${response.code()})")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "상품 업데이트 오류", e)
+            }
+        }
     }
 
     suspend fun getDownloadUrl(imageLocation: String): String {

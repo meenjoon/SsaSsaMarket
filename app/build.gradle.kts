@@ -117,4 +117,7 @@ dependencies {
     //Hilt 관련
     implementation ("com.google.dagger:hilt-android:2.44")
     kapt ("com.google.dagger:hilt-compiler:2.44")
+
+    //SwipeRefreshLayout 관련
+    implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }

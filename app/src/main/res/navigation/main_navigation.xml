@@ -34,7 +34,7 @@
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.mbj.ssassamarket.ui.home.HomeFragment"
-        android:label="HomeFragment" >
+        android:label="HomeFragment">
         <action
             android:id="@+id/action_navigation_home_to_sellerFragment"
             app:destination="@id/sellerFragment" />
@@ -78,7 +78,10 @@
     <fragment
         android:id="@+id/sellerFragment"
         android:name="com.mbj.ssassamarket.ui.detail.seller.SellerFragment"
-        android:label="SellerFragment" >
+        android:label="SellerFragment">
+        <argument
+            android:name="postId"
+            app:argType="string" />
         <argument
             android:name="product"
             app:argType="com.mbj.ssassamarket.data.model.ProductPostItem" />

@@ -43,6 +43,7 @@ import net.daum.mf.map.api.MapReverseGeoCoder
 
 @AndroidEntryPoint
 class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
+
     override val binding get() = _binding as FragmentWritingBinding
     override val layoutId: Int get() = R.layout.fragment_writing
 

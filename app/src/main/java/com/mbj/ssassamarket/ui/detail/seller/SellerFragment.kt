@@ -3,7 +3,6 @@ package com.mbj.ssassamarket.ui.detail.seller
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -32,7 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class SellerFragment : BaseFragment() {
 
-    override val binding by lazy { FragmentSellerBinding.inflate(layoutInflater) }
+    override val binding get() = _binding as FragmentSellerBinding
     override val layoutId: Int = R.layout.fragment_seller
 
     private val args: SellerFragmentArgs by navArgs()
@@ -51,7 +50,7 @@ class SellerFragment : BaseFragment() {
     }
 
     private fun initViewModel() {
-        viewModel.initializeProduct(args.product)
+        viewModel.initializeProduct( args.postId, args.product)
     }
 
     private fun observeData() {
@@ -63,7 +62,7 @@ class SellerFragment : BaseFragment() {
 
         viewModel.nickname.observe(viewLifecycleOwner, EventObserver { nickname ->
             binding.detailReceiver.setDetailNicknameText(nickname)
-            viewModel.handlePostResponse(nickname)
+            viewModel.handleNicknameResponse(nickname)
         })
 
         viewModel.productNicknameCompleted.observe(viewLifecycleOwner, EventObserver { productNicknameCompleted ->
@@ -85,6 +84,27 @@ class SellerFragment : BaseFragment() {
             setDetailTitleTextColor(viewModel.isTitleMatch())
             setDetailPriceTextColor(viewModel.isPriceMatch())
             setDetailContentTextColor(viewModel.isContentMatch())
+        })
+
+        viewModel.productUpdatedResponse.observe(viewLifecycleOwner, EventObserver { response ->
+            viewModel.handleUpdateResponse(response)
+        })
+
+        viewModel.productUpdatedSuccess.observe(viewLifecycleOwner, EventObserver { success ->
+            if (success) {
+                findNavController().navigateUp()
+                showToast(R.string.product_update_success)
+            } else {
+                showToast(R.string.product_update_failed)
+            }
+        })
+
+        viewModel.productUpdateCompleted.observe(viewLifecycleOwner, EventObserver{ compleated ->
+            if(compleated) {
+                dismissLoadingDialog()
+            } else {
+                showLoadingDialog()
+            }
         })
     }
 
@@ -153,6 +173,7 @@ class SellerFragment : BaseFragment() {
             showConfirmationDialog()
         }
         binding.detailSubmitTv.setOnClickListener {
+            viewModel.updateProduct()
         }
         binding.detailBackIv.setOnClickListener {
             if (viewModel.isReadOnlyMode()) {

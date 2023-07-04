@@ -1,9 +1,8 @@
 package com.mbj.ssassamarket.data.source
 
 import android.util.Log
-import com.mbj.ssassamarket.data.model.Category
-import com.mbj.ssassamarket.data.model.FilterType
 import com.mbj.ssassamarket.data.model.ImageContent
+import com.mbj.ssassamarket.data.model.PatchProductRequest
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
 import javax.inject.Inject
@@ -43,7 +42,7 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
         }
     }
 
-    suspend fun getProduct(): List<ProductPostItem> {
+    suspend fun getProduct(): List<Pair<String, ProductPostItem>> {
         return try {
             marketNetworkDataSource.getProduct()
         } catch (e: Exception) {
@@ -52,34 +51,13 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
         }
     }
 
-    suspend fun getProductByCategory(category: Category): List<ProductPostItem> {
+    suspend fun updateProduct(postId: String, request: PatchProductRequest): Boolean {
         return try {
-            val allProducts = getProduct()
-            allProducts.filter { it.category == category.label }
+            marketNetworkDataSource.updateProduct(postId, request)
+            true
         } catch (e: Exception) {
-            Log.e(TAG, "Exception while getting product by category", e)
-            emptyList()
-        }
-    }
-
-    suspend fun filterProductsByCategory(category: Category, filterType: FilterType): List<ProductPostItem> {
-        return try {
-            val allProducts = getProduct()
-            val filteredProducts = allProducts.filter { it.category == category.label }
-            when (filterType) {
-                FilterType.LATEST -> {
-                    filteredProducts.sortedByDescending { it.createdDate }
-                }
-                FilterType.PRICE -> {
-                    filteredProducts.sortedWith(compareBy { it.price })
-                }
-                FilterType.FAVORITE -> {
-                    filteredProducts.sortedWith(compareBy { it.favoriteCount })
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Exception while filtering products by category", e)
-            emptyList()
+            Log.e(TAG, "상품 업데이트 오류", e)
+            false
         }
     }
 

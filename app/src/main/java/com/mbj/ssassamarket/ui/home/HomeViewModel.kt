@@ -15,8 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(private val productRepository: ProductRepository, private val userInfoRepository: UserInfoRepository) : ViewModel() {
 
-    private val _items = MutableLiveData<Event<List<ProductPostItem>>>()
-    val items: LiveData<Event<List<ProductPostItem>>>
+    private val _items = MutableLiveData<Event<List<Pair<String, ProductPostItem>>>>()
+    val items: LiveData<Event<List<Pair<String, ProductPostItem>>>>
         get() = _items
 
     private val _filterType = MutableLiveData<FilterType>()
@@ -27,9 +27,18 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
     val category: LiveData<Category>
         get() = _category
 
+    private val _itemRefreshCompleted = MutableLiveData<Event<Boolean>>()
+    val itemRefreshCompleted: LiveData<Event<Boolean>> get() = _itemRefreshCompleted
+
+    private val _itemRefreshSuccess = MutableLiveData<Event<Boolean>>()
+    val itemRefreshSuccess: LiveData<Event<Boolean>> get() = _itemRefreshSuccess
+
+    private val _itemRefreshResponse = MutableLiveData<Event<Boolean>>()
+    val itemRefreshResponse: LiveData<Event<Boolean>> get() = _itemRefreshResponse
+
     val searchText = MutableLiveData<String>()
 
-    private val productList = MediatorLiveData<List<ProductPostItem>>()
+    private val productList = MediatorLiveData<List<Pair<String, ProductPostItem>>>()
 
     init {
         loadAllProducts()
@@ -90,7 +99,7 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
             return
         }
 
-        val filteredProducts = productList.value.orEmpty().filter { product ->
+        val filteredProducts = productList.value.orEmpty().filter { (_, product) ->
             product.category == currentCategory.label &&
                     (currentSearchText.isNullOrBlank() || product.title.contains(
                         currentSearchText,
@@ -99,9 +108,9 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
         }.toMutableList()
 
         when (currentFilterType) {
-            FilterType.LATEST -> filteredProducts.sortByDescending { product -> product.createdDate }
-            FilterType.PRICE -> filteredProducts.sortBy { product -> product.price }
-            FilterType.FAVORITE -> filteredProducts.sortByDescending { product -> product.favoriteCount }
+            FilterType.LATEST -> filteredProducts.sortByDescending { (_, product) -> product.createdDate }
+            FilterType.PRICE -> filteredProducts.sortBy { (_, product) -> product.price }
+            FilterType.FAVORITE -> filteredProducts.sortByDescending { (_, product) -> product.favoriteCount }
         }
 
         _items.value = Event(filteredProducts)
@@ -115,5 +124,28 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
 
             callback(userType)
         }
+    }
+
+    fun refreshData() {
+        viewModelScope.launch {
+            _itemRefreshCompleted.value = Event(false)
+            val products = productRepository.getProduct()
+            if (products != null) {
+                _itemRefreshResponse.value = Event(true)
+                productList.value = products
+                applyFilters()
+            } else {
+                _itemRefreshResponse.value = Event(false)
+            }
+        }
+    }
+
+    fun handleUpdateResponse(response: Boolean) {
+        if (response) {
+            _itemRefreshSuccess.value = Event(true)
+        } else {
+            _itemRefreshSuccess.value = Event(true)
+        }
+        _itemRefreshCompleted.value = Event(true)
     }
 }

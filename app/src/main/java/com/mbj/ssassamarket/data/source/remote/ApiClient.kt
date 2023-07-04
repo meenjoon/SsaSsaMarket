@@ -1,5 +1,6 @@
 package com.mbj.ssassamarket.data.source.remote
 
+import com.mbj.ssassamarket.data.model.PatchProductRequest
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.model.User
 import retrofit2.Response
@@ -36,5 +37,12 @@ interface ApiClient {
     suspend fun getProduct(
         @Query("auth") auth: String
     ): Response<Map<String, ProductPostItem>>
+
+    @PATCH("posts/{postId}.json")
+    suspend fun updateProduct(
+        @Path("postId") postId: String,
+        @Body request: PatchProductRequest,
+        @Query("auth") auth: String
+    ): Response<Unit>
 }
 
