@@ -5,7 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mbj.ssassamarket.data.model.EditMode
+import com.mbj.ssassamarket.data.model.PatchProductRequest
 import com.mbj.ssassamarket.data.model.ProductPostItem
+import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SellerViewModel @Inject constructor(private val userInfoRepository: UserInfoRepository) : ViewModel() {
+class SellerViewModel @Inject constructor(private val userInfoRepository: UserInfoRepository, private val productRepository: ProductRepository) : ViewModel() {
 
     private val _product = MutableLiveData<Event<ProductPostItem?>>()
     val product: LiveData<Event<ProductPostItem?>> get() = _product
@@ -30,9 +32,23 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
     private val _productNicknameSuccess = MutableLiveData<Event<Boolean>>()
     val productNicknameSuccess: LiveData<Event<Boolean>> get() = _productNicknameSuccess
 
-    private var originalProduct: ProductPostItem? = null
+    private val _productUpdateCompleted = MutableLiveData<Event<Boolean>>()
+    val productUpdateCompleted: LiveData<Event<Boolean>> get() = _productUpdateCompleted
 
-    fun initializeProduct(productPostItem: ProductPostItem) {
+    private val _productUpdatedSuccess = MutableLiveData<Event<Boolean>>()
+    val productUpdatedSuccess: LiveData<Event<Boolean>> get() = _productUpdatedSuccess
+
+    private val _productUpdatedResponse = MutableLiveData<Event<Boolean>>()
+    val productUpdatedResponse: LiveData<Event<Boolean>>
+        get() = _productUpdatedResponse
+
+    private var originalProduct: ProductPostItem? = null
+    private var postId: String? = null
+
+    fun initializeProduct(inputPostId: String, productPostItem: ProductPostItem) {
+        if(postId == null){
+            postId = inputPostId
+        }
         if (_product.value == null) {
             _product.value = Event(productPostItem)
             if (originalProduct == null) {
@@ -62,7 +78,7 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
         }
     }
 
-    fun handlePostResponse(nickName: String?) {
+    fun handleNicknameResponse(nickName: String?) {
         val isSuccess = nickName != null
         _productNicknameSuccess.value = Event(isSuccess)
     }
@@ -125,5 +141,34 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
 
     fun isReadOnlyMode(): Boolean {
         return editMode.value?.peekContent() == EditMode.READ_ONLY
+    }
+
+    fun updateProduct() {
+        val productValue = _product.value?.peekContent()
+        val originalProductValue = originalProduct
+
+        if (productValue != null && originalProductValue != null) {
+            val updatedTitle = productValue.title ?: originalProductValue.title
+            val updatedPrice = productValue.price ?: originalProductValue.price
+            val updatedContent = productValue.content ?: originalProductValue.content
+
+            val patchRequest = PatchProductRequest(updatedTitle, updatedPrice, updatedContent)
+
+            viewModelScope.launch {
+                _productUpdateCompleted.value = Event(false)
+                if (postId != null) {
+                    _productUpdatedResponse.value = Event(productRepository.updateProduct(postId!!, patchRequest))
+                }
+            }
+        }
+    }
+
+    fun handleUpdateResponse(response: Boolean) {
+        if (response) {
+            _productUpdatedSuccess.value = Event(true)
+        } else {
+            _productUpdatedSuccess.value = Event(true)
+        }
+        _productUpdateCompleted.value = Event(true)
     }
 }
