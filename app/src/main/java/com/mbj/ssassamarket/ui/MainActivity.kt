@@ -39,7 +39,9 @@ class MainActivity : AppCompatActivity() {
                 R.id.splashFragment,
                 R.id.settingNicknameFragment,
                 R.id.navigation_writing,
-                R.id.sellerFragment -> false
+                R.id.sellerFragment,
+                R.id.buyerFragment,
+                R.id.chatDetailFragment -> false
                 else -> true
             }
             binding.mainBottomNavigation.visibility = if (shouldShowBottomNavigation) {
