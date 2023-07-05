@@ -3,21 +3,25 @@ package com.mbj.ssassamarket.data.source.remote
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
-import com.mbj.ssassamarket.data.model.ImageContent
-import com.mbj.ssassamarket.data.model.PatchProductRequest
-import com.mbj.ssassamarket.data.model.ProductPostItem
-import com.mbj.ssassamarket.data.model.User
+import com.mbj.ssassamarket.BuildConfig
+import com.mbj.ssassamarket.data.model.*
+import com.mbj.ssassamarket.util.Constants.CHAT_ROOMS
 import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 import retrofit2.Response
+import java.util.*
 import javax.inject.Inject
 
 class FirebaseDataSource @Inject constructor(
     private val apiClient: ApiClient,
     private val storage: FirebaseStorage
 ) : MarketNetworkDataSource {
+
+    private val chatRoomsRef = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference.child(CHAT_ROOMS)
 
     override suspend fun currentUserExists(): Boolean {
         val (user, idToken) = getUserAndIdToken()
@@ -293,6 +297,28 @@ class FirebaseDataSource @Inject constructor(
             } catch (e: Exception) {
                 Log.e(TAG, "상품 업데이트 오류", e)
             }
+        }
+    }
+
+    override suspend fun enterChatRoom(ohterUserId: String, otherUserName: String, otherLocation: String): String {
+        val userId = getUserAndIdToken().first?.uid?: ""
+
+        val chatRoomDB = chatRoomsRef.child(userId).child(ohterUserId)
+        val dataSnapshot = chatRoomDB.get().await()
+
+        return if (dataSnapshot.value != null) {
+            val chatRoom = dataSnapshot.getValue(ChatRoomItem::class.java)
+            chatRoom?.chatRoomId ?: ""
+        } else {
+            val chatRoomId = UUID.randomUUID().toString()
+            val newChatRoom = ChatRoomItem(
+                chatRoomId = chatRoomId,
+                otherUserId = ohterUserId,
+                otherUserName = otherUserName,
+                otherLocation = otherLocation
+            )
+            chatRoomDB.setValue(newChatRoom).await()
+            chatRoomId
         }
     }
 

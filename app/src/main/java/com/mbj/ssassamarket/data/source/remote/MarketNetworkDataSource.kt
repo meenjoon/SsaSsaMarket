@@ -28,4 +28,5 @@ interface MarketNetworkDataSource {
     suspend fun getUserAndIdToken() : Pair<FirebaseUser?, String?>
     suspend fun getUserNameByUserId(userIdToken: String) : String?
     suspend fun updateProduct(postId: String, request: PatchProductRequest)
+    suspend fun enterChatRoom(productId: String, otherUserName: String, otherLocation: String): String
 }

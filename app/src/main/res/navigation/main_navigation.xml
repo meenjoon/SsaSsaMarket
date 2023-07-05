@@ -99,5 +99,28 @@
         <argument
             android:name="product"
             app:argType="com.mbj.ssassamarket.data.model.ProductPostItem" />
+        <action
+            android:id="@+id/action_buyerFragment_to_chatDetailFragment"
+            app:destination="@id/chatDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/chatDetailFragment"
+        android:name="com.mbj.ssassamarket.ui.chat.detail.ChatDetailFragment"
+        android:label="ChatDetailFragment">
+        <argument
+            android:name="chatRoomId"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="otherId"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="chatRoomItem"
+            android:defaultValue="@null"
+            app:argType="com.mbj.ssassamarket.data.model.ChatRoomItem"
+            app:nullable="true" />
     </fragment>
 </navigation>

@@ -23,4 +23,5 @@ object Constants {
     const val TITLE = "title"
     const val PRICE = "price"
     const val CONTENT = "content"
+    const val CHAT_ROOMS = "chatRooms"
 }
