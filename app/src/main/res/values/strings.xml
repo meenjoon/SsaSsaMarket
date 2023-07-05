@@ -53,4 +53,7 @@
     <string name="product_update_success">"상품을 업데이트 하셨습니다."</string>
     <string name="buyer_chat">채팅하기</string>
     <string name="request_message">메세지를 입력하세요.</string>
+    <string name="empty_message_error">빈 메세지를 전송할 수는 없습니다.</string>
+    <string name="test_seller_name">판매자 닉네임(테스트값)</string>
+    <string name="test_seller_location">판매자 위치(테스트값)</string>
 </resources>

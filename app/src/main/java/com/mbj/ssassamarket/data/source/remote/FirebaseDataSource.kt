@@ -3,12 +3,25 @@ package com.mbj.ssassamarket.data.source.remote
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.data.model.*
+import com.mbj.ssassamarket.util.Constants.CHATS
 import com.mbj.ssassamarket.util.Constants.CHAT_ROOMS
+import com.mbj.ssassamarket.util.Constants.CHAT_ROOM_ID
+import com.mbj.ssassamarket.util.Constants.LAST_MESSAGE
+import com.mbj.ssassamarket.util.Constants.LAT_LNG
+import com.mbj.ssassamarket.util.Constants.OTHER_LOCATION
+import com.mbj.ssassamarket.util.Constants.OTHER_USER_ID
+import com.mbj.ssassamarket.util.Constants.OTHER_USER_NAME
+import com.mbj.ssassamarket.util.Constants.USER
+import com.mbj.ssassamarket.util.Constants.USER_ID
+import com.mbj.ssassamarket.util.Constants.USER_NAME
 import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
@@ -22,6 +35,8 @@ class FirebaseDataSource @Inject constructor(
 ) : MarketNetworkDataSource {
 
     private val chatRoomsRef = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference.child(CHAT_ROOMS)
+    private val chatRef = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference.child(CHATS)
+    private val database = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference
 
     override suspend fun currentUserExists(): Boolean {
         val (user, idToken) = getUserAndIdToken()
@@ -319,6 +334,89 @@ class FirebaseDataSource @Inject constructor(
             )
             chatRoomDB.setValue(newChatRoom).await()
             chatRoomId
+        }
+    }
+
+    override suspend fun getMyUserItem(callback: (User) -> Unit) {
+        val userId = getUserAndIdToken().first?.uid?: ""
+
+        database.child(USER).child(userId).get().addOnSuccessListener { dataSnapshot ->
+            val userId = dataSnapshot.child(USER_ID).getValue(String::class.java)
+            val userName = dataSnapshot.child(USER_NAME).getValue(String::class.java)
+            val latLng = dataSnapshot.child(LAT_LNG).getValue(String::class.java)
+
+            val myUserItem = User(userId, userName, latLng)
+            callback(myUserItem)
+        }
+    }
+
+    override suspend fun getOtherUserItem(userId: String, callback: (User) -> Unit) {
+        database.child(USER).child(userId).get().addOnSuccessListener { dataSnapshot ->
+            for (childSnapshot in dataSnapshot.children) {
+                val otherUserId = childSnapshot.child(USER_ID).getValue(String::class.java)
+                val otherUserName = childSnapshot.child(USER_NAME).getValue(String::class.java)
+                val otherLatLng = childSnapshot.child(LAT_LNG).getValue(String::class.java)
+
+                val otherUserItem = User(otherUserId, otherUserName, otherLatLng)
+                callback(otherUserItem)
+            }
+        }
+    }
+
+    override suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, otherUserName: String, otherLocation: String) {
+        val userId = getUserAndIdToken().first?.uid?: ""
+
+        val newChatItem = ChatItem(
+            message = message,
+            userId = userId
+        )
+
+        newChatItem.chatId = database.child(CHATS).child(chatRoomId).push().key
+        database.child(CHATS).child(chatRoomId).child(newChatItem.chatId ?: "").setValue(newChatItem)
+
+        val updates: MutableMap<String, Any> = hashMapOf(
+            "${CHAT_ROOMS}/${userId}/$otherUserId/${LAST_MESSAGE}" to message,
+            "${CHAT_ROOMS}/$otherUserId/${userId}/${LAST_MESSAGE}" to message,
+            "${CHAT_ROOMS}/$otherUserId/${userId}/${CHAT_ROOM_ID}" to chatRoomId,
+            "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_USER_ID}" to userId,
+            "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_USER_NAME}" to otherUserName,
+            "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_LOCATION}" to otherLocation
+        )
+        database.updateChildren(updates)
+    }
+
+    override suspend fun addChatDetailEventListener(
+        chatRoomId: String,
+        onChatItemAdded: (ChatItem) -> Unit
+    ): ChildEventListener {
+        val chatDetailEventListener = object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                val chatItem = snapshot.getValue(ChatItem::class.java)
+                chatItem?.let { onChatItemAdded(it) }
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
+        }
+
+        database.child(CHATS).child(chatRoomId)
+            .addChildEventListener(chatDetailEventListener)
+
+        return chatDetailEventListener
+    }
+
+    override suspend fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String) {
+        chatDetailEventListener?.let {
+            chatRef.child(chatRoomId).removeEventListener(it)
         }
     }
 

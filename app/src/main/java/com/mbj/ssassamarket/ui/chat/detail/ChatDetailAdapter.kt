@@ -10,7 +10,7 @@ import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.databinding.RecyclerviewItemMeChatBinding
 import com.mbj.ssassamarket.databinding.RecyclerviewItemOtehrChatBinding
 
-class ChatAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatListDiffCallback()) {
+class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatListDiffCallback()) {
 
     private var otherUser: User? = null
 

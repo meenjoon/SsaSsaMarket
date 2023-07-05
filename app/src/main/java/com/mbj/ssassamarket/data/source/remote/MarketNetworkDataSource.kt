@@ -1,9 +1,8 @@
 package com.mbj.ssassamarket.data.source.remote
 
 import com.google.firebase.auth.FirebaseUser
-import com.mbj.ssassamarket.data.model.ImageContent
-import com.mbj.ssassamarket.data.model.PatchProductRequest
-import com.mbj.ssassamarket.data.model.ProductPostItem
+import com.google.firebase.database.ChildEventListener
+import com.mbj.ssassamarket.data.model.*
 
 interface MarketNetworkDataSource {
     suspend fun currentUserExists(): Boolean
@@ -29,4 +28,9 @@ interface MarketNetworkDataSource {
     suspend fun getUserNameByUserId(userIdToken: String) : String?
     suspend fun updateProduct(postId: String, request: PatchProductRequest)
     suspend fun enterChatRoom(productId: String, otherUserName: String, otherLocation: String): String
+    suspend fun getMyUserItem(callback: (User) -> Unit)
+    suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, otherUserName: String, otherLocation: String)
+    suspend fun getOtherUserItem(userId: String, callback: (User) -> Unit)
+    suspend fun addChatDetailEventListener(chatRoomId: String, onChatItemAdded: (ChatItem) -> Unit): ChildEventListener
+    suspend fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String)
 }
