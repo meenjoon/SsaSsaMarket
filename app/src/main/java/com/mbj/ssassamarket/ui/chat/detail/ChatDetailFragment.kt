@@ -46,7 +46,12 @@ class ChatDetailFragment : BaseFragment() {
 
         viewModel.chatItemList.observe(viewLifecycleOwner, EventObserver { chatItemList ->
             adapter.submitList(chatItemList)
-            binding.chatDetailRv.scrollToPosition(chatItemList.size - 1)
+
+            if (chatItemList.isNotEmpty()) {
+                binding.chatDetailRv.post {
+                    binding.chatDetailRv.scrollToPosition(chatItemList.size - 1)
+                }
+            }
         })
 
         viewModel.otherUserItem.observe(viewLifecycleOwner, EventObserver { otherUserItem ->
