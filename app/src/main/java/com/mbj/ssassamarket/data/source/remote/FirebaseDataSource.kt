@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -385,6 +386,14 @@ class FirebaseDataSource @Inject constructor(
         database.updateChildren(updates)
     }
 
+    override suspend fun getChatRooms(callback: (List<ChatRoomItem>) -> Unit) {
+        val userId = getUserAndIdToken().first?.uid?: ""
+        val chatRoomsDB = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference.child(CHAT_ROOMS).child(userId)
+
+        val chatRoomsValueEventListener = addChatRoomsValueEventListener(callback)
+        chatRoomsDB.addValueEventListener(chatRoomsValueEventListener)
+    }
+
     override suspend fun addChatDetailEventListener(
         chatRoomId: String,
         onChatItemAdded: (ChatItem) -> Unit
@@ -417,6 +426,33 @@ class FirebaseDataSource @Inject constructor(
     override suspend fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String) {
         chatDetailEventListener?.let {
             chatRef.child(chatRoomId).removeEventListener(it)
+        }
+    }
+
+    override suspend fun addChatRoomsValueEventListener(callback: (List<ChatRoomItem>) -> Unit): ValueEventListener {
+        val userId = getUserAndIdToken().first?.uid ?: ""
+        val chatRoomsValueEventListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val chatRoomList = snapshot.children.mapNotNull {
+                    it.getValue(ChatRoomItem::class.java)
+                }
+                callback(chatRoomList)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, error.toString())
+            }
+        }
+
+        chatRoomsRef.child(userId).addValueEventListener(chatRoomsValueEventListener)
+
+        return chatRoomsValueEventListener
+    }
+
+    override suspend fun removeChatRoomsValueEventListener(valueEventListener: ValueEventListener?) {
+        val userId = getUserAndIdToken().first?.uid?: ""
+        valueEventListener?.let {
+            chatRoomsRef.child(userId).removeEventListener(it)
         }
     }
 

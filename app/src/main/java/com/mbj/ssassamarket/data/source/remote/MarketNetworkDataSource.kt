@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.data.source.remote
 
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.ValueEventListener
 import com.mbj.ssassamarket.data.model.*
 
 interface MarketNetworkDataSource {
@@ -31,6 +32,9 @@ interface MarketNetworkDataSource {
     suspend fun getMyUserItem(callback: (User) -> Unit)
     suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, otherUserName: String, otherLocation: String)
     suspend fun getOtherUserItem(userId: String, callback: (User) -> Unit)
+    suspend fun getChatRooms(callback: (List<ChatRoomItem>) -> Unit)
     suspend fun addChatDetailEventListener(chatRoomId: String, onChatItemAdded: (ChatItem) -> Unit): ChildEventListener
     suspend fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String)
+    suspend fun addChatRoomsValueEventListener(callback: (List<ChatRoomItem>) -> Unit): ValueEventListener
+    suspend fun removeChatRoomsValueEventListener(valueEventListener: ValueEventListener?)
 }

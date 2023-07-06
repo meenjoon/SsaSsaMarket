@@ -1,7 +1,9 @@
 package com.mbj.ssassamarket.data.source
 
 import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.ValueEventListener
 import com.mbj.ssassamarket.data.model.ChatItem
+import com.mbj.ssassamarket.data.model.ChatRoomItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
 import javax.inject.Inject
@@ -24,6 +26,10 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         marketNetworkDataSource.sendMessage(chatRoomId, otherUserId, message, otherUserName, otherLocation)
     }
 
+    suspend fun getChatRooms(callback: (List<ChatRoomItem>) -> Unit) {
+        marketNetworkDataSource.getChatRooms(callback)
+    }
+
     suspend fun addChatDetailEventListener(
         chatRoomId: String,
         onChatItemAdded: (ChatItem) -> Unit
@@ -33,5 +39,13 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
 
     suspend fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String) {
         marketNetworkDataSource.removeChatDetailEventListener(chatDetailEventListener, chatRoomId)
+    }
+
+    suspend fun addChatRoomsValueEventListener(callback: (List<ChatRoomItem>) -> Unit): ValueEventListener {
+         return marketNetworkDataSource.addChatRoomsValueEventListener(callback)
+    }
+
+    suspend fun removeChatRoomsValueEventListener(valueEventListener: ValueEventListener) {
+        marketNetworkDataSource.removeChatRoomsValueEventListener(valueEventListener)
     }
 }
