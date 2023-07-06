@@ -122,6 +122,11 @@
             app:argType="string"
             app:nullable="true" />
         <argument
+            android:name="otherImageColor"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
             android:name="chatRoomItem"
             android:defaultValue="@null"
             app:argType="com.mbj.ssassamarket.data.model.ChatRoomItem"

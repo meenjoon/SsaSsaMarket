@@ -27,7 +27,7 @@ class ChatDetailFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         adapter = ChatDetailAdapter()
         binding.chatDetailRv.adapter = adapter
-
+        args.otherImageColor?.let { adapter.updateOtherImageColor(it) }
         setupViewModel()
         setupUI()
     }

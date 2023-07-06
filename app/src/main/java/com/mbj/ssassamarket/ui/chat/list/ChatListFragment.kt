@@ -9,11 +9,16 @@ import com.mbj.ssassamarket.data.model.ChatRoomItem
 import com.mbj.ssassamarket.databinding.FragmentChatListBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.ChatListClickListener
+import com.mbj.ssassamarket.util.Colors
 import com.mbj.ssassamarket.util.EventObserver
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ChatListFragment() : BaseFragment(), ChatListClickListener {
+    @Inject
+    lateinit var colors: Colors
+
     override val binding get() = _binding as FragmentChatListBinding
     override val layoutId: Int get() = R.layout.fragment_chat_list
 
@@ -31,7 +36,7 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
     }
 
     private fun initRecyclerView() {
-        adapter = ChatListAdapter(this)
+        adapter = ChatListAdapter(this, colors)
         binding.chatListRv.adapter = adapter
     }
 
@@ -41,8 +46,8 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
         })
     }
 
-    override fun onChatRoomClicked(chatRoomItem: ChatRoomItem) {
-        val action = ChatListFragmentDirections.actionNavigationChatToChatDetailFragment(chatRoomItem = chatRoomItem)
+    override fun onChatRoomClicked(chatRoomItem: ChatRoomItem, otherImageColor: String) {
+        val action = ChatListFragmentDirections.actionNavigationChatToChatDetailFragment(chatRoomItem = chatRoomItem, otherImageColor = otherImageColor)
         findNavController().navigate(action)
     }
 

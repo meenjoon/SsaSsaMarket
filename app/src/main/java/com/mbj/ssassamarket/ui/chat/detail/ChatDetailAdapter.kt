@@ -1,5 +1,7 @@
 package com.mbj.ssassamarket.ui.chat.detail
 
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -13,9 +15,15 @@ import com.mbj.ssassamarket.databinding.RecyclerviewItemOtehrChatBinding
 class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatListDiffCallback()) {
 
     private var otherUser: User? = null
+    private var otherImageColor: String? = null
 
     fun updateOtherUserItem(user: User?) {
         otherUser = user
+        notifyDataSetChanged()
+    }
+
+    fun updateOtherImageColor(color: String) {
+        otherImageColor = color
         notifyDataSetChanged()
     }
 
@@ -45,7 +53,7 @@ class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatL
         val chatItem = getItem(position)
         when (holder) {
             is MeViewHolder -> holder.bind(chatItem)
-            is OtherViewHolder -> holder.bind(chatItem)
+            is OtherViewHolder -> holder.bind(chatItem, otherImageColor)
             else -> throw IllegalArgumentException("Invalid view holder")
         }
     }
@@ -69,7 +77,10 @@ class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatL
     class OtherViewHolder(private val binding: RecyclerviewItemOtehrChatBinding, private val otherUser: User?) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(chatItem: ChatItem) {
+        fun bind(chatItem: ChatItem, otherImageColor: String?) {
+            if (otherImageColor != null) {
+                binding.chatOtherUserIv.setColorFilter(Color.parseColor(otherImageColor), PorterDuff.Mode.SRC_IN)
+            }
             binding.chatOtherNicknameTv.text = otherUser?.userName
             binding.chatOtherMessageTv.text = chatItem.message
         }

@@ -16,4 +16,13 @@
     <color name="white_grey">#EFE4E4</color>
     <color name="shrine_pink_900">#ECDDDD</color>
     <color name="deep_red">#3D1717</color>
+
+    <array name="random_colors">
+        <item>"#55ff0000"</item>
+        <item>"#78D5FF"</item>
+        <item>"#DE0707"</item>
+        <item>"#FF3700B3"</item>
+        <item>"#FFE500"</item>
+        <item>"#FFBB86FC"</item>
+    </array>
 </resources>
