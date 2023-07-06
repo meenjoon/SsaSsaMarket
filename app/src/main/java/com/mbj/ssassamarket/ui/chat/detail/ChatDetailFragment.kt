@@ -49,7 +49,7 @@ class ChatDetailFragment : BaseFragment() {
 
             if (chatItemList.isNotEmpty()) {
                 binding.chatDetailRv.post {
-                    binding.chatDetailRv.scrollToPosition(chatItemList.size - 1)
+                    binding.chatDetailRv.smoothScrollToPosition(chatItemList.size - 1)
                 }
             }
         })
@@ -73,7 +73,6 @@ class ChatDetailFragment : BaseFragment() {
                 return@setOnClickListener
             }
             viewModel.sendMessage(message)
-
             binding.chatDetailTiev.text?.clear()
         }
     }
