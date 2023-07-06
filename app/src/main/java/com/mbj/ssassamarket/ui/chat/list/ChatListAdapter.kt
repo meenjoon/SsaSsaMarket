@@ -11,6 +11,7 @@ import com.mbj.ssassamarket.data.model.ChatRoomItem
 import com.mbj.ssassamarket.databinding.RecyclerviewItemChatRoomBinding
 import com.mbj.ssassamarket.ui.common.ChatListClickListener
 import com.mbj.ssassamarket.util.Colors
+import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
 import com.mbj.ssassamarket.util.TextFormat.getInitialLetter
 import javax.inject.Inject
 
@@ -36,6 +37,7 @@ class ChatListAdapter@Inject constructor(
 
         fun bind(chatRoomItem: ChatRoomItem, chatListClickListener: ChatListClickListener, colors: Colors) {
             val randomColor = colors.randomColor
+            binding.chatListLastSentTimeTv.text = chatRoomItem.lastSentTime?.let { getFormattedElapsedTime(it) }
             binding.chatListUserIv.setColorFilter(Color.parseColor(randomColor), PorterDuff.Mode.SRC_IN)
             binding.chatListNicknameTv.text = chatRoomItem.otherUserName
             binding.chatListFirstNicknameTv.text = chatRoomItem.otherUserName?.let { getInitialLetter(it) }

@@ -34,4 +34,5 @@ object Constants {
     const val USER_ID = "userId"
     const val USER_NAME = "userName"
     const val LAT_LNG = "latLng"
+    const val LAST_SENT_TIME = "lastSentTime"
 }

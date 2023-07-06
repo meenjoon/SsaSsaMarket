@@ -8,6 +8,7 @@ import com.google.firebase.database.ChildEventListener
 import com.mbj.ssassamarket.data.model.ChatItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.ChatRepository
+import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -67,7 +68,7 @@ class ChatDetailViewModel @Inject constructor(private val chatRepository: ChatRe
             if (otherUserId != null) {
                 chatRepository.sendMessage(
                     chatRoomId.value?.peekContent()!!,
-                    otherUserId!!, message, myUserName, myUserLocation
+                    otherUserId!!, message, myUserName, myUserLocation, getCurrentTime()
                 )
             }
         }

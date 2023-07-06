@@ -8,4 +8,5 @@ data class ChatRoomItem(
     val lastMessage: String? = null,
     val otherUserId: String? = null,
     val otherLocation: String? = null,
+    val lastSentTime: String? = null
 ) : Serializable

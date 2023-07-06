@@ -16,6 +16,7 @@ import com.mbj.ssassamarket.util.Constants.CHATS
 import com.mbj.ssassamarket.util.Constants.CHAT_ROOMS
 import com.mbj.ssassamarket.util.Constants.CHAT_ROOM_ID
 import com.mbj.ssassamarket.util.Constants.LAST_MESSAGE
+import com.mbj.ssassamarket.util.Constants.LAST_SENT_TIME
 import com.mbj.ssassamarket.util.Constants.LAT_LNG
 import com.mbj.ssassamarket.util.Constants.OTHER_LOCATION
 import com.mbj.ssassamarket.util.Constants.OTHER_USER_ID
@@ -331,7 +332,7 @@ class FirebaseDataSource @Inject constructor(
                 chatRoomId = chatRoomId,
                 otherUserId = ohterUserId,
                 otherUserName = otherUserName,
-                otherLocation = otherLocation
+                otherLocation = otherLocation,
             )
             chatRoomDB.setValue(newChatRoom).await()
             chatRoomId
@@ -366,7 +367,7 @@ class FirebaseDataSource @Inject constructor(
         }
     }
 
-    override suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, myUserName: String, myLocation: String) {
+    override suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, myUserName: String, myLocation: String, lastSentTime: String) {
         val userId = getUserAndIdToken().first?.uid?: ""
 
         val newChatItem = ChatItem(
@@ -379,11 +380,13 @@ class FirebaseDataSource @Inject constructor(
 
         val updates: MutableMap<String, Any> = hashMapOf(
             "${CHAT_ROOMS}/${userId}/$otherUserId/${LAST_MESSAGE}" to message,
+            "${CHAT_ROOMS}/${userId}/$otherUserId/${LAST_SENT_TIME}" to lastSentTime,
             "${CHAT_ROOMS}/$otherUserId/${userId}/${LAST_MESSAGE}" to message,
+            "${CHAT_ROOMS}/$otherUserId/${userId}/${LAST_SENT_TIME}" to lastSentTime,
             "${CHAT_ROOMS}/$otherUserId/${userId}/${CHAT_ROOM_ID}" to chatRoomId,
             "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_USER_ID}" to userId,
             "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_USER_NAME}" to myUserName,
-            "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_LOCATION}" to myLocation
+            "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_LOCATION}" to myLocation,
         )
         database.updateChildren(updates)
     }

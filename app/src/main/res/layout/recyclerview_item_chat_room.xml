@@ -3,16 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="100dp"
     android:padding="16dp">
 
     <ImageView
         android:id="@+id/chat_list_user_iv"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/chat_list_last_message_tv"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/chat_list_nickname_tv"
         app:srcCompat="@drawable/user_english_icon" />
 
     <TextView
@@ -39,6 +39,14 @@
         tools:text="유저이름" />
 
     <TextView
+        android:id="@+id/chat_list_last_sent_time_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/chat_list_nickname_tv"
+        app:layout_constraintTop_toBottomOf="@id/chat_list_nickname_tv"
+        tools:text="방금전" />
+
+    <TextView
         android:id="@+id/chat_list_location_tv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -53,11 +61,11 @@
         android:id="@+id/chat_list_last_message_tv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginTop="3dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/chat_list_user_iv"
-        app:layout_constraintTop_toBottomOf="@id/chat_list_nickname_tv"
+        app:layout_constraintStart_toStartOf="@id/chat_list_nickname_tv"
+        app:layout_constraintTop_toBottomOf="@id/chat_list_last_sent_time_tv"
         tools:text="마지막 메세지" />
 
 
