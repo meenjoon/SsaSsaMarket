@@ -56,6 +56,7 @@ class ChatDetailFragment : BaseFragment() {
 
         viewModel.otherUserItem.observe(viewLifecycleOwner, EventObserver { otherUserItem ->
             adapter.updateOtherUserItem(otherUserItem)
+            binding.chatDetailNicknameAbTv.text = otherUserItem.userName
         })
     }
 
