@@ -84,8 +84,6 @@ class ChatDetailFragment : BaseFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        lifecycleScope.launch {
-            viewModel.removeChatDetailEventListener()
-        }
+        viewModel.removeChatDetailEventListener()
     }
 }

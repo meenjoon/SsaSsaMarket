@@ -394,7 +394,7 @@ class FirebaseDataSource @Inject constructor(
         chatRoomsDB.addValueEventListener(chatRoomsValueEventListener)
     }
 
-    override suspend fun addChatDetailEventListener(
+    override fun addChatDetailEventListener(
         chatRoomId: String,
         onChatItemAdded: (ChatItem) -> Unit
     ): ChildEventListener {
@@ -423,7 +423,7 @@ class FirebaseDataSource @Inject constructor(
         return chatDetailEventListener
     }
 
-    override suspend fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String) {
+    override fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String) {
         chatDetailEventListener?.let {
             chatRef.child(chatRoomId).removeEventListener(it)
         }

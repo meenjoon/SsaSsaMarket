@@ -33,8 +33,8 @@ interface MarketNetworkDataSource {
     suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, otherUserName: String, otherLocation: String)
     suspend fun getOtherUserItem(userId: String, callback: (User) -> Unit)
     suspend fun getChatRooms(callback: (List<ChatRoomItem>) -> Unit)
-    suspend fun addChatDetailEventListener(chatRoomId: String, onChatItemAdded: (ChatItem) -> Unit): ChildEventListener
-    suspend fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String)
+    fun addChatDetailEventListener(chatRoomId: String, onChatItemAdded: (ChatItem) -> Unit): ChildEventListener
+    fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String)
     suspend fun addChatRoomsValueEventListener(callback: (List<ChatRoomItem>) -> Unit): ValueEventListener
     suspend fun removeChatRoomsValueEventListener(valueEventListener: ValueEventListener?)
 }

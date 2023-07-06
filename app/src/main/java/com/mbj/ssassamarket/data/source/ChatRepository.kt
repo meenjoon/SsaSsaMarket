@@ -30,14 +30,14 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         marketNetworkDataSource.getChatRooms(callback)
     }
 
-    suspend fun addChatDetailEventListener(
+    fun addChatDetailEventListener(
         chatRoomId: String,
         onChatItemAdded: (ChatItem) -> Unit
     ): ChildEventListener {
         return marketNetworkDataSource.addChatDetailEventListener(chatRoomId, onChatItemAdded)
     }
 
-    suspend fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String) {
+    fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String) {
         marketNetworkDataSource.removeChatDetailEventListener(chatDetailEventListener, chatRoomId)
     }
 

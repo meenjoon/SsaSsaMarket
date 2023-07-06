@@ -71,19 +71,17 @@ class ChatDetailViewModel @Inject constructor(private val chatRepository: ChatRe
         }
     }
 
-    suspend fun addChatDetailEventListener() {
-        viewModelScope.launch {
-            chatDetailEventListener = chatRoomId.value?.peekContent()?.let {
-                chatRepository.addChatDetailEventListener(it) { chatItem ->
-                    val currentList = _chatItemList.value?.peekContent() ?: emptyList()
-                    val newList = currentList.toMutableList().apply { add(chatItem) }
-                    _chatItemList.value = Event(newList)
-                }
+    fun addChatDetailEventListener() {
+        chatDetailEventListener = chatRoomId.value?.peekContent()?.let {
+            chatRepository.addChatDetailEventListener(it) { chatItem ->
+                val currentList = _chatItemList.value?.peekContent() ?: emptyList()
+                val newList = currentList.toMutableList().apply { add(chatItem) }
+                _chatItemList.value = Event(newList)
             }
         }
     }
 
-    suspend fun removeChatDetailEventListener() {
+    fun removeChatDetailEventListener() {
         chatDetailEventListener?.let {
             chatRepository.removeChatDetailEventListener(it, _chatRoomId.value?.peekContent() ?: "")
         }
