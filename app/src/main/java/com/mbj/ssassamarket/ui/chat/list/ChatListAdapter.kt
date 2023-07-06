@@ -11,6 +11,7 @@ import com.mbj.ssassamarket.data.model.ChatRoomItem
 import com.mbj.ssassamarket.databinding.RecyclerviewItemChatRoomBinding
 import com.mbj.ssassamarket.ui.common.ChatListClickListener
 import com.mbj.ssassamarket.util.Colors
+import com.mbj.ssassamarket.util.TextFormat.getInitialLetter
 import javax.inject.Inject
 
 class ChatListAdapter@Inject constructor(
@@ -37,6 +38,7 @@ class ChatListAdapter@Inject constructor(
             val randomColor = colors.randomColor
             binding.chatListUserIv.setColorFilter(Color.parseColor(randomColor), PorterDuff.Mode.SRC_IN)
             binding.chatListNicknameTv.text = chatRoomItem.otherUserName
+            binding.chatListFirstNicknameTv.text = chatRoomItem.otherUserName?.let { getInitialLetter(it) }
             binding.chatListLastMessageTv.text = chatRoomItem.lastMessage
             binding.chatListLocationTv.text = chatRoomItem.otherLocation
             binding.root.setOnClickListener {

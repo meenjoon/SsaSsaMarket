@@ -11,6 +11,7 @@ import com.mbj.ssassamarket.data.model.ChatItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.databinding.RecyclerviewItemMeChatBinding
 import com.mbj.ssassamarket.databinding.RecyclerviewItemOtehrChatBinding
+import com.mbj.ssassamarket.util.TextFormat.getInitialLetter
 
 class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatListDiffCallback()) {
 
@@ -83,6 +84,7 @@ class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatL
             }
             binding.chatOtherNicknameTv.text = otherUser?.userName
             binding.chatOtherMessageTv.text = chatItem.message
+            binding.chatOtherUserFirstNicknameTv.text = otherUser?.userName?.let { getInitialLetter(it) }
         }
     }
 

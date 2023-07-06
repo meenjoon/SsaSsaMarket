@@ -13,4 +13,8 @@ object TextFormat {
         val currencySymbol = context.getString(R.string.korean_currency)
         return "$formattedPrice$currencySymbol"
     }
+
+    fun getInitialLetter(nickname: String): String {
+        return nickname.substring(0, 1)
+    }
 }
