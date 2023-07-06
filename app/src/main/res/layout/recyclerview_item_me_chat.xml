@@ -13,26 +13,19 @@
         android:padding="12dp">
 
         <TextView
-            android:id="@+id/chat_me_nickname_tv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:textSize="13sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="슈퍼맨" />
-
-        <TextView
             android:id="@+id/chat_me_message_tv"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="end"
+            android:background="@drawable/chat_me_background"
+            android:paddingStart="10dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="8dp"
             android:textColor="@color/black"
             android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/chat_me_nickname_tv"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="싸고 좋은 거 팔아요" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
