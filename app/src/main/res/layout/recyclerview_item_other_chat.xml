@@ -25,7 +25,7 @@
             android:id="@+id/chat_other_user_first_nickname_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:textSize="25sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@id/chat_other_user_iv"
             app:layout_constraintEnd_toEndOf="@id/chat_other_user_iv"

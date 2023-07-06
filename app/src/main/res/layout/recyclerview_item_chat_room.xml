@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
+    android:layout_height="wrap_content"
     android:padding="16dp">
 
     <ImageView
@@ -32,11 +32,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:maxWidth="180dp"
         android:textColor="@color/black"
         android:textSize="18sp"
         app:layout_constraintStart_toEndOf="@id/chat_list_user_iv"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="유저이름" />
+        tools:text="삼겹살짱짱맨" />
 
     <TextView
         android:id="@+id/chat_list_last_sent_time_tv"
@@ -62,11 +63,14 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/chat_list_nickname_tv"
         app:layout_constraintTop_toBottomOf="@id/chat_list_last_sent_time_tv"
-        tools:text="마지막 메세지" />
+        tools:text="마지막 메세지마지막 메세지마지막 메세지마지막 메세지마지막 메세지마지막 메세지마지막 메세지마지막 메세지마지막 메세지마지막 메세지" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
