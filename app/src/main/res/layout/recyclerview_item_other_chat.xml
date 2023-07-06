@@ -9,7 +9,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         android:padding="12dp">
 
         <ImageView
@@ -46,10 +46,12 @@
 
         <TextView
             android:id="@+id/chat_other_message_tv"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
             android:background="@drawable/chat_other_bacground"
+            android:maxWidth="250dp"
             android:paddingStart="10dp"
             android:paddingTop="8dp"
             android:paddingEnd="10dp"
@@ -59,7 +61,16 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/chat_other_user_iv"
             app:layout_constraintTop_toBottomOf="@id/chat_other_nickname_tv"
-            tools:text="사겠습니다!" />
+            tools:text="사겠습니다!사겠습니다!사겠습니다!사겠습니다!사겠습니다!사겠습니다!사겠습니다!사겠습니다!사겠습니다!사겠습니다!" />
+
+        <TextView
+            android:id="@+id/chat_other_lastSentTime_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            app:layout_constraintBottom_toBottomOf="@id/chat_other_message_tv"
+            app:layout_constraintStart_toEndOf="@id/chat_other_message_tv"
+            tools:text="방금전" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

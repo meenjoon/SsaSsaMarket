@@ -372,7 +372,8 @@ class FirebaseDataSource @Inject constructor(
 
         val newChatItem = ChatItem(
             message = message,
-            userId = userId
+            userId = userId,
+            lastSentTime = lastSentTime
         )
 
         newChatItem.chatId = database.child(CHATS).child(chatRoomId).push().key

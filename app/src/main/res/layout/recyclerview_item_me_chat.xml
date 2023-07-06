@@ -14,9 +14,10 @@
 
         <TextView
             android:id="@+id/chat_me_message_tv"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@drawable/chat_me_background"
+            android:maxWidth="300dp"
             android:paddingStart="10dp"
             android:paddingTop="8dp"
             android:paddingEnd="10dp"
@@ -26,7 +27,16 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="싸고 좋은 거 팔아요" />
+            tools:text="싸고 좋은 거 팔아요 싸고 좋은 거 팔아요 싸고 좋은 거 팔아요 싸고 좋은 거 팔아요 싸고 좋은 거 팔아요" />
+
+        <TextView
+            android:id="@+id/chat_me_lastSentTime_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="3dp"
+            app:layout_constraintBottom_toBottomOf="@id/chat_me_message_tv"
+            app:layout_constraintEnd_toStartOf="@id/chat_me_message_tv"
+            tools:text="방금전" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -10,7 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mbj.ssassamarket.data.model.ChatItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.databinding.RecyclerviewItemMeChatBinding
-import com.mbj.ssassamarket.databinding.RecyclerviewItemOtehrChatBinding
+import com.mbj.ssassamarket.databinding.RecyclerviewItemOtherChatBinding
+import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
 import com.mbj.ssassamarket.util.TextFormat.getInitialLetter
 
 class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatListDiffCallback()) {
@@ -39,7 +40,7 @@ class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatL
                 MeViewHolder(binding)
             }
             VIEW_TYPE_OTHER -> {
-                val binding = RecyclerviewItemOtehrChatBinding.inflate(
+                val binding = RecyclerviewItemOtherChatBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
@@ -72,10 +73,11 @@ class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatL
 
         fun bind(chatItem: ChatItem) {
             binding.chatMeMessageTv.text = chatItem.message
+            binding.chatMeLastSentTimeTv.text = chatItem.lastSentTime?.let { getFormattedElapsedTime(it) }
         }
     }
 
-    class OtherViewHolder(private val binding: RecyclerviewItemOtehrChatBinding, private val otherUser: User?) :
+    class OtherViewHolder(private val binding: RecyclerviewItemOtherChatBinding, private val otherUser: User?) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(chatItem: ChatItem, otherImageColor: String?) {
@@ -85,6 +87,7 @@ class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatL
             binding.chatOtherNicknameTv.text = otherUser?.userName
             binding.chatOtherMessageTv.text = chatItem.message
             binding.chatOtherUserFirstNicknameTv.text = otherUser?.userName?.let { getInitialLetter(it) }
+            binding.chatOtherLastSentTimeTv.text = chatItem.lastSentTime?.let { getFormattedElapsedTime(it) }
         }
     }
 
