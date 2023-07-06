@@ -21,7 +21,8 @@
         tools:targetApi="33">
         <activity
             android:name=".ui.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,7 +32,7 @@
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
-            android:value= "${KAKAO_MAP_NATIVE_KEY}" />
+            android:value="${KAKAO_MAP_NATIVE_KEY}" />
     </application>
 
 </manifest>

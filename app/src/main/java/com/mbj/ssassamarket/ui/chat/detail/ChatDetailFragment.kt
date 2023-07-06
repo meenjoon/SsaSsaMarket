@@ -79,6 +79,7 @@ class ChatDetailFragment : BaseFragment() {
 
             viewModel.sendMessage(message, otherUserName, otherLocation)
 
+            binding.chatDetailRv.smoothScrollToPosition(adapter.itemCount - 1)
             binding.chatDetailTiev.text?.clear()
         }
     }
