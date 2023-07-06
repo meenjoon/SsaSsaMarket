@@ -22,8 +22,8 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         marketNetworkDataSource.getOtherUserItem(userId, callback)
     }
 
-    suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, otherUserName: String, otherLocation: String) {
-        marketNetworkDataSource.sendMessage(chatRoomId, otherUserId, message, otherUserName, otherLocation)
+    suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, myUserName: String, myLocation: String) {
+        marketNetworkDataSource.sendMessage(chatRoomId, otherUserId, message, myUserName, myLocation)
     }
 
     suspend fun getChatRooms(callback: (List<ChatRoomItem>) -> Unit) {

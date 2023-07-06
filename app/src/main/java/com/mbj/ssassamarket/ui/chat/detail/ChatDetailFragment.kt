@@ -71,15 +71,8 @@ class ChatDetailFragment : BaseFragment() {
                 showToast(R.string.empty_message_error)
                 return@setOnClickListener
             }
+            viewModel.sendMessage(message)
 
-            val otherUserName = viewModel.otherUserItem.value?.peekContent()?.userName
-                ?: getString(R.string.test_seller_name)
-            val otherLocation = viewModel.otherUserItem.value?.peekContent()?.latLng
-                ?: getString(R.string.test_seller_location)
-
-            viewModel.sendMessage(message, otherUserName, otherLocation)
-
-            binding.chatDetailRv.smoothScrollToPosition(adapter.itemCount - 1)
             binding.chatDetailTiev.text?.clear()
         }
     }

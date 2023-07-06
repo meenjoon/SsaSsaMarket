@@ -60,12 +60,14 @@ class ChatDetailViewModel @Inject constructor(private val chatRepository: ChatRe
         }
     }
 
-    fun sendMessage(message: String, otherUserName: String, otherLocation: String) {
+    fun sendMessage(message: String) {
+        val myUserName = myUserItem.value?.peekContent()?.userName?: ""
+        val myUserLocation = myUserItem.value?.peekContent()?.latLng?: ""
         viewModelScope.launch {
             if (otherUserId != null) {
                 chatRepository.sendMessage(
                     chatRoomId.value?.peekContent()!!,
-                    otherUserId!!, message, otherUserName, otherLocation
+                    otherUserId!!, message, myUserName, myUserLocation
                 )
             }
         }
