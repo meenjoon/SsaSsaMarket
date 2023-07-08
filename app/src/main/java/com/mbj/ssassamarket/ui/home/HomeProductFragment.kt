@@ -114,6 +114,8 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
                     findNavController().navigate(action)
                 }
                 UserType.BUYER -> {
+                    val action = HomeFragmentDirections.actionNavigationHomeToBuyerFragment(productPostItem.first, productPostItem.second)
+                    findNavController().navigate(action)
                 }
             }
         }

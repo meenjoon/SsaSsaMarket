@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.mbj.ssassamarket.util.Colors
 import com.mbj.ssassamarket.util.Constants.SHARED_PREFERENCE_KEY
 import com.mbj.ssassamarket.util.PreferenceManager
 import dagger.Module
@@ -28,5 +29,11 @@ object AppModule {
     @Provides
     fun providePreferenceManager(sharedPreferences: SharedPreferences): PreferenceManager {
         return PreferenceManager(sharedPreferences)
+    }
+
+    @Singleton
+    @Provides
+    fun provideColors(@ApplicationContext context: Context): Colors {
+        return Colors(context)
     }
 }

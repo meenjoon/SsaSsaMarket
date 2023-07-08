@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <ImageView
+            android:id="@+id/chat_other_user_iv"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/user_english_icon" />
+
+        <TextView
+            android:id="@+id/chat_other_user_first_nickname_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/chat_other_user_iv"
+            app:layout_constraintEnd_toEndOf="@id/chat_other_user_iv"
+            app:layout_constraintStart_toStartOf="@id/chat_other_user_iv"
+            app:layout_constraintTop_toTopOf="@id/chat_other_user_iv"
+            tools:text="삼" />
+
+        <TextView
+            android:id="@+id/chat_other_nickname_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/black"
+            android:textSize="13sp"
+            app:layout_constraintStart_toEndOf="@id/chat_other_user_iv"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="삼겹살짱짱맨" />
+
+        <TextView
+            android:id="@+id/chat_other_message_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/chat_other_bacground"
+            android:maxWidth="250dp"
+            android:paddingStart="10dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="8dp"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/chat_other_user_iv"
+            app:layout_constraintTop_toBottomOf="@id/chat_other_nickname_tv"
+            tools:text="사겠습니다!사겠습니다!사겠습니다!사겠습니다!사겠습니다!사겠습니다!사겠습니다!사겠습니다!사겠습니다!사겠습니다!" />
+
+        <TextView
+            android:id="@+id/chat_other_lastSentTime_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            app:layout_constraintBottom_toBottomOf="@id/chat_other_message_tv"
+            app:layout_constraintStart_toEndOf="@id/chat_other_message_tv"
+            tools:text="방금전" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

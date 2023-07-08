@@ -38,6 +38,9 @@
         <action
             android:id="@+id/action_navigation_home_to_sellerFragment"
             app:destination="@id/sellerFragment" />
+        <action
+            android:id="@+id/action_navigation_home_to_buyerFragment"
+            app:destination="@id/buyerFragment" />
     </fragment>
     <fragment
         android:id="@+id/splashFragment"
@@ -61,8 +64,12 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_chat"
-        android:name="com.mbj.ssassamarket.ui.chat.ChatFragment"
-        android:label="ChatFragment" />
+        android:name="com.mbj.ssassamarket.ui.chat.list.ChatListFragment"
+        android:label="ChatListFragment">
+        <action
+            android:id="@+id/action_navigation_chat_to_chatDetailFragment"
+            app:destination="@id/chatDetailFragment" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_inventory"
         android:name="com.mbj.ssassamarket.ui.inventory.InventoryFragment"
@@ -85,5 +92,44 @@
         <argument
             android:name="product"
             app:argType="com.mbj.ssassamarket.data.model.ProductPostItem" />
+    </fragment>
+    <fragment
+        android:id="@+id/buyerFragment"
+        android:name="com.mbj.ssassamarket.ui.detail.buyer.BuyerFragment"
+        android:label="BuyerFragment">
+        <argument
+            android:name="postId"
+            app:argType="string" />
+        <argument
+            android:name="product"
+            app:argType="com.mbj.ssassamarket.data.model.ProductPostItem" />
+        <action
+            android:id="@+id/action_buyerFragment_to_chatDetailFragment"
+            app:destination="@id/chatDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/chatDetailFragment"
+        android:name="com.mbj.ssassamarket.ui.chat.detail.ChatDetailFragment"
+        android:label="ChatDetailFragment">
+        <argument
+            android:name="chatRoomId"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="otherId"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="otherImageColor"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="chatRoomItem"
+            android:defaultValue="@null"
+            app:argType="com.mbj.ssassamarket.data.model.ChatRoomItem"
+            app:nullable="true" />
     </fragment>
 </navigation>

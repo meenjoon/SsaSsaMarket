@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/chat_list_user_iv"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintBottom_toBottomOf="@id/chat_list_last_message_tv"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/chat_list_nickname_tv"
+        app:srcCompat="@drawable/user_english_icon" />
+
+    <TextView
+        android:id="@+id/chat_list_first_nickname_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/chat_list_user_iv"
+        app:layout_constraintEnd_toEndOf="@id/chat_list_user_iv"
+        app:layout_constraintStart_toStartOf="@id/chat_list_user_iv"
+        app:layout_constraintTop_toTopOf="@id/chat_list_user_iv"
+        tools:text="유" />
+
+    <TextView
+        android:id="@+id/chat_list_nickname_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:maxWidth="180dp"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        app:layout_constraintStart_toEndOf="@id/chat_list_user_iv"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="삼겹살짱짱맨" />
+
+    <TextView
+        android:id="@+id/chat_list_last_sent_time_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/chat_list_nickname_tv"
+        app:layout_constraintTop_toBottomOf="@id/chat_list_nickname_tv"
+        tools:text="방금전" />
+
+    <TextView
+        android:id="@+id/chat_list_location_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        app:layout_constraintBottom_toBottomOf="@id/chat_list_nickname_tv"
+        app:layout_constraintStart_toEndOf="@id/chat_list_nickname_tv"
+        app:layout_constraintTop_toTopOf="@id/chat_list_nickname_tv"
+        tools:text="대전 유성구" />
+
+
+    <TextView
+        android:id="@+id/chat_list_last_message_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/chat_list_nickname_tv"
+        app:layout_constraintTop_toBottomOf="@id/chat_list_last_sent_time_tv"
+        tools:text="마지막 메세지마지막 메세지마지막 메세지마지막 메세지마지막 메세지마지막 메세지마지막 메세지마지막 메세지마지막 메세지마지막 메세지" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
