@@ -106,16 +106,66 @@
 
         </androidx.core.widget.NestedScrollView>
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/detail_buyer_chat"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_gravity="bottom"
-            android:background="@color/orange_700"
-            android:gravity="center"
-            android:text="@string/buyer_chat"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:layout_marginBottom="10dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/detail_buyer_chat_bt"
+                style="@style/CardViewButtonStyle"
+                android:layout_width="140dp"
+                android:layout_height="0dp"
+                app:cardBackgroundColor="@color/orange_700"
+                app:layout_constraintEnd_toEndOf="@id/guideline_vertical_5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/buyer_chat"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/detail_buyer_buy_bt"
+                style="@style/CardViewButtonStyle"
+                android:layout_width="140dp"
+                android:layout_height="0dp"
+                app:cardBackgroundColor="@color/orange_700"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/guideline_vertical_5"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/buyer_buy"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_vertical_5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

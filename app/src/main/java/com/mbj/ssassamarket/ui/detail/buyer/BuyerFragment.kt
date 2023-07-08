@@ -29,7 +29,7 @@ class BuyerFragment : BaseFragment() {
             viewModel.otherUserId.value?.let { navigateToChatDetailFragment(chatRoomId, it.peekContent()) }
         })
 
-        binding.detailBuyerChat.setOnClickListener {
+        binding.detailBuyerChatBt.setOnClickListener {
             viewModel.onChatButtonClicked(getString(R.string.test_seller_name), getString(R.string.test_seller_location))
         }
 
