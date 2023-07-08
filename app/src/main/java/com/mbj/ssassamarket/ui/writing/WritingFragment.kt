@@ -359,32 +359,15 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     }
 
     override fun onLocationUpdated(latitude: Double?, longitude: Double?) {
-        val reverseGeoCodingResultListener =
-            object : MapReverseGeoCoder.ReverseGeoCodingResultListener {
-                override fun onReverseGeoCoderFoundAddress(
-                    mapReverseGeoCoder: MapReverseGeoCoder,
-                    addressString: String
-                ) {
-                    val location = LocateFormat.getSelectedAddress(addressString, 2)
-                    viewModel.setLocation(location)
-                    hideLoadingDialog()
-                }
-
-                override fun onReverseGeoCoderFailedToFindAddress(mapReverseGeoCoder: MapReverseGeoCoder) {
-                    Log.e("ReverseGeoCoder", "Failed to find address.")
-                }
-            }
-
         if (latitude != null && longitude != null) {
             val latLngString = "$latitude $longitude"
             viewModel.setLatLng(latLngString)
             val mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude)
-            val reverseGeoCoder = MapReverseGeoCoder(
-                BuildConfig.KAKAO_MAP_NATIVE_KEY,
-                mapPoint,
-                reverseGeoCodingResultListener,
-                requireActivity()
-            )
+            val reverseGeoCoder = locationManager.createReverseGeoCoder(requireActivity(),mapPoint) { addressString ->
+                val location = LocateFormat.getSelectedAddress(addressString, 2)
+                viewModel.setLocation(location)
+                hideLoadingDialog()
+            }
             reverseGeoCoder.startFindingAddress()
         }
     }

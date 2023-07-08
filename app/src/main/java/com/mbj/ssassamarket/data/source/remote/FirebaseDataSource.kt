@@ -367,7 +367,7 @@ class FirebaseDataSource @Inject constructor(
         }
     }
 
-    override suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, myUserName: String, myLocation: String, lastSentTime: String) {
+    override suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, myUserName: String, myLocation: String, lastSentTime: String, myLatLng: String) {
         val userId = getUserAndIdToken().first?.uid?: ""
 
         val newChatItem = ChatItem(
@@ -379,7 +379,11 @@ class FirebaseDataSource @Inject constructor(
         newChatItem.chatId = database.child(CHATS).child(chatRoomId).push().key
         database.child(CHATS).child(chatRoomId).child(newChatItem.chatId ?: "").setValue(newChatItem)
 
+        val dataId = getMyDataId()
+        val uId = getUserAndIdToken().first?.uid?: ""
+
         val updates: MutableMap<String, Any> = hashMapOf(
+            "${USER}/${uId}/${dataId}/${LAT_LNG}" to myLatLng,
             "${CHAT_ROOMS}/${userId}/$otherUserId/${LAST_MESSAGE}" to message,
             "${CHAT_ROOMS}/${userId}/$otherUserId/${LAST_SENT_TIME}" to lastSentTime,
             "${CHAT_ROOMS}/$otherUserId/${userId}/${LAST_MESSAGE}" to message,

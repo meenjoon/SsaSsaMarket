@@ -4,10 +4,15 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Looper
+import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.location.*
+import com.mbj.ssassamarket.BuildConfig
+import net.daum.mf.map.api.MapPoint
+import net.daum.mf.map.api.MapReverseGeoCoder
 
 class LocationManager(
     private val context: Context,
@@ -17,10 +22,9 @@ class LocationManager(
 ) : LocationCallback() {
 
     private var request: LocationRequest
-    private var locationClient: FusedLocationProviderClient
+    private var locationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 
     init {
-        locationClient = LocationServices.getFusedLocationProviderClient(context)
         request = createRequest()
     }
 
@@ -65,6 +69,32 @@ class LocationManager(
         createRequest()
         stopLocationTracking()
         startLocationTracking()
+    }
+
+    fun createReverseGeoCoder(
+        activity: FragmentActivity,
+        mapPoint: MapPoint?,
+        onAddressFound: (String) -> Unit
+    ): MapReverseGeoCoder {
+        val reverseGeoCodingResultListener =
+            object : MapReverseGeoCoder.ReverseGeoCodingResultListener {
+                override fun onReverseGeoCoderFoundAddress(
+                    mapReverseGeoCoder: MapReverseGeoCoder,
+                    addressString: String
+                ) {
+                    onAddressFound(addressString)
+                }
+                override fun onReverseGeoCoderFailedToFindAddress(mapReverseGeoCoder: MapReverseGeoCoder) {
+                    Log.e("ReverseGeoCoder", "Failed to find address.")
+                }
+            }
+        val reverseGeoCoder = MapReverseGeoCoder(
+            BuildConfig.KAKAO_MAP_NATIVE_KEY,
+            mapPoint,
+            reverseGeoCodingResultListener,
+            activity
+        )
+        return reverseGeoCoder
     }
 
     fun startLocationTracking() {
