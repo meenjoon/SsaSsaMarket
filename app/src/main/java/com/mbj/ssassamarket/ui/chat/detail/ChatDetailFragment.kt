@@ -33,17 +33,36 @@ class ChatDetailFragment : BaseFragment() {
     }
 
     private fun setupViewModel() {
-        viewModel.setChatRoomId(args.chatRoomItem?.chatRoomId ?: args.chatRoomId.toString())
-        viewModel.setOtherUserId(args.chatRoomItem?.otherUserId ?: args.otherId.toString())
+        setChatRoomId()
+        addChatDetailEventListener()
+        getMyUserItem()
+        getOtherUserItem()
+        observeChatItemList()
+        observeOtherUserItem()
+    }
 
+    private fun setChatRoomId() {
+        val chatRoomId = args.chatRoomItem?.chatRoomId ?: args.chatRoomId.toString()
+        viewModel.setChatRoomId(chatRoomId)
+    }
+
+    private fun addChatDetailEventListener() {
         lifecycleScope.launch {
             viewModel.addChatDetailEventListener()
         }
+    }
 
+    private fun getMyUserItem() {
         viewModel.getMyUserItem()
+    }
 
-        viewModel.getOtherUserId()?.let { viewModel.getOtherUserItem(it) }
+    private fun getOtherUserItem() {
+        val otherUserId = args.chatRoomItem?.otherUserId ?: args.otherId.toString()
+        viewModel.setOtherUserId(otherUserId)
+        viewModel.getOtherUserItem(otherUserId)
+    }
 
+    private fun observeChatItemList() {
         viewModel.chatItemList.observe(viewLifecycleOwner, EventObserver { chatItemList ->
             adapter.submitList(chatItemList)
 
@@ -53,10 +72,12 @@ class ChatDetailFragment : BaseFragment() {
                 }
             }
         })
+    }
 
+    private fun observeOtherUserItem() {
         viewModel.otherUserItem.observe(viewLifecycleOwner, EventObserver { otherUserItem ->
             adapter.updateOtherUserItem(otherUserItem)
-            binding.chatDetailNicknameAbTv.text = otherUserItem.userName
+            binding.chatDetailNicknameAbTv.text = otherUserItem?.userName
         })
     }
 
