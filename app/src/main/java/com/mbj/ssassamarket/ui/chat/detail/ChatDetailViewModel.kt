@@ -117,8 +117,6 @@ class ChatDetailViewModel @Inject constructor(private val chatRepository: ChatRe
             val otherLatitude = otherCoordinates?.get(0)?.toDouble()
             val otherLongitude = otherCoordinates?.get(1)?.toDouble()
 
-            Log.d("@@ 나의 위도 경도", "${myCoordinates}")
-            Log.d("@@ 상대방  위도 경도", "${otherCoordinates}")
             // 거리 계산 및 관련 로직 수행
             if(myLatitude != null && myLongitude != null && otherLatitude != null && otherLongitude != null) {
                 val distance = calculateDistance(myLatitude,myLongitude,otherLatitude,otherLongitude)
