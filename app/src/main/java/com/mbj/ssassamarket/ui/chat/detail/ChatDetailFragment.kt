@@ -11,17 +11,27 @@ import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentChatDetailBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.util.EventObserver
+import com.mbj.ssassamarket.util.LocateFormat
+import com.mbj.ssassamarket.util.LocationManager
+import com.mbj.ssassamarket.util.location.LocationFormat.parseLatLng
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import net.daum.mf.map.api.MapPoint
 
 @AndroidEntryPoint
-class ChatDetailFragment : BaseFragment() {
+class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     override val binding get() = _binding as FragmentChatDetailBinding
     override val layoutId: Int get() = R.layout.fragment_chat_detail
 
     private lateinit var adapter: ChatDetailAdapter
     private val args: ChatDetailFragmentArgs by navArgs()
     private val viewModel: ChatDetailViewModel by viewModels()
+    private lateinit var locationManager: LocationManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        locationManager = LocationManager(requireContext(), 10000L, 10000.0F, this)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -32,6 +42,11 @@ class ChatDetailFragment : BaseFragment() {
         setupUI()
     }
 
+    override fun onResume() {
+        super.onResume()
+        locationManager.startLocationTracking()
+    }
+
     private fun setupViewModel() {
         setChatRoomId()
         addChatDetailEventListener()
@@ -39,6 +54,8 @@ class ChatDetailFragment : BaseFragment() {
         getOtherUserItem()
         observeChatItemList()
         observeOtherUserItem()
+        observeLatLngString()
+        observeDistanceDiff()
     }
 
     private fun setChatRoomId() {
@@ -74,13 +91,6 @@ class ChatDetailFragment : BaseFragment() {
         })
     }
 
-    private fun observeOtherUserItem() {
-        viewModel.otherUserItem.observe(viewLifecycleOwner, EventObserver { otherUserItem ->
-            adapter.updateOtherUserItem(otherUserItem)
-            binding.chatDetailNicknameAbTv.text = otherUserItem?.userName
-        })
-    }
-
     private fun setupUI() {
         binding.chatDetailBackIv.setOnClickListener {
             findNavController().navigateUp()
@@ -102,8 +112,61 @@ class ChatDetailFragment : BaseFragment() {
         Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
     }
 
+    override fun onLocationUpdated(latitude: Double?, longitude: Double?) {
+        if (latitude != null && longitude != null) {
+            val latLngString = "$latitude $longitude"
+            viewModel.setLatLng(latLngString)
+            val mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude)
+            val reverseGeoCoder = locationManager.createReverseGeoCoder(requireActivity(),mapPoint) { addressString ->
+                val location = LocateFormat.getSelectedAddress(addressString, 2)
+                viewModel.setLocation(location)
+            }
+            reverseGeoCoder.startFindingAddress()
+        }
+    }
+
+    private fun observeOtherUserItem() {
+        viewModel.otherUserItem.observe(viewLifecycleOwner, EventObserver { otherUserItem ->
+            adapter.updateOtherUserItem(otherUserItem)
+            binding.chatDetailNicknameAbTv.text = otherUserItem.userName
+
+            viewModel.setOtherUserItemState(otherUserItem)
+            viewModel.processLocationData()
+
+            val coordinates = parseLatLng(otherUserItem.latLng)
+            if(coordinates != null) {
+                val (latitude, longitude) = coordinates
+                val mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude)
+                val reverseGeoCoder = locationManager.createReverseGeoCoder(requireActivity(),mapPoint) { addressString ->
+                    val location = LocateFormat.getSelectedAddress(addressString, 2)
+                    binding.chatDetailLocationTv.text = location
+                }
+                reverseGeoCoder.startFindingAddress()
+            }
+        })
+    }
+
+    private fun observeLatLngString() {
+        viewModel.latLngString.observe(viewLifecycleOwner, EventObserver { myLatLng ->
+            viewModel.setLngState(myLatLng)
+            viewModel.processLocationData()
+        })
+    }
+
+    private fun observeDistanceDiff() {
+        viewModel.distanceDiff.observe(viewLifecycleOwner, EventObserver { distanceDiff ->
+            binding.chatDetailLocationDiffTv.text = distanceDiff
+        })
+    }
+
+    override fun onPause() {
+        super.onPause()
+        locationManager.stopLocationTracking()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.removeChatDetailEventListener()
     }
 }
+
