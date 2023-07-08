@@ -35,14 +35,11 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val shouldShowBottomNavigation = when (destination.id) {
-                R.id.logInFragment,
-                R.id.splashFragment,
-                R.id.settingNicknameFragment,
-                R.id.navigation_writing,
-                R.id.sellerFragment,
-                R.id.buyerFragment,
-                R.id.chatDetailFragment -> false
-                else -> true
+                R.id.navigation_home,
+                R.id.navigation_chat,
+                R.id.navigation_inventory,
+                R.id.navigation_setting, -> true
+                else -> false
             }
             binding.mainBottomNavigation.visibility = if (shouldShowBottomNavigation) {
                 View.VISIBLE
