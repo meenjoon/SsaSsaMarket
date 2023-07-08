@@ -13,6 +13,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class BuyerFragment : BaseFragment() {
+
     override val binding get() = _binding as FragmentBuyerBinding
     override val layoutId: Int get() = R.layout.fragment_buyer
 
@@ -29,7 +30,7 @@ class BuyerFragment : BaseFragment() {
         })
 
         binding.buyerChatBt.setOnClickListener {
-            viewModel.onChatButtonClicked("판매자 닉네임", "판매자 주소")
+            viewModel.onChatButtonClicked(getString(R.string.test_seller_name), getString(R.string.test_seller_location))
         }
 
         binding.buyerBackBt.setOnClickListener {
