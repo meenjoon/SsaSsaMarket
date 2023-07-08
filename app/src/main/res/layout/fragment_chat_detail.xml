@@ -42,18 +42,19 @@
                         android:id="@+id/chat_detail_nickname_ab_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="35sp"
+                        android:textSize="22sp"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        tools:text="슈퍼맨" />
+                        tools:text="싸게게파는사람" />
 
                     <TextView
                         android:id="@+id/chat_detail_location_tv"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:gravity="end"
                         android:textColor="@color/black"
                         app:layout_constraintBottom_toTopOf="@id/chat_detail_location_diff_tv"
                         app:layout_constraintEnd_toEndOf="@id/guideline_vertical_92"
@@ -93,11 +94,11 @@
             android:id="@+id/chat_detail_rv"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@id/chat_detail_message_cl"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/chat_detail_abl"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+            app:layout_constraintTop_toBottomOf="@id/chat_detail_abl" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/chat_detail_message_cl"
