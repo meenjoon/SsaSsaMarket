@@ -42,7 +42,7 @@ class LocationManager(
         }
     }
 
-    fun isAnyLocationPermissionGranted(context: Context): Boolean {
+    fun isAnyLocationPermissionGranted(): Boolean {
         val fineLocationGranted = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
