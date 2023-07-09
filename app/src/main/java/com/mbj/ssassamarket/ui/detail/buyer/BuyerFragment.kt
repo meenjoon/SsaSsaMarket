@@ -13,11 +13,15 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.tabs.TabLayoutMediator
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentBuyerBinding
 import com.mbj.ssassamarket.ui.BaseFragment
+import com.mbj.ssassamarket.ui.detail.BannerAdapter
+import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
 import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.LocationManager
+import com.mbj.ssassamarket.util.TextFormat.convertToCurrencyFormat
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -30,11 +34,13 @@ class BuyerFragment : BaseFragment() {
     private val viewModel: BuyerViewModel by viewModels()
 
     private lateinit var locationManager: LocationManager
+    private lateinit var bannerAdapter: BannerAdapter
 
     private val requestLocationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
-            val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+            val coarseLocationGranted =
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
 
             if (fineLocationGranted || coarseLocationGranted) {
                 onLocationPermissionGranted()
@@ -50,17 +56,59 @@ class BuyerFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupViewModel()
+        setupViews()
+    }
+
+    private fun setupViewModel() {
         viewModel.setOtherUserId(args.product.id)
+        viewModel.initializeProduct(args.postId, args.product)
+        viewModel.getProductNickname()
 
         viewModel.chatRoomId.observe(viewLifecycleOwner, EventObserver { chatRoomId ->
-            viewModel.otherUserId.value?.let { navigateToChatDetailFragment(chatRoomId, it.peekContent()) }
+            viewModel.otherUserId.value?.let { otherUserId ->
+                navigateToChatDetailFragment(chatRoomId, otherUserId.peekContent())
+            }
         })
 
-        binding.detailBuyerChatBt.setOnClickListener { onBuyerChatButtonClicked() }
+        viewModel.nickname.observe(viewLifecycleOwner, EventObserver { nickname ->
+            binding.detailReceiver.setDetailNicknameText(nickname)
+        })
+    }
 
-        binding.detailBuyerBuyBt.setOnClickListener { onBuyerBuyButtonClicked() }
+    private fun setupViews() {
+        setupViewPager()
+        with(binding) {
+            detailBuyerChatBt.setOnClickListener { onBuyerChatButtonClicked() }
+            detailBuyerBuyBt.setOnClickListener { onBuyerBuyButtonClicked() }
+            detailBackIv.setOnClickListener { navigateUp() }
 
-        binding.detailBackIv.setOnClickListener { navigateUp() }
+            val productPostItem = viewModel.getProductPostItem()
+            detailReceiver.setDetailTitleText(productPostItem?.title)
+            detailReceiver.setDetailPriceText(productPostItem?.price?.let { convertToCurrencyFormat(it, requireContext()) })
+            detailReceiver.setDetailContentText(productPostItem?.content)
+            detailReceiver.setLocation(productPostItem?.location)
+            detailReceiver.setDetailTimeText(productPostItem?.createdDate?.let { getFormattedElapsedTime(it) })
+            bannerAdapter.submitList(productPostItem?.imageLocations)
+        }
+    }
+
+    private fun setupViewPager() {
+        bannerAdapter = BannerAdapter()
+        binding.detailVp2.adapter = bannerAdapter
+
+        val pageWidth = resources.getDimension(R.dimen.viewpager_item_width)
+        val pageMargin = resources.getDimension(R.dimen.viewpager_item_margin)
+        val screenWidth = resources.displayMetrics.widthPixels
+        val offset = screenWidth - pageWidth - pageMargin
+
+        binding.detailVp2.offscreenPageLimit = 2
+        binding.detailVp2.setPageTransformer { page, position ->
+            page.translationX = position * -offset
+        }
+
+        TabLayoutMediator(binding.detailTl, binding.detailVp2) { tab, position ->
+        }.attach()
     }
 
     private fun requestLocationPermission() {
