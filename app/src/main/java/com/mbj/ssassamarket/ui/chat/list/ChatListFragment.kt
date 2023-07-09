@@ -69,7 +69,7 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        locationManager = LocationManager(requireContext(), 10000L, 10000.0F)
+        locationManager = LocationManager(requireContext())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
