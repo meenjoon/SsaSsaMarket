@@ -46,7 +46,7 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
 
     private fun loadAllProducts() {
         viewModelScope.launch {
-            val products = productRepository.getProduct()
+            val products = productRepository.getAvailableProducts()
             productList.value = products
             setupProductList()
         }
@@ -129,14 +129,10 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
     fun refreshData() {
         viewModelScope.launch {
             _itemRefreshCompleted.value = Event(false)
-            val products = productRepository.getProduct()
-            if (products != null) {
-                _itemRefreshResponse.value = Event(true)
-                productList.value = products
-                applyFilters()
-            } else {
-                _itemRefreshResponse.value = Event(false)
-            }
+            val products = productRepository.getAvailableProducts()
+            _itemRefreshResponse.value = Event(true)
+            productList.value = products
+            applyFilters()
         }
     }
 
