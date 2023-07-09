@@ -58,4 +58,5 @@
     <string name="test_seller_location">판매자 위치(테스트값)</string>
     <string name="chat_list_location_permission">채팅을 이용하기 위해 위치 권한 설정이 필요합니다. 설정으로 이동하시겠습니까?</string>
     <string name="buyer_buy">구매하기</string>
+    <string name="buyer_chat_buy_permission">채팅 및 구매 기능을 이용하기 위해 위치 권한 설정이 필요합니다. 설정으로 이동하시겠습니까?</string>
 </resources>
