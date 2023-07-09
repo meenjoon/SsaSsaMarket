@@ -317,6 +317,22 @@ class FirebaseDataSource @Inject constructor(
         }
     }
 
+    override suspend fun buyProduct(postId: String, request: PatchBuyRequest) {
+        val (user, idToken) = getUserAndIdToken()
+        if (idToken != null) {
+            try {
+                val response = apiClient.buyProduct(postId, request, idToken)
+                if (response.isSuccessful) {
+                    Log.d(TAG, "구매 시 업데이트 실패")
+                } else {
+                    Log.e(TAG, "구매 시 업데이트 실패 (Status Code: ${response.code()})")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "구매 시 업데이트 오류", e)
+            }
+        }
+    }
+
     override suspend fun enterChatRoom(ohterUserId: String, otherUserName: String, otherLocation: String): String {
         val userId = getUserAndIdToken().first?.uid?: ""
 

@@ -4,8 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mbj.ssassamarket.data.model.PatchBuyRequest
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.source.ChatRepository
+import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +15,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class BuyerViewModel @Inject constructor(private val chatRepository: ChatRepository, private val userInfoRepository: UserInfoRepository) : ViewModel() {
+class BuyerViewModel @Inject constructor(
+    private val chatRepository: ChatRepository,
+    private val userInfoRepository: UserInfoRepository,
+    private val productRepository: ProductRepository
+) : ViewModel() {
 
     private val _otherUserId = MutableLiveData<Event<String>>()
     val otherUserId: LiveData<Event<String>> get() = _otherUserId
@@ -51,7 +57,10 @@ class BuyerViewModel @Inject constructor(private val chatRepository: ChatReposit
     }
 
     fun onChatButtonClicked(otherUserName: String, otherLocation: String) {
+        val patchRequest = PatchBuyRequest(true, listOf(productPostItem?.id))
+
         viewModelScope.launch {
+            postId?.let { productRepository.buyProduct(it, patchRequest) }
             _chatRoomId.value = Event(
                 chatRepository.enterChatRoom(
                     otherUserId.value?.peekContent()!!,

@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.data.source
 
 import android.util.Log
 import com.mbj.ssassamarket.data.model.ImageContent
+import com.mbj.ssassamarket.data.model.PatchBuyRequest
 import com.mbj.ssassamarket.data.model.PatchProductRequest
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
@@ -57,6 +58,16 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
             true
         } catch (e: Exception) {
             Log.e(TAG, "상품 업데이트 오류", e)
+            false
+        }
+    }
+
+    suspend fun buyProduct(postId: String, request: PatchBuyRequest): Boolean {
+        return try {
+            marketNetworkDataSource.buyProduct(postId, request)
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "구매 시 업데이트 오류", e)
             false
         }
     }
