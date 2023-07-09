@@ -38,3 +38,8 @@ data class PatchProductRequest(
     val price: Int,
     val content: String
 )
+
+data class PatchBuyRequest(
+    val soldOut: Boolean,
+    val shoppingList: List<String?>?
+)

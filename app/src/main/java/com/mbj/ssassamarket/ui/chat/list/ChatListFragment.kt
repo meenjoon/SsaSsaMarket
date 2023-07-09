@@ -69,7 +69,7 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        locationManager = LocationManager(requireContext(), 10000L, 10000.0F)
+        locationManager = LocationManager(requireContext())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -99,10 +99,10 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
 
     private fun handleLocationPermission() {
         if (!isLocationPermissionChecked) {
-            if (isSystemSettingsExited && !locationManager.isAnyLocationPermissionGranted(requireContext())) {
+            if (isSystemSettingsExited && !locationManager.isAnyLocationPermissionGranted()) {
                 // 시스템 설정에서 돌아온 경우이지만 위치 권한이 허용되지 않은 경우
                 findNavController().navigateUp()
-            } else if (isSystemSettingsExited && locationManager.isAnyLocationPermissionGranted(requireContext())) {
+            } else if (isSystemSettingsExited && locationManager.isAnyLocationPermissionGranted()) {
                 // 시스템 설정에서 돌아온 경우이고 위치 권한이 허용된 경우
             } else {
                 // 처음 진입하는 경우 위치 권한 체크

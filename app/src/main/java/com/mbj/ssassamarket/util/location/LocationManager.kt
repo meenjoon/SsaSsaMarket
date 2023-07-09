@@ -16,12 +16,12 @@ import net.daum.mf.map.api.MapReverseGeoCoder
 
 class LocationManager(
     private val context: Context,
-    private var timeInterval: Long,
-    private var minimalDistance: Float,
+    private var timeInterval: Long? = null,
+    private var minimalDistance: Float? = null,
     private val locationUpdateListener: LocationUpdateListener? = null
 ) : LocationCallback() {
 
-    private var request: LocationRequest
+    private var request: LocationRequest?
     private var locationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 
     init {
@@ -42,7 +42,7 @@ class LocationManager(
         }
     }
 
-    fun isAnyLocationPermissionGranted(context: Context): Boolean {
+    fun isAnyLocationPermissionGranted(): Boolean {
         val fineLocationGranted = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -56,12 +56,17 @@ class LocationManager(
         return fineLocationGranted || coarseLocationGranted
     }
 
-    private fun createRequest(): LocationRequest =
-        LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, timeInterval).apply {
-            setMinUpdateDistanceMeters(minimalDistance)
-            setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
-            setWaitForAccurateLocation(true)
-        }.build()
+    private fun createRequest(): LocationRequest? {
+        return if (timeInterval != null && minimalDistance != null) {
+            LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, timeInterval!!).apply {
+                setMinUpdateDistanceMeters(minimalDistance!!)
+                setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+                setWaitForAccurateLocation(true)
+            }.build()
+        } else {
+            null
+        }
+    }
 
     fun changeRequest(timeInterval: Long, minimalDistance: Float) {
         this.timeInterval = timeInterval
@@ -107,7 +112,7 @@ class LocationManager(
             ) != PackageManager.PERMISSION_GRANTED
                     )
         ) {
-            locationClient.requestLocationUpdates(request, this, Looper.getMainLooper())
+            request?.let { locationClient.requestLocationUpdates(it, this, Looper.getMainLooper()) }
         }
     }
 
