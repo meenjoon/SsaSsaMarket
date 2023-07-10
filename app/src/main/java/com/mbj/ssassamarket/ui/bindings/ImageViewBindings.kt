@@ -31,3 +31,10 @@ fun ImageView.loadFirstImage(imageLocations: List<String?>?) {
         this.load(R.drawable.null_icon)
     }
 }
+
+@BindingAdapter("imageUrl")
+fun ImageView.loadImage(imageUrl: String) {
+    this.load(imageUrl) {
+        error(R.drawable.null_icon)
+    }
+}

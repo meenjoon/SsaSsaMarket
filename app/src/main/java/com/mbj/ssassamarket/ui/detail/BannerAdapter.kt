@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
 import com.mbj.ssassamarket.databinding.RecyclerviewItemBannerBinding
 
 class BannerAdapter : ListAdapter<String, BannerAdapter.BannerViewHolder>(BannerDiffCallback()) {
@@ -21,7 +20,7 @@ class BannerAdapter : ListAdapter<String, BannerAdapter.BannerViewHolder>(Banner
     class BannerViewHolder(private val binding: RecyclerviewItemBannerBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(image: String) {
-            binding.bannerIv.load(image)
+            binding.imageUrl = image
         }
 
         companion object {

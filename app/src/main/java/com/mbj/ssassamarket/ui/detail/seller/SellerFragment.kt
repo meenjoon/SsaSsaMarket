@@ -156,9 +156,9 @@ class SellerFragment : BaseFragment() {
             setDetailPriceEnabled(isEditMode)
             setDetailTitleEnabled(isEditMode)
             setDetailTitleText(product?.peekContent()?.title)
-            setDetailTimeText(product?.peekContent()?.createdDate?.let { getFormattedElapsedTime(it) })
+            setDetailTimeText(product?.peekContent()?.createdDate)
             setDetailPriceText(product?.peekContent()?.price.toString())
-            setLocation(product?.peekContent()?.location)
+            setDetailLocationText(product?.peekContent()?.location)
             setDetailContentText(product?.peekContent()?.content)
             if (editMode == EditMode.READ_ONLY) {
                 setDetailContentTextColor(ContextCompat.getColor(context, R.color.black))

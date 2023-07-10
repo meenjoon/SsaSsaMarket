@@ -19,11 +19,9 @@ import com.mbj.ssassamarket.databinding.FragmentBuyerBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.detail.BannerAdapter
 import com.mbj.ssassamarket.util.Constants
-import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
 import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.LocationManager
 import com.mbj.ssassamarket.util.ProgressDialogFragment
-import com.mbj.ssassamarket.util.TextFormat.convertToCurrencyFormat
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -60,6 +58,7 @@ class BuyerFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.viewModel = viewModel
         setupViewModel()
         setupViews()
     }
@@ -68,6 +67,7 @@ class BuyerFragment : BaseFragment() {
         viewModel.setOtherUserId(args.product.id)
         viewModel.initializeProduct(args.postId, args.product)
         viewModel.getProductNickname()
+        viewModel.checkProductInFavorites()
 
         viewModel.chatRoomId.observe(viewLifecycleOwner, EventObserver { chatRoomId ->
             viewModel.otherUserId.value?.let { otherUserId ->
@@ -75,15 +75,7 @@ class BuyerFragment : BaseFragment() {
             }
         })
 
-        viewModel.nickname.observe(viewLifecycleOwner, EventObserver { nickname ->
-            binding.detailReceiver.setDetailNicknameText(nickname)
-        })
-
-        viewModel.checkProductInFavorites()
-
         viewModel.isLiked.observe(viewLifecycleOwner, EventObserver { isLinked ->
-            val drawable = getHeartDrawableRes(isLinked)
-            binding.detailHeart.setImageResource(drawable)
             viewModel.handleFavoriteResponse()
         })
 
@@ -102,15 +94,7 @@ class BuyerFragment : BaseFragment() {
             detailBuyerChatBt.setOnClickListener { onBuyerChatButtonClicked() }
             detailBuyerBuyBt.setOnClickListener { onBuyerBuyButtonClicked() }
             detailBackIv.setOnClickListener { navigateUp() }
-            detailHeart.setOnClickListener { viewModel.isLiked.value?.peekContent()
-                ?.let { it1 -> updateLikeButton(it1) } }
-
-            val productPostItem = viewModel.getProductPostItem()
-            detailReceiver.setDetailTitleText(productPostItem?.title)
-            detailReceiver.setDetailPriceText(productPostItem?.price?.let { convertToCurrencyFormat(it, requireContext()) })
-            detailReceiver.setDetailContentText(productPostItem?.content)
-            detailReceiver.setLocation(productPostItem?.location)
-            detailReceiver.setDetailTimeText(productPostItem?.createdDate?.let { getFormattedElapsedTime(it) })
+            val productPostItem = viewModel!!.getProductPostItem()
             bannerAdapter.submitList(productPostItem?.imageLocations)
         }
     }
@@ -196,22 +180,6 @@ class BuyerFragment : BaseFragment() {
             onLocationPermissionGranted()
         } else {
             requestLocationPermission()
-        }
-    }
-
-    private fun updateLikeButton(isLiked: Boolean) {
-        if (isLiked) {
-            viewModel.likeProduct()
-        } else {
-            viewModel.unlikeProduct()
-        }
-    }
-
-    private fun getHeartDrawableRes(isLinked: Boolean): Int {
-        return if (isLinked) {
-            R.drawable.heart_full_icon
-        } else {
-            R.drawable.heart_empty_icon
         }
     }
 

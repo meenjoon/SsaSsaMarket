@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.ViewProductDetailInfoBinding
+import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
 
 
 class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
@@ -27,7 +28,7 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
                     val timeTextColor = getColor(R.styleable.ProductDetailInfoLayout_detailTimeTextColor, 0)
                     val nicknameText = getString(R.styleable.ProductDetailInfoLayout_detailNicknameText)
                     val timeText = getString(R.styleable.ProductDetailInfoLayout_detailTimeText)
-                    val locationText = getString(R.styleable.ProductDetailInfoLayout_detailLocation)
+                    val locationText = getString(R.styleable.ProductDetailInfoLayout_detailLocationText)
                     val titleTextColor = getColor(R.styleable.ProductDetailInfoLayout_detailTimeTextColor, 0)
                     val priceTextColor = getColor(R.styleable.ProductDetailInfoLayout_detailTimeTextColor, 0)
                     val contentTextColor = getColor(R.styleable.ProductDetailInfoLayout_detailTimeTextColor, 0)
@@ -41,7 +42,7 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
                     setDetailTimeTextColor(timeTextColor)
                     setDetailNicknameText(nicknameText)
                     setDetailTimeText(timeText)
-                    setLocation(locationText)
+                    setDetailLocationText(locationText)
                     setDetailTitleTextColor(titleTextColor)
                     setDetailPriceTextColor(priceTextColor)
                     setDetailContentTextColor(contentTextColor)
@@ -86,13 +87,13 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
     }
 
     fun setDetailTimeText(text: CharSequence?) {
-        binding.detailTimeTv.setText(text)
+        val formattedText = text?.toString()?.let { getFormattedElapsedTime(it) }
+        binding.detailTimeTv.text = formattedText
     }
 
-    fun setLocation(text: CharSequence?) {
+    fun setDetailLocationText(text: CharSequence?) {
         binding.detailLocationTv.setText(text)
     }
-
     fun setDetailTitleTextChangeListener(textWatcher: TextWatcher) {
         binding.detailTitleTiev.addTextChangedListener(textWatcher)
     }

@@ -81,7 +81,7 @@ class BuyerViewModel @Inject constructor(
         }
     }
 
-    fun likeProduct() {
+    private fun likeProduct() {
         viewModelScope.launch {
             _productFavoriteCompleted.value = Event(false)
 
@@ -102,7 +102,7 @@ class BuyerViewModel @Inject constructor(
         }
     }
 
-    fun unlikeProduct() {
+    private fun unlikeProduct() {
         viewModelScope.launch {
             _productFavoriteCompleted.value = Event(false)
 
@@ -120,6 +120,14 @@ class BuyerViewModel @Inject constructor(
                 _productFavoriteResponse.value = Event(productRepository.updateProductFavorite(postId!!, request))
                 toggleIsLiked()
             }
+        }
+    }
+
+    fun onHeartClicked() {
+        if (isLiked.value?.peekContent() == true) {
+            unlikeProduct()
+        } else {
+            likeProduct()
         }
     }
 
