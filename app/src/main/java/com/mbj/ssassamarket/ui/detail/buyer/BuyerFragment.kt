@@ -44,9 +44,7 @@ class BuyerFragment : BaseFragment() {
             val coarseLocationGranted =
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
 
-            if (fineLocationGranted || coarseLocationGranted) {
-                onLocationPermissionGranted()
-            } else {
+            if (!(fineLocationGranted || coarseLocationGranted)) {
                 showPermissionPermanentlyDeniedDialog()
             }
         }
@@ -160,16 +158,9 @@ class BuyerFragment : BaseFragment() {
         startActivity(intent)
     }
 
-    private fun onLocationPermissionGranted() {
-        viewModel.onChatButtonClicked(
-            getString(R.string.test_seller_name),
-            getString(R.string.test_seller_location)
-        )
-    }
-
     private fun onBuyerChatButtonClicked() {
         if (locationManager.isAnyLocationPermissionGranted()) {
-            onLocationPermissionGranted()
+            viewModel.onChatButtonClicked()
         } else {
             requestLocationPermission()
         }
@@ -177,7 +168,7 @@ class BuyerFragment : BaseFragment() {
 
     private fun onBuyerBuyButtonClicked() {
         if (locationManager.isAnyLocationPermissionGranted()) {
-            onLocationPermissionGranted()
+            viewModel.onBuyButtonClicked()
         } else {
             requestLocationPermission()
         }

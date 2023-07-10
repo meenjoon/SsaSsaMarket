@@ -66,18 +66,33 @@ class BuyerViewModel @Inject constructor(
         }
     }
 
-    fun onChatButtonClicked(otherUserName: String, otherLocation: String) {
-        val patchRequest = PatchBuyRequest(true, listOf(productPostItem?.id))
+    fun onChatButtonClicked() {
+        viewModelScope.launch {
+            if (nickname.value?.peekContent() != null && productPostItem?.location != null) {
+                _chatRoomId.value = Event(
+                    chatRepository.enterChatRoom(
+                        otherUserId.value?.peekContent()!!,
+                        nickname.value!!.peekContent()!!,
+                        productPostItem?.location!!
+                    )
+                )
+            }
+        }
+    }
 
+    fun onBuyButtonClicked() {
+        val patchRequest = PatchBuyRequest(true, listOf(productPostItem?.id))
         viewModelScope.launch {
             postId?.let { productRepository.buyProduct(it, patchRequest) }
-            _chatRoomId.value = Event(
-                chatRepository.enterChatRoom(
-                    otherUserId.value?.peekContent()!!,
-                    otherUserName,
-                    otherLocation
+            if (nickname.value?.peekContent() != null && productPostItem?.location != null) {
+                _chatRoomId.value = Event(
+                    chatRepository.enterChatRoom(
+                        otherUserId.value?.peekContent()!!,
+                        nickname.value!!.peekContent()!!,
+                        productPostItem?.location!!
+                    )
                 )
-            )
+            }
         }
     }
 
