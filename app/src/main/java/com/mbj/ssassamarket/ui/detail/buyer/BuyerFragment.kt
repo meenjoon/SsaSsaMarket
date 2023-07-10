@@ -18,9 +18,11 @@ import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentBuyerBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.detail.BannerAdapter
+import com.mbj.ssassamarket.util.Constants
 import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
 import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.LocationManager
+import com.mbj.ssassamarket.util.ProgressDialogFragment
 import com.mbj.ssassamarket.util.TextFormat.convertToCurrencyFormat
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -35,6 +37,8 @@ class BuyerFragment : BaseFragment() {
 
     private lateinit var locationManager: LocationManager
     private lateinit var bannerAdapter: BannerAdapter
+
+    private var progressDialog: ProgressDialogFragment? = null
 
     private val requestLocationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -74,6 +78,22 @@ class BuyerFragment : BaseFragment() {
         viewModel.nickname.observe(viewLifecycleOwner, EventObserver { nickname ->
             binding.detailReceiver.setDetailNicknameText(nickname)
         })
+
+        viewModel.checkProductInFavorites()
+
+        viewModel.isLiked.observe(viewLifecycleOwner, EventObserver { isLinked ->
+            val drawable = getHeartDrawableRes(isLinked)
+            binding.detailHeart.setImageResource(drawable)
+            viewModel.handleFavoriteResponse()
+        })
+
+        viewModel.productFavoriteCompleted.observe(viewLifecycleOwner, EventObserver { completed ->
+            if (completed) {
+                hideLoadingDialog()
+            } else {
+                showLoadingDialog()
+            }
+        })
     }
 
     private fun setupViews() {
@@ -82,6 +102,8 @@ class BuyerFragment : BaseFragment() {
             detailBuyerChatBt.setOnClickListener { onBuyerChatButtonClicked() }
             detailBuyerBuyBt.setOnClickListener { onBuyerBuyButtonClicked() }
             detailBackIv.setOnClickListener { navigateUp() }
+            detailHeart.setOnClickListener { viewModel.isLiked.value?.peekContent()
+                ?.let { it1 -> updateLikeButton(it1) } }
 
             val productPostItem = viewModel.getProductPostItem()
             detailReceiver.setDetailTitleText(productPostItem?.title)
@@ -175,6 +197,32 @@ class BuyerFragment : BaseFragment() {
         } else {
             requestLocationPermission()
         }
+    }
+
+    private fun updateLikeButton(isLiked: Boolean) {
+        if (isLiked) {
+            viewModel.likeProduct()
+        } else {
+            viewModel.unlikeProduct()
+        }
+    }
+
+    private fun getHeartDrawableRes(isLinked: Boolean): Int {
+        return if (isLinked) {
+            R.drawable.heart_full_icon
+        } else {
+            R.drawable.heart_empty_icon
+        }
+    }
+
+    private fun showLoadingDialog() {
+        progressDialog = ProgressDialogFragment()
+        progressDialog?.show(childFragmentManager, Constants.PROGRESS_DIALOG)
+    }
+
+    private fun hideLoadingDialog() {
+        progressDialog?.dismiss()
+        progressDialog = null
     }
 
     private fun navigateToChatDetailFragment(chatRoomId: String, otherId: String) {
