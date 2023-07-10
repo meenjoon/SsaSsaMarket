@@ -56,5 +56,11 @@ interface ApiClient {
         @Body requestBody: FavoriteCountRequest,
         @Query("auth") auth: String
     ): Response<Unit>
+
+    @GET("posts/{postId}.json")
+    suspend fun getProductDetail(
+        @Path("postId") postId: String,
+        @Query("auth") auth: String
+    ): Response<ProductPostItem>
 }
 

@@ -265,6 +265,28 @@ class FirebaseDataSource @Inject constructor(
         }
     }
 
+    override suspend fun getProductDetail(postId: String): ProductPostItem? {
+        val (user, idToken) = getUserAndIdToken()
+        return try {
+            if (idToken != null) {
+                val response = apiClient.getProductDetail(postId, idToken)
+                if (response.isSuccessful) {
+                    val product = response.body()
+                    product
+                } else {
+                    val statusCode = response.code()
+                    Log.e(TAG, "Failed to get product detail. Status Code: $statusCode")
+                    throw Exception("Failed to get product detail. Status Code: $statusCode")
+                }
+            } else {
+                throw Exception("Missing GoogleIdToken")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception while getting product detail", e)
+            throw Exception("Failed to get product detail", e)
+        }
+    }
+
     override suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
         val user = FirebaseAuth.getInstance().currentUser
         var idToken: String? = null

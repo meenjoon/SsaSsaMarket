@@ -25,6 +25,7 @@ interface MarketNetworkDataSource {
     suspend fun getMyDataId(): String?
     suspend fun updateMyLatLng(latLng: String): Boolean
     suspend fun getProduct(): List<Pair<String, ProductPostItem>>
+    suspend fun getProductDetail(postId: String): ProductPostItem?
     suspend fun getUserAndIdToken() : Pair<FirebaseUser?, String?>
     suspend fun getUserNameByUserId(userIdToken: String) : String?
     suspend fun updateProduct(postId: String, request: PatchProductRequest): Boolean

@@ -49,6 +49,15 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
         }
     }
 
+    suspend fun getProductDetail(postId: String): ProductPostItem? {
+        return try {
+            marketNetworkDataSource.getProductDetail(postId)
+        } catch (e: Exception) {
+            Log.e(TAG, "상세 Product 가져 오던 중 에외가 발생하였습니다.", e)
+            throw Exception("상세 Product 가져 오던 중 에외가 발생하였습니다.  $e")
+        }
+    }
+
     suspend fun getAvailableProducts() : List<Pair<String, ProductPostItem>> {
         return try {
             marketNetworkDataSource.getProduct().filter { (_, product) -> product.soldOut.not() }
