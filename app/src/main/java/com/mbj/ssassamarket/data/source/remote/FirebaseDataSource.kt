@@ -301,20 +301,23 @@ class FirebaseDataSource @Inject constructor(
         return null
     }
 
-    override suspend fun updateProduct(postId: String, request: PatchProductRequest) {
+    override suspend fun updateProduct(postId: String, request: PatchProductRequest): Boolean {
         val (user, idToken) = getUserAndIdToken()
         if (idToken != null) {
             try {
                 val response = apiClient.updateProduct(postId, request, idToken)
                 if (response.isSuccessful) {
                     Log.d(TAG, "상품 업데이트 성공")
+                    return true
                 } else {
                     Log.e(TAG, "상품 업데이트 실패 (Status Code: ${response.code()})")
+                    return false
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "상품 업데이트 오류", e)
             }
         }
+        return false
     }
 
     override suspend fun buyProduct(postId: String, request: PatchBuyRequest) {

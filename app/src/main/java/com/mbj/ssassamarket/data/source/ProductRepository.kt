@@ -1,10 +1,7 @@
 package com.mbj.ssassamarket.data.source
 
 import android.util.Log
-import com.mbj.ssassamarket.data.model.ImageContent
-import com.mbj.ssassamarket.data.model.PatchBuyRequest
-import com.mbj.ssassamarket.data.model.PatchProductRequest
-import com.mbj.ssassamarket.data.model.ProductPostItem
+import com.mbj.ssassamarket.data.model.*
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
 import javax.inject.Inject
 
@@ -64,7 +61,6 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
     suspend fun updateProduct(postId: String, request: PatchProductRequest): Boolean {
         return try {
             marketNetworkDataSource.updateProduct(postId, request)
-            true
         } catch (e: Exception) {
             Log.e(TAG, "상품 업데이트 오류", e)
             false
