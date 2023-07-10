@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mbj.ssassamarket.data.model.FavoriteCountRequest
 import com.mbj.ssassamarket.data.model.PatchBuyRequest
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.source.ChatRepository
@@ -29,6 +30,15 @@ class BuyerViewModel @Inject constructor(
 
     private val _nickname = MutableLiveData<Event<String?>>()
     val nickname: LiveData<Event<String?>> get() = _nickname
+
+    private val _isLiked = MutableLiveData<Event<Boolean>>()
+    val isLiked: LiveData<Event<Boolean>> get() = _isLiked
+
+    private val _productFavoriteCompleted = MutableLiveData<Event<Boolean>>()
+    val productFavoriteCompleted: LiveData<Event<Boolean>> get() = _productFavoriteCompleted
+
+    private val _productFavoriteResponse = MutableLiveData<Event<Boolean>>()
+    val productFavoriteResponse: LiveData<Event<Boolean>> get() = _productFavoriteResponse
 
     private var postId: String? = null
     private var productPostItem: ProductPostItem? = null
@@ -56,18 +66,100 @@ class BuyerViewModel @Inject constructor(
         }
     }
 
-    fun onChatButtonClicked(otherUserName: String, otherLocation: String) {
-        val patchRequest = PatchBuyRequest(true, listOf(productPostItem?.id))
+    fun onChatButtonClicked() {
+        viewModelScope.launch {
+            if (nickname.value?.peekContent() != null && productPostItem?.location != null) {
+                _chatRoomId.value = Event(
+                    chatRepository.enterChatRoom(
+                        otherUserId.value?.peekContent()!!,
+                        nickname.value!!.peekContent()!!,
+                        productPostItem?.location!!
+                    )
+                )
+            }
+        }
+    }
 
+    fun onBuyButtonClicked() {
+        val patchRequest = PatchBuyRequest(true, listOf(productPostItem?.id))
         viewModelScope.launch {
             postId?.let { productRepository.buyProduct(it, patchRequest) }
-            _chatRoomId.value = Event(
-                chatRepository.enterChatRoom(
-                    otherUserId.value?.peekContent()!!,
-                    otherUserName,
-                    otherLocation
+            if (nickname.value?.peekContent() != null && productPostItem?.location != null) {
+                _chatRoomId.value = Event(
+                    chatRepository.enterChatRoom(
+                        otherUserId.value?.peekContent()!!,
+                        nickname.value!!.peekContent()!!,
+                        productPostItem?.location!!
+                    )
                 )
-            )
+            }
         }
+    }
+
+    private fun likeProduct() {
+        viewModelScope.launch {
+            _productFavoriteCompleted.value = Event(false)
+
+            val productId = productPostItem?.id
+            val currentProductPostItem = postId?.let { productRepository.getProductDetail(it) }
+            val currentFavoriteCount = currentProductPostItem?.favoriteCount
+
+            if (productId != null && currentFavoriteCount != null && postId != null) {
+                val newFavoriteCount = currentFavoriteCount + 1
+                val newFavoriteList = currentProductPostItem.favoriteList.orEmpty().toMutableList().apply {
+                    add(productId)
+                }
+
+                val request = FavoriteCountRequest(newFavoriteCount, newFavoriteList)
+                _productFavoriteResponse.value = Event(productRepository.updateProductFavorite(postId!!, request))
+                toggleIsLiked()
+            }
+        }
+    }
+
+    private fun unlikeProduct() {
+        viewModelScope.launch {
+            _productFavoriteCompleted.value = Event(false)
+
+            val productId = productPostItem?.id
+            val currentProductPostItem = postId?.let { productRepository.getProductDetail(it) }
+            val currentFavoriteCount = currentProductPostItem?.favoriteCount
+
+            if (productId != null && currentFavoriteCount != null && postId != null) {
+                val newFavoriteCount = currentFavoriteCount - 1
+                val newFavoriteList = currentProductPostItem.favoriteList.orEmpty().toMutableList().apply {
+                    remove(productId)
+                }
+
+                val request = FavoriteCountRequest(newFavoriteCount, newFavoriteList)
+                _productFavoriteResponse.value = Event(productRepository.updateProductFavorite(postId!!, request))
+                toggleIsLiked()
+            }
+        }
+    }
+
+    fun onHeartClicked() {
+        if (isLiked.value?.peekContent() == true) {
+            unlikeProduct()
+        } else {
+            likeProduct()
+        }
+    }
+
+    private fun toggleIsLiked() {
+        _isLiked.value = isLiked.value?.peekContent()?.let { Event(it.not()) }
+    }
+
+    fun checkProductInFavorites() {
+        viewModelScope.launch {
+            _productFavoriteCompleted.value = Event(false)
+            val product = postId?.let { productRepository.getProductDetail(it) }
+            _productFavoriteResponse.value = Event(product?.favoriteList?.contains(product.id) == true)
+            _isLiked.value = productFavoriteResponse.value?.let { Event(it.peekContent()) }
+        }
+    }
+
+    fun handleFavoriteResponse() {
+        _productFavoriteCompleted.value = Event(true)
     }
 }

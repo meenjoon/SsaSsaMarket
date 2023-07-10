@@ -10,7 +10,7 @@
         <attr name="detailTimeTextColor" format="color" />
         <attr name="detailNicknameText" format="string" />
         <attr name="detailTimeText" format="string" />
-        <attr name="detailLocation" format="string" />
+        <attr name="detailLocationText" format="string" />
         <attr name="detailTitleTextColor" format="color" />
         <attr name="detailPriceTextColor" format="color" />
         <attr name="detailContentTextColor" format="color" />

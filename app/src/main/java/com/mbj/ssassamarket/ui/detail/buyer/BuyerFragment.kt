@@ -18,10 +18,10 @@ import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentBuyerBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.detail.BannerAdapter
-import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
+import com.mbj.ssassamarket.util.Constants
 import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.LocationManager
-import com.mbj.ssassamarket.util.TextFormat.convertToCurrencyFormat
+import com.mbj.ssassamarket.util.ProgressDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -36,15 +36,15 @@ class BuyerFragment : BaseFragment() {
     private lateinit var locationManager: LocationManager
     private lateinit var bannerAdapter: BannerAdapter
 
+    private var progressDialog: ProgressDialogFragment? = null
+
     private val requestLocationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
             val coarseLocationGranted =
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
 
-            if (fineLocationGranted || coarseLocationGranted) {
-                onLocationPermissionGranted()
-            } else {
+            if (!(fineLocationGranted || coarseLocationGranted)) {
                 showPermissionPermanentlyDeniedDialog()
             }
         }
@@ -56,6 +56,7 @@ class BuyerFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.viewModel = viewModel
         setupViewModel()
         setupViews()
     }
@@ -64,6 +65,7 @@ class BuyerFragment : BaseFragment() {
         viewModel.setOtherUserId(args.product.id)
         viewModel.initializeProduct(args.postId, args.product)
         viewModel.getProductNickname()
+        viewModel.checkProductInFavorites()
 
         viewModel.chatRoomId.observe(viewLifecycleOwner, EventObserver { chatRoomId ->
             viewModel.otherUserId.value?.let { otherUserId ->
@@ -71,8 +73,16 @@ class BuyerFragment : BaseFragment() {
             }
         })
 
-        viewModel.nickname.observe(viewLifecycleOwner, EventObserver { nickname ->
-            binding.detailReceiver.setDetailNicknameText(nickname)
+        viewModel.isLiked.observe(viewLifecycleOwner, EventObserver { isLinked ->
+            viewModel.handleFavoriteResponse()
+        })
+
+        viewModel.productFavoriteCompleted.observe(viewLifecycleOwner, EventObserver { completed ->
+            if (completed) {
+                hideLoadingDialog()
+            } else {
+                showLoadingDialog()
+            }
         })
     }
 
@@ -82,13 +92,7 @@ class BuyerFragment : BaseFragment() {
             detailBuyerChatBt.setOnClickListener { onBuyerChatButtonClicked() }
             detailBuyerBuyBt.setOnClickListener { onBuyerBuyButtonClicked() }
             detailBackIv.setOnClickListener { navigateUp() }
-
-            val productPostItem = viewModel.getProductPostItem()
-            detailReceiver.setDetailTitleText(productPostItem?.title)
-            detailReceiver.setDetailPriceText(productPostItem?.price?.let { convertToCurrencyFormat(it, requireContext()) })
-            detailReceiver.setDetailContentText(productPostItem?.content)
-            detailReceiver.setLocation(productPostItem?.location)
-            detailReceiver.setDetailTimeText(productPostItem?.createdDate?.let { getFormattedElapsedTime(it) })
+            val productPostItem = viewModel!!.getProductPostItem()
             bannerAdapter.submitList(productPostItem?.imageLocations)
         }
     }
@@ -154,16 +158,9 @@ class BuyerFragment : BaseFragment() {
         startActivity(intent)
     }
 
-    private fun onLocationPermissionGranted() {
-        viewModel.onChatButtonClicked(
-            getString(R.string.test_seller_name),
-            getString(R.string.test_seller_location)
-        )
-    }
-
     private fun onBuyerChatButtonClicked() {
         if (locationManager.isAnyLocationPermissionGranted()) {
-            onLocationPermissionGranted()
+            viewModel.onChatButtonClicked()
         } else {
             requestLocationPermission()
         }
@@ -171,10 +168,20 @@ class BuyerFragment : BaseFragment() {
 
     private fun onBuyerBuyButtonClicked() {
         if (locationManager.isAnyLocationPermissionGranted()) {
-            onLocationPermissionGranted()
+            viewModel.onBuyButtonClicked()
         } else {
             requestLocationPermission()
         }
+    }
+
+    private fun showLoadingDialog() {
+        progressDialog = ProgressDialogFragment()
+        progressDialog?.show(childFragmentManager, Constants.PROGRESS_DIALOG)
+    }
+
+    private fun hideLoadingDialog() {
+        progressDialog?.dismiss()
+        progressDialog = null
     }
 
     private fun navigateToChatDetailFragment(chatRoomId: String, otherId: String) {

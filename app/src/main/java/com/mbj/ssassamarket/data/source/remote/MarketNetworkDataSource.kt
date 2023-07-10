@@ -6,6 +6,7 @@ import com.google.firebase.database.ValueEventListener
 import com.mbj.ssassamarket.data.model.*
 
 interface MarketNetworkDataSource {
+
     suspend fun currentUserExists(): Boolean
     suspend fun addUser(nickname: String): Boolean
     suspend fun checkDuplicateUserName(nickname: String): Boolean
@@ -25,9 +26,11 @@ interface MarketNetworkDataSource {
     suspend fun getMyDataId(): String?
     suspend fun updateMyLatLng(latLng: String): Boolean
     suspend fun getProduct(): List<Pair<String, ProductPostItem>>
-    suspend fun getUserAndIdToken() : Pair<FirebaseUser?, String?>
-    suspend fun getUserNameByUserId(userIdToken: String) : String?
-    suspend fun updateProduct(postId: String, request: PatchProductRequest)
+    suspend fun getProductDetail(postId: String): ProductPostItem?
+    suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?>
+    suspend fun getUserNameByUserId(userIdToken: String): String?
+    suspend fun updateProduct(postId: String, request: PatchProductRequest): Boolean
+    suspend fun updateProductFavorite(postId: String, request: FavoriteCountRequest): Boolean
     suspend fun buyProduct(postId: String, request: PatchBuyRequest)
     suspend fun enterChatRoom(productId: String, otherUserName: String, otherLocation: String): String
     suspend fun getMyUserItem(callback: (User) -> Unit)

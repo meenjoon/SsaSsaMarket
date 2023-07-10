@@ -5,6 +5,9 @@
 
     <data>
 
+        <variable
+            name="viewModel"
+            type="com.mbj.ssassamarket.ui.detail.buyer.BuyerViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -36,8 +39,11 @@
                         app:srcCompat="@drawable/back_icon" />
 
                     <ImageView
+                        android:id="@+id/detail_heart"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:onClick="@{() -> viewModel.onHeartClicked()}"
+                        android:src="@{viewModel.isLiked.peekContent() ? @drawable/heart_full_icon : @drawable/heart_empty_icon}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="@id/guideline_vertical_93"
                         app:layout_constraintTop_toTopOf="parent"
@@ -90,8 +96,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     app:detailContentEnabled="false"
+                    app:detailContentText="@{viewModel.productPostItem.content}"
+                    app:detailLocationText="@{viewModel.productPostItem.location}"
+                    app:detailNicknameText="@{viewModel.nickname.peekContent()}"
                     app:detailPriceEnabled="false"
+                    app:detailPriceText="@{Integer.toString(viewModel.productPostItem.price)}"
+                    app:detailTimeText="@{viewModel.productPostItem.createdDate}"
                     app:detailTitleEnabled="false"
+                    app:detailTitleText="@{viewModel.productPostItem.title}"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

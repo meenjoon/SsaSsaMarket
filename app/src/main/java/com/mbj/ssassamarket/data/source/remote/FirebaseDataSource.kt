@@ -265,6 +265,28 @@ class FirebaseDataSource @Inject constructor(
         }
     }
 
+    override suspend fun getProductDetail(postId: String): ProductPostItem? {
+        val (user, idToken) = getUserAndIdToken()
+        return try {
+            if (idToken != null) {
+                val response = apiClient.getProductDetail(postId, idToken)
+                if (response.isSuccessful) {
+                    val product = response.body()
+                    product
+                } else {
+                    val statusCode = response.code()
+                    Log.e(TAG, "Failed to get product detail. Status Code: $statusCode")
+                    throw Exception("Failed to get product detail. Status Code: $statusCode")
+                }
+            } else {
+                throw Exception("Missing GoogleIdToken")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception while getting product detail", e)
+            throw Exception("Failed to get product detail", e)
+        }
+    }
+
     override suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
         val user = FirebaseAuth.getInstance().currentUser
         var idToken: String? = null
@@ -301,20 +323,42 @@ class FirebaseDataSource @Inject constructor(
         return null
     }
 
-    override suspend fun updateProduct(postId: String, request: PatchProductRequest) {
+    override suspend fun updateProduct(postId: String, request: PatchProductRequest): Boolean {
         val (user, idToken) = getUserAndIdToken()
         if (idToken != null) {
             try {
                 val response = apiClient.updateProduct(postId, request, idToken)
                 if (response.isSuccessful) {
                     Log.d(TAG, "상품 업데이트 성공")
+                    return true
                 } else {
                     Log.e(TAG, "상품 업데이트 실패 (Status Code: ${response.code()})")
+                    return false
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "상품 업데이트 오류", e)
             }
         }
+        return false
+    }
+
+    override suspend fun updateProductFavorite(postId: String, request: FavoriteCountRequest): Boolean {
+        val (user, idToken) = getUserAndIdToken()
+        if (idToken != null) {
+            try {
+                val response = apiClient.updateProductFavorite(postId, request, idToken)
+                if (response.isSuccessful) {
+                    Log.d(TAG, "좋아요 업데이트 성공")
+                    return true
+                } else {
+                    Log.e(TAG, "좋아요 업데이트 (Status Code: ${response.code()})")
+                    return false
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "좋아요 업데이트", e)
+            }
+        }
+        return false
     }
 
     override suspend fun buyProduct(postId: String, request: PatchBuyRequest) {
