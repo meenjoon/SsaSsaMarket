@@ -1,9 +1,6 @@
 package com.mbj.ssassamarket.data.source.remote
 
-import com.mbj.ssassamarket.data.model.PatchBuyRequest
-import com.mbj.ssassamarket.data.model.PatchProductRequest
-import com.mbj.ssassamarket.data.model.ProductPostItem
-import com.mbj.ssassamarket.data.model.User
+import com.mbj.ssassamarket.data.model.*
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -50,6 +47,13 @@ interface ApiClient {
     suspend fun buyProduct(
         @Path("postId") postId: String,
         @Body request: PatchBuyRequest,
+        @Query("auth") auth: String
+    ): Response<Unit>
+
+    @PATCH("posts/{postId}.json")
+    suspend fun updateProductFavorite(
+        @Path("postId") productId: String,
+        @Body requestBody: FavoriteCountRequest,
         @Query("auth") auth: String
     ): Response<Unit>
 }

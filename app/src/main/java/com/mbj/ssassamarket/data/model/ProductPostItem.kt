@@ -43,3 +43,8 @@ data class PatchBuyRequest(
     val soldOut: Boolean,
     val shoppingList: List<String?>?
 )
+
+data class FavoriteCountRequest(
+    val favoriteCount: Int,
+    val favoriteList: List<String?>?
+)

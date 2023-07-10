@@ -67,6 +67,15 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
         }
     }
 
+    suspend fun updateProductFavorite(postId: String, request: FavoriteCountRequest): Boolean {
+        return try {
+            marketNetworkDataSource.updateProductFavorite(postId, request)
+        } catch (e: Exception) {
+            Log.e(TAG, "좋아요 업데이트 오류", e)
+            false
+        }
+    }
+
     suspend fun buyProduct(postId: String, request: PatchBuyRequest): Boolean {
         return try {
             marketNetworkDataSource.buyProduct(postId, request)

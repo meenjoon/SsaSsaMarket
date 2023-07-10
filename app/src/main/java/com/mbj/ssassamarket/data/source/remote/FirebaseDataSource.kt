@@ -320,6 +320,25 @@ class FirebaseDataSource @Inject constructor(
         return false
     }
 
+    override suspend fun updateProductFavorite(postId: String, request: FavoriteCountRequest): Boolean {
+        val (user, idToken) = getUserAndIdToken()
+        if (idToken != null) {
+            try {
+                val response = apiClient.updateProductFavorite(postId, request, idToken)
+                if (response.isSuccessful) {
+                    Log.d(TAG, "좋아요 업데이트 성공")
+                    return true
+                } else {
+                    Log.e(TAG, "좋아요 업데이트 (Status Code: ${response.code()})")
+                    return false
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "좋아요 업데이트", e)
+            }
+        }
+        return false
+    }
+
     override suspend fun buyProduct(postId: String, request: PatchBuyRequest) {
         val (user, idToken) = getUserAndIdToken()
         if (idToken != null) {
