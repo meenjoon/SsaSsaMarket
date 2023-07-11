@@ -7,11 +7,9 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.databinding.RecyclerviewItemInventoryProductBinding
-import com.mbj.ssassamarket.ui.bindings.loadFirstImage
-import com.mbj.ssassamarket.ui.bindings.setFormattedElapsedTime
 import com.mbj.ssassamarket.ui.common.ProductClickListener
 
-class InventoryInnerAdapter(val productClickListener: ProductClickListener) :
+class InventoryInnerAdapter(private val productClickListener: ProductClickListener) :
     ListAdapter<Pair<String, ProductPostItem>, InventoryInnerAdapter.InventoryProductViewHolder>(
         InventoryProductDiffCallback()
     ) {
@@ -28,9 +26,7 @@ class InventoryInnerAdapter(val productClickListener: ProductClickListener) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(productItem: Pair<String, ProductPostItem>, productClickListener: ProductClickListener) {
-            binding.inventoryInnerProductIv.loadFirstImage(productItem.second.imageLocations)
-            binding.inventoryInnerProductTimeTv.setFormattedElapsedTime(productItem.second.createdDate)
-            binding.inventoryInnerProductTitleTv.text = productItem.second.title
+            binding.productPostItem = productItem.second
             binding.root.setOnClickListener {
                 productClickListener.onProductClick(productItem)
             }

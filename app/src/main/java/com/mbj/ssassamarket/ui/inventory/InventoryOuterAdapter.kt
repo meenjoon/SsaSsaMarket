@@ -60,7 +60,7 @@ class InventoryOuterAdapter(private val productClickListener: ProductClickListen
         ViewHolder(binding.root) {
 
         fun bind(categoryItem: InventoryData.ProductType) {
-            binding.savedOuterType.text = categoryItem.inventoryType.label
+            binding.productType = categoryItem
         }
 
         companion object {
@@ -78,7 +78,7 @@ class InventoryOuterAdapter(private val productClickListener: ProductClickListen
 
     class InventoryProductListViewHolder(
         val binding: RecyclerviewItemInventoryProductListBinding,
-        val productClickListener: ProductClickListener
+        private val productClickListener: ProductClickListener
     ) : ViewHolder(binding.root) {
 
         private val inventoryInnerAdapter = InventoryInnerAdapter(productClickListener)
