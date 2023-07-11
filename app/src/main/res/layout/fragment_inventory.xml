@@ -52,7 +52,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/guideline_vertical_5"
-            app:layout_constraintTop_toTopOf="@id/guideline_horizontal_15" />
+            app:layout_constraintTop_toTopOf="@id/guideline_horizontal_15"
+            tools:listitem="@layout/recyclerview_item_inventory_product_list" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline_vertical_5"
