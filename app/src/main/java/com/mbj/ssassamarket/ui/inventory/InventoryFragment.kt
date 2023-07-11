@@ -24,5 +24,9 @@ class InventoryFragment : BaseFragment() {
         viewModel.inventoryDataList.observe(viewLifecycleOwner, EventObserver{ inventoryDataList ->
             adapter.submitList(inventoryDataList)
         })
+
+        viewModel.nickname.observe(viewLifecycleOwner, EventObserver{ nickname ->
+            binding.inventoryNicknameTv.text = nickname
+        })
     }
 }

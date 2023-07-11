@@ -20,10 +20,14 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
     private val _inventoryDataList = MutableLiveData<Event<List<InventoryData>>>()
     val inventoryDataList: LiveData<Event<List<InventoryData>>> get() = _inventoryDataList
 
+    private val _nickname = MutableLiveData<Event<String?>>()
+    val nickname: LiveData<Event<String?>> get() = _nickname
+
     private var productPostItemList : List<ProductPostItem>?= null
 
     init {
         viewModelScope.launch {
+            getNickname()
             initProductPostItemList()
             getMyFavoriteProduct()
             getMyRegisteredProduct()
@@ -76,6 +80,14 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
                 inventoryDataList.add(InventoryData.ProductItem(purchasedProductList))
             }
             _inventoryDataList.value = Event(inventoryDataList)
+        }
+    }
+
+    private fun getNickname() {
+        viewModelScope.launch {
+            val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
+            val nickname = userInfoRepository.getUserNameByUserId(uId)
+            _nickname.value = Event(nickname)
         }
     }
 
