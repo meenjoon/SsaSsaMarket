@@ -81,8 +81,9 @@ class BuyerViewModel @Inject constructor(
     }
 
     fun onBuyButtonClicked() {
-        val patchRequest = PatchBuyRequest(true, listOf(productPostItem?.id))
         viewModelScope.launch {
+            val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
+            val patchRequest = PatchBuyRequest(true, listOf(uId))
             postId?.let { productRepository.buyProduct(it, patchRequest) }
             if (nickname.value?.peekContent() != null && productPostItem?.location != null) {
                 _chatRoomId.value = Event(
