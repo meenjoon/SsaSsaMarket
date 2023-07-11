@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -10,6 +11,62 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.inventory.InventoryFragment">
+
+        <ImageView
+            android:id="@+id/inventory_user_iv"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginStart="10dp"
+            app:layout_constraintBottom_toBottomOf="@id/guideline_horizontal_15"
+            app:layout_constraintStart_toStartOf="@id/guideline_vertical_5"
+            app:srcCompat="@drawable/user_default_icon" />
+
+        <TextView
+            android:id="@+id/inventory_nickname_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:textColor="@color/orange_700"
+            android:textSize="26sp"
+            app:layout_constraintBottom_toBottomOf="@id/inventory_user_iv"
+            app:layout_constraintStart_toEndOf="@id/inventory_user_iv"
+            app:layout_constraintTop_toTopOf="@id/inventory_user_iv"
+            tools:text="슈퍼맨" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:textColor="@color/black"
+            android:textSize="22sp"
+            app:layout_constraintBottom_toBottomOf="@id/inventory_nickname_tv"
+            app:layout_constraintStart_toEndOf="@id/inventory_nickname_tv"
+            tools:text="님" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/inventory_outer_rv"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="25dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/guideline_vertical_5"
+            app:layout_constraintTop_toTopOf="@id/guideline_horizontal_15" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_vertical_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.05" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_horizontal_15"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.15" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
