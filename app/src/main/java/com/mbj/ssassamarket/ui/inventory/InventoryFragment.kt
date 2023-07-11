@@ -24,6 +24,8 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
         super.onViewCreated(view, savedInstanceState)
         val adapter = InventoryOuterAdapter(this)
         binding.inventoryOuterRv.adapter = adapter
+        viewModel.getNickname()
+        viewModel.initProductPostItemList()
 
         viewModel.inventoryDataList.observe(viewLifecycleOwner, EventObserver{ inventoryDataList ->
             adapter.submitList(inventoryDataList)

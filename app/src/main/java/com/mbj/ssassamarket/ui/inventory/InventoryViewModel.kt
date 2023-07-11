@@ -26,18 +26,13 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
 
     private var productPostItemList : List<Pair<String, ProductPostItem>>?= null
 
-    init {
+    fun initProductPostItemList() {
         viewModelScope.launch {
-            getNickname()
-            initProductPostItemList()
+            productPostItemList = productRepository.getProduct()
             getMyFavoriteProduct()
             getMyRegisteredProduct()
             getMyPurchasedProduct()
         }
-    }
-
-    private suspend fun initProductPostItemList() {
-        productPostItemList = productRepository.getProduct()
     }
 
     private fun getMyFavoriteProduct() {
@@ -94,7 +89,7 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
         }
     }
 
-    private fun getNickname() {
+    fun getNickname() {
         viewModelScope.launch {
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             val nickname = userInfoRepository.getUserNameByUserId(uId)
