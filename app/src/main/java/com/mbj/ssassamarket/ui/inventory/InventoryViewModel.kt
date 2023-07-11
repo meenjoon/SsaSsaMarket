@@ -43,7 +43,7 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
                 product.favoriteList?.contains(uId) == true
             }?.map { (key, product) ->
                 key to product
-            } ?: emptyList()
+            }?.sortedByDescending { it.second.createdDate } ?: emptyList()
 
             if (favoriteProductList.isNotEmpty()) {
                 inventoryDataList.add(InventoryData.ProductType(InventoryType.FAVORITE))
@@ -61,7 +61,7 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
                 product.id == uId
             }?.map { (key, product) ->
                 key to product
-            } ?: emptyList()
+            }?.sortedByDescending { it.second.createdDate } ?: emptyList()
 
             if (registeredProductList.isNotEmpty()) {
                 inventoryDataList.add(InventoryData.ProductType(InventoryType.REGISTER_PRODUCT))
@@ -79,7 +79,7 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
                 product.shoppingList?.contains(uId) == true
             }?.map { (key, product) ->
                 key to product
-            } ?: emptyList()
+            }?.sortedByDescending { it.second.createdDate } ?: emptyList()
 
             if (purchasedProductList.isNotEmpty()) {
                 inventoryDataList.add(InventoryData.ProductType(InventoryType.SHOPPING_PRODUCT))
