@@ -23,7 +23,7 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
     private val _nickname = MutableLiveData<Event<String?>>()
     val nickname: LiveData<Event<String?>> get() = _nickname
 
-    private var productPostItemList : List<ProductPostItem>?= null
+    private var productPostItemList : List<Pair<String, ProductPostItem>>?= null
 
     init {
         viewModelScope.launch {
@@ -35,12 +35,18 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
         }
     }
 
+    private suspend fun initProductPostItemList() {
+        productPostItemList = productRepository.getProduct()
+    }
+
     private fun getMyFavoriteProduct() {
         viewModelScope.launch {
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             val inventoryDataList = mutableListOf<InventoryData>()
-            val favoriteProductList = productPostItemList?.filter { product ->
+            val favoriteProductList = productPostItemList?.filter { (_, product) ->
                 product.favoriteList?.contains(uId) == true
+            }?.map { (key, product) ->
+                key to product
             } ?: emptyList()
 
             if (favoriteProductList.isNotEmpty()) {
@@ -55,8 +61,10 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
         viewModelScope.launch {
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             val inventoryDataList = mutableListOf<InventoryData>()
-            val registeredProductList = productPostItemList?.filter { product ->
+            val registeredProductList = productPostItemList?.filter { (_, product) ->
                 product.id == uId
+            }?.map { (key, product) ->
+                key to product
             } ?: emptyList()
 
             if (registeredProductList.isNotEmpty()) {
@@ -71,8 +79,10 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
         viewModelScope.launch {
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             val inventoryDataList = mutableListOf<InventoryData>()
-            val purchasedProductList = productPostItemList?.filter { product ->
+            val purchasedProductList = productPostItemList?.filter { (_, product) ->
                 product.shoppingList?.contains(uId) == true
+            }?.map { (key, product) ->
+                key to product
             } ?: emptyList()
 
             if (purchasedProductList.isNotEmpty()) {
@@ -89,9 +99,5 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
             val nickname = userInfoRepository.getUserNameByUserId(uId)
             _nickname.value = Event(nickname)
         }
-    }
-
-    private suspend fun initProductPostItemList() {
-        productPostItemList = productRepository.getProduct().map { it.second }
     }
 }

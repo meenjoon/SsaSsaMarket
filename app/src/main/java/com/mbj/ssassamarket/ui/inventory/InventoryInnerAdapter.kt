@@ -11,7 +11,7 @@ import com.mbj.ssassamarket.ui.bindings.loadFirstImage
 import com.mbj.ssassamarket.ui.bindings.setFormattedElapsedTime
 
 class InventoryInnerAdapter :
-    ListAdapter<ProductPostItem, InventoryInnerAdapter.InventoryProductViewHolder>(
+    ListAdapter<Pair<String, ProductPostItem>, InventoryInnerAdapter.InventoryProductViewHolder>(
         InventoryProductDiffCallback()
     ) {
 
@@ -26,10 +26,10 @@ class InventoryInnerAdapter :
     class InventoryProductViewHolder(private val binding: RecyclerviewItemInventoryProductBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: ProductPostItem) {
-            binding.inventoryInnerProductIv.loadFirstImage(item.imageLocations)
-            binding.inventoryInnerProductTimeTv.setFormattedElapsedTime(item.createdDate)
-            binding.inventoryInnerProductTitleTv.text = item.title
+        fun bind(item: Pair<String, ProductPostItem>) {
+            binding.inventoryInnerProductIv.loadFirstImage(item.second.imageLocations)
+            binding.inventoryInnerProductTimeTv.setFormattedElapsedTime(item.second.createdDate)
+            binding.inventoryInnerProductTitleTv.text = item.second.title
         }
 
         companion object {
@@ -46,12 +46,12 @@ class InventoryInnerAdapter :
     }
 }
 
-class InventoryProductDiffCallback : DiffUtil.ItemCallback<ProductPostItem>() {
-    override fun areItemsTheSame(oldItem: ProductPostItem, newItem: ProductPostItem): Boolean {
-        return oldItem.imageLocations == newItem.imageLocations
+class InventoryProductDiffCallback : DiffUtil.ItemCallback<Pair<String, ProductPostItem>>() {
+    override fun areItemsTheSame(oldItem: Pair<String, ProductPostItem>, newItem: Pair<String, ProductPostItem>): Boolean {
+        return oldItem.second.imageLocations == newItem.second.imageLocations
     }
 
-    override fun areContentsTheSame(oldItem: ProductPostItem, newItem: ProductPostItem): Boolean {
+    override fun areContentsTheSame(oldItem: Pair<String, ProductPostItem>, newItem: Pair<String, ProductPostItem>): Boolean {
         return oldItem == newItem
     }
 }
