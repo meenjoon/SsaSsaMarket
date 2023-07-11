@@ -48,7 +48,6 @@ class InventoryOuterAdapter : RecyclerView.Adapter<ViewHolder>() {
     }
 
     fun submitList(list: List<InventoryData>) {
-        inventoryDataList.clear()
         inventoryDataList.addAll(list)
         notifyDataSetChanged()
     }
