@@ -61,10 +61,9 @@ class InventoryOuterAdapter : RecyclerView.Adapter<ViewHolder>() {
 
         companion object {
             fun from(parent: ViewGroup): InventoryTypeViewHolder {
-                val inflater = LayoutInflater.from(parent.context)
                 return InventoryTypeViewHolder(
                     RecyclerviewItemInventoryTypeBinding.inflate(
-                        inflater,
+                        LayoutInflater.from(parent.context),
                         parent,
                         false
                     )
@@ -87,10 +86,9 @@ class InventoryOuterAdapter : RecyclerView.Adapter<ViewHolder>() {
 
         companion object {
             fun from(parent: ViewGroup): InventoryProductListViewHolder {
-                val inflater = LayoutInflater.from(parent.context)
                 return InventoryProductListViewHolder(
                     RecyclerviewItemInventoryProductListBinding.inflate(
-                        inflater,
+                        LayoutInflater.from(parent.context),
                         parent,
                         false
                     )

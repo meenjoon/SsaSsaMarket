@@ -34,10 +34,9 @@ class InventoryInnerAdapter :
 
         companion object {
             fun from(parent: ViewGroup): InventoryProductViewHolder {
-                val inflater = LayoutInflater.from(parent.context)
                 return InventoryProductViewHolder(
                     RecyclerviewItemInventoryProductBinding.inflate(
-                        inflater,
+                        LayoutInflater.from(parent.context),
                         parent,
                         false
                     )
