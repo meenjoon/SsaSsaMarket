@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.mbj.ssassamarket.data.model.InventoryData
 import com.mbj.ssassamarket.data.model.InventoryType
 import com.mbj.ssassamarket.data.model.ProductPostItem
+import com.mbj.ssassamarket.data.model.UserType
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.util.Event
@@ -98,6 +99,16 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             val nickname = userInfoRepository.getUserNameByUserId(uId)
             _nickname.value = Event(nickname)
+        }
+    }
+
+    fun navigateBasedOnUserType(productIdToken: String, callback: (UserType) -> Unit) {
+        viewModelScope.launch {
+            val response = userInfoRepository.getUserAndIdToken()
+            val idToken = response.first?.uid
+            val userType = if (productIdToken == idToken) UserType.SELLER else UserType.BUYER
+
+            callback(userType)
         }
     }
 }

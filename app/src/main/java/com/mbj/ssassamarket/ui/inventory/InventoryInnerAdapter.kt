@@ -9,8 +9,9 @@ import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.databinding.RecyclerviewItemInventoryProductBinding
 import com.mbj.ssassamarket.ui.bindings.loadFirstImage
 import com.mbj.ssassamarket.ui.bindings.setFormattedElapsedTime
+import com.mbj.ssassamarket.ui.common.ProductClickListener
 
-class InventoryInnerAdapter :
+class InventoryInnerAdapter(val productClickListener: ProductClickListener) :
     ListAdapter<Pair<String, ProductPostItem>, InventoryInnerAdapter.InventoryProductViewHolder>(
         InventoryProductDiffCallback()
     ) {
@@ -20,16 +21,19 @@ class InventoryInnerAdapter :
     }
 
     override fun onBindViewHolder(holder: InventoryProductViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), productClickListener)
     }
 
     class InventoryProductViewHolder(private val binding: RecyclerviewItemInventoryProductBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: Pair<String, ProductPostItem>) {
-            binding.inventoryInnerProductIv.loadFirstImage(item.second.imageLocations)
-            binding.inventoryInnerProductTimeTv.setFormattedElapsedTime(item.second.createdDate)
-            binding.inventoryInnerProductTitleTv.text = item.second.title
+        fun bind(productItem: Pair<String, ProductPostItem>, productClickListener: ProductClickListener) {
+            binding.inventoryInnerProductIv.loadFirstImage(productItem.second.imageLocations)
+            binding.inventoryInnerProductTimeTv.setFormattedElapsedTime(productItem.second.createdDate)
+            binding.inventoryInnerProductTitleTv.text = productItem.second.title
+            binding.root.setOnClickListener {
+                productClickListener.onProductClick(productItem)
+            }
         }
 
         companion object {
