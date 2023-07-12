@@ -4,11 +4,12 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.ValueEventListener
 import com.mbj.ssassamarket.data.model.*
+import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
 
 interface MarketNetworkDataSource {
 
     suspend fun currentUserExists(): Boolean
-    suspend fun addUser(nickname: String): Boolean
+    suspend fun addUser(nickname: String): ApiResponse<Map<String, String>>
     suspend fun checkDuplicateUserName(nickname: String): Boolean
     suspend fun addProductPost(
         content: String,

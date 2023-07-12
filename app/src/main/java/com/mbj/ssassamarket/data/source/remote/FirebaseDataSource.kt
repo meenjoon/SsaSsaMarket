@@ -12,6 +12,8 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.data.model.*
+import com.mbj.ssassamarket.data.source.remote.network.ApiClient
+import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
 import com.mbj.ssassamarket.util.Constants.CHATS
 import com.mbj.ssassamarket.util.Constants.CHAT_ROOMS
 import com.mbj.ssassamarket.util.Constants.CHAT_ROOM_ID
@@ -60,23 +62,11 @@ class FirebaseDataSource @Inject constructor(
         return false
     }
 
-    override suspend fun addUser(nickname: String): Boolean {
+    override suspend fun addUser(nickname: String): ApiResponse<Map<String, String>> {
         val (user, idToken) = getUserAndIdToken()
+        val googleIdToken = idToken?: ""
         val userItem = User(user?.uid, nickname, null)
-        if (idToken != null) {
-            try {
-                val response = apiClient.addUser(user?.uid ?: "", userItem, idToken)
-                if (response.isSuccessful) {
-                    Log.d("postUser Success", "${response.body()}")
-                    return true
-                } else {
-                    Log.e("FirebaseDataSource", "postUser Error: ${response.code()}")
-                }
-            } catch (e: Exception) {
-                Log.e("FirebaseDataSource", "postUser Error: $e")
-            }
-        }
-        return false
+        return apiClient.addUser(user?.uid ?: "", userItem, googleIdToken)
     }
 
     override suspend fun checkDuplicateUserName(nickname: String): Boolean {

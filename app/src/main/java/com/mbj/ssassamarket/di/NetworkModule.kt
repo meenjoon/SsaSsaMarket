@@ -2,9 +2,10 @@ package com.mbj.ssassamarket.di
 
 import com.google.firebase.storage.FirebaseStorage
 import com.mbj.ssassamarket.BuildConfig
-import com.mbj.ssassamarket.data.source.remote.ApiClient
+import com.mbj.ssassamarket.data.source.remote.network.ApiClient
 import com.mbj.ssassamarket.data.source.remote.FirebaseDataSource
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
+import com.mbj.ssassamarket.data.source.remote.network.ApiCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -48,6 +49,7 @@ object NetworkModule {
             .baseUrl(BuildConfig.FIREBASE_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addCallAdapterFactory(ApiCallAdapterFactory.create())
             .build()
     }
 

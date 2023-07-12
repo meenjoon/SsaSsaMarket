@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.data.source
 
 import com.google.firebase.auth.FirebaseUser
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
+import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
 import javax.inject.Inject
 
 class UserInfoRepository @Inject constructor(private val marketNetworkDataSource: MarketNetworkDataSource) {
@@ -10,7 +11,7 @@ class UserInfoRepository @Inject constructor(private val marketNetworkDataSource
         return marketNetworkDataSource.currentUserExists()
     }
 
-    suspend fun addUser(nickname: String): Boolean {
+    suspend fun addUser(nickname: String): ApiResponse<Map<String, String>> {
         return marketNetworkDataSource.addUser(nickname)
     }
 

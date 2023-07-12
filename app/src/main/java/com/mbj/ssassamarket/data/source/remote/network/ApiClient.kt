@@ -1,4 +1,4 @@
-package com.mbj.ssassamarket.data.source.remote
+package com.mbj.ssassamarket.data.source.remote.network
 
 import com.mbj.ssassamarket.data.model.*
 import retrofit2.Response
@@ -11,7 +11,7 @@ interface ApiClient {
         @Path("uId") uId: String,
         @Body user: User,
         @Query("auth") auth: String
-    ): Response<Map<String, String>>
+    ): ApiResponse<Map<String, String>>
 
     @GET("user.json")
     suspend fun getUser(

@@ -9,6 +9,7 @@ import androidx.navigation.fragment.findNavController
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentSettingNicknameBinding
 import com.mbj.ssassamarket.ui.BaseFragment
+import com.mbj.ssassamarket.util.Constants
 import com.mbj.ssassamarket.util.Constants.NICKNAME_DUPLICATE
 import com.mbj.ssassamarket.util.Constants.NICKNAME_ERROR
 import com.mbj.ssassamarket.util.Constants.NICKNAME_REQUEST
@@ -29,13 +30,11 @@ class SettingNicknameFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
-        viewModel.addUserResult.observe(viewLifecycleOwner) { addUserResult ->
-            viewModel.handlePostResponse(addUserResult)
-        }
+
         viewModel.nickname.observe(viewLifecycleOwner) { nickname ->
             viewModel.validateNickname()
         }
-        viewModel.nicknameErrorMessage.observe(viewLifecycleOwner) { nicknameErrorMessage ->
+        viewModel.nicknameErrorMessage.observe(viewLifecycleOwner, EventObserver { nicknameErrorMessage ->
             when (nicknameErrorMessage) {
                 NICKNAME_REQUEST -> {
                     setButtonBackground(R.color.orange_100)
@@ -52,22 +51,25 @@ class SettingNicknameFragment : BaseFragment() {
                     binding.settingNicknameTil.error = null
                 }
             }
-        }
-        viewModel.preUploadCompleted.observe(viewLifecycleOwner) { preUploadCompleted ->
-            if (preUploadCompleted == false) {
-                if (loadingProgressDialog == null) {
-                    loadingProgressDialog = ProgressDialogFragment()
-                    loadingProgressDialog?.show(childFragmentManager, "progress_dialog")
-                }
-            } else {
-                loadingProgressDialog?.dismissAllowingStateLoss()
-                loadingProgressDialog = null
-            }
-        }
+        })
 
-        viewModel.uploadSuccess.observe(viewLifecycleOwner, EventObserver { uploadSuccess ->
-            if (uploadSuccess) {
+        viewModel.isLoading.observe(viewLifecycleOwner, EventObserver{ isLoading ->
+            if (isLoading) {
+                showLoadingDialog()
+            }
+        })
+
+        viewModel.isCompleted.observe(viewLifecycleOwner, EventObserver { isCompleted ->
+            if (isCompleted) {
+                hideLoadingDialog()
                 navigateToHomeFragment()
+                showToast(R.string.setting_nickname_success)
+            }
+        })
+
+        viewModel.isError.observe(viewLifecycleOwner, EventObserver { isCompleted ->
+            if (isCompleted) {
+                showToast(R.string.error_message_retry)
             }
         })
 
@@ -93,5 +95,15 @@ class SettingNicknameFragment : BaseFragment() {
 
     private fun showToast(messageResId: Int) {
         Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showLoadingDialog() {
+        loadingProgressDialog = ProgressDialogFragment()
+        loadingProgressDialog?.show(childFragmentManager, Constants.PROGRESS_DIALOG)
+    }
+
+    private fun hideLoadingDialog() {
+        loadingProgressDialog?.dismiss()
+        loadingProgressDialog = null
     }
 }
