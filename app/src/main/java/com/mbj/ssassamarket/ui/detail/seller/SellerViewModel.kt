@@ -7,8 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.mbj.ssassamarket.data.model.EditMode
 import com.mbj.ssassamarket.data.model.PatchProductRequest
 import com.mbj.ssassamarket.data.model.ProductPostItem
+import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.remote.network.onError
+import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -26,21 +29,20 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
     private val _nickname = MutableLiveData<Event<String?>>()
     val nickname: LiveData<Event<String?>> get() = _nickname
 
-    private val _productNicknameCompleted = MutableLiveData<Event<Boolean>>(Event(false))
-    val productNicknameCompleted: LiveData<Event<Boolean>> get() = _productNicknameCompleted
+    private val _productUpdateLoading = MutableLiveData(Event(false))
+    val productUpdateLoading: LiveData<Event<Boolean>> = _productUpdateLoading
 
-    private val _productNicknameSuccess = MutableLiveData<Event<Boolean>>()
-    val productNicknameSuccess: LiveData<Event<Boolean>> get() = _productNicknameSuccess
+    private val _productUpdateCompleted = MutableLiveData(Event(false))
+    val productUpdateCompleted: LiveData<Event<Boolean>> = _productUpdateCompleted
 
-    private val _productUpdateCompleted = MutableLiveData<Event<Boolean>>()
-    val productUpdateCompleted: LiveData<Event<Boolean>> get() = _productUpdateCompleted
+    private val _productUpdateError = MutableLiveData(Event(false))
+    val productUpdateError: LiveData<Event<Boolean>> = _productUpdateError
 
-    private val _productUpdatedSuccess = MutableLiveData<Event<Boolean>>()
-    val productUpdatedSuccess: LiveData<Event<Boolean>> get() = _productUpdatedSuccess
+    private val _nicknameError = MutableLiveData<Event<Boolean>>()
+    val nicknameError: LiveData<Event<Boolean>> get() = _nicknameError
 
-    private val _productUpdatedResponse = MutableLiveData<Event<Boolean>>()
-    val productUpdatedResponse: LiveData<Event<Boolean>>
-        get() = _productUpdatedResponse
+    private val _nicknameLoading = MutableLiveData<Event<Boolean>>()
+    val nicknameLoading: LiveData<Event<Boolean>> get() = _nicknameLoading
 
     private var originalProduct: ProductPostItem? = null
     private var postId: String? = null
@@ -69,18 +71,20 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
 
     fun getProductNickname() {
         viewModelScope.launch {
+            _nicknameLoading.value = Event(true)
             val productUid = product.value?.peekContent()?.id
             if (productUid != null) {
-                val nickname = userInfoRepository.getUserNameByUserId(productUid)
-                _nickname.value = Event(nickname)
+                val result = userInfoRepository.getUser()
+                result.onSuccess { users ->
+                    val nickname = findNicknameByUserId(users, productUid)
+                    _nicknameLoading.value = Event(false)
+                    _nickname.value = Event(nickname)
+                }.onError { code, message ->
+                    _nicknameLoading.value = Event(false)
+                    _nicknameError.value = Event(true)
+                }
             }
-            _productNicknameCompleted.value = Event(true)
         }
-    }
-
-    fun handleNicknameResponse(nickName: String?) {
-        val isSuccess = nickName != null
-        _productNicknameSuccess.value = Event(isSuccess)
     }
 
     fun toggleEditMode() {
@@ -155,20 +159,25 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
             val patchRequest = PatchProductRequest(updatedTitle, updatedPrice, updatedContent)
 
             viewModelScope.launch {
-                _productUpdateCompleted.value = Event(false)
+                _productUpdateLoading.value = Event(true)
                 if (postId != null) {
-                    _productUpdatedResponse.value = Event(productRepository.updateProduct(postId!!, patchRequest))
+                    val result = productRepository.updateProduct(postId!!, patchRequest)
+                    result.onSuccess {
+                        _productUpdateLoading.value = Event(false)
+                        _productUpdateCompleted.value = Event(true)
+                    }.onError { code, message ->
+                        _productUpdateLoading.value = Event(false)
+                        _productUpdateError.value = Event(true)
+                    }
                 }
             }
         }
     }
 
-    fun handleUpdateResponse(response: Boolean) {
-        if (response) {
-            _productUpdatedSuccess.value = Event(true)
-        } else {
-            _productUpdatedSuccess.value = Event(true)
+    private fun findNicknameByUserId(users: Map<String, Map<String, User>>, userId: String): String? {
+        val matchingUser = users.values.flatMap { it.values }.find { userInfo ->
+            userInfo.userId == userId
         }
-        _productUpdateCompleted.value = Event(true)
+        return matchingUser?.userName
     }
 }

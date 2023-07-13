@@ -4,12 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mbj.ssassamarket.data.model.InventoryData
-import com.mbj.ssassamarket.data.model.InventoryType
-import com.mbj.ssassamarket.data.model.ProductPostItem
-import com.mbj.ssassamarket.data.model.UserType
+import com.mbj.ssassamarket.data.model.*
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.remote.network.onError
+import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -21,14 +20,32 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
     private val _inventoryDataList = MutableLiveData<Event<List<InventoryData>>>()
     val inventoryDataList: LiveData<Event<List<InventoryData>>> get() = _inventoryDataList
 
+    private val _isLoading = MutableLiveData(Event(false))
+    val isLoading: LiveData<Event<Boolean>> = _isLoading
+
     private val _nickname = MutableLiveData<Event<String?>>()
     val nickname: LiveData<Event<String?>> get() = _nickname
 
-    private var productPostItemList : List<Pair<String, ProductPostItem>>?= null
+    private val _nicknameError = MutableLiveData<Event<Boolean>>()
+    val nicknameError: LiveData<Event<Boolean>> get() = _nicknameError
+
+    private val _productError = MutableLiveData<Event<Boolean>>()
+    val productError: LiveData<Event<Boolean>> get() = _productError
+
+    private var productPostItemList: List<Pair<String, ProductPostItem>>? = null
 
     fun initProductPostItemList() {
         viewModelScope.launch {
-            productPostItemList = productRepository.getProduct()
+            _isLoading.value = Event(true)
+            val result = productRepository.getProduct()
+            result.onSuccess { productMap ->
+                val updateProduct = updateProductsWithImageUrls(productMap)
+                productPostItemList = updateProduct
+                _isLoading.value = Event(false)
+            }.onError { code, message ->
+                _isLoading.value = Event(false)
+                _productError.value = Event(true)
+            }
             getMyFavoriteProduct()
             getMyRegisteredProduct()
             getMyPurchasedProduct()
@@ -92,8 +109,13 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
     fun getNickname() {
         viewModelScope.launch {
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
-            val nickname = userInfoRepository.getUserNameByUserId(uId)
-            _nickname.value = Event(nickname)
+            val result = userInfoRepository.getUser()
+            result.onSuccess { users ->
+                val nickname = findNicknameByUserId(users, uId)
+                _nickname.value = Event(nickname)
+            }.onError { code, message ->
+                _nicknameError.value = Event(true)
+            }
         }
     }
 
@@ -105,5 +127,29 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
 
             callback(userType)
         }
+    }
+
+    private fun findNicknameByUserId(
+        users: Map<String, Map<String, User>>,
+        userId: String
+    ): String? {
+        val matchingUser = users.values.flatMap { it.values }.find { userInfo ->
+            userInfo.userId == userId
+        }
+        return matchingUser?.userName
+    }
+
+    private suspend fun updateProductsWithImageUrls(productMap: Map<String, ProductPostItem>): List<Pair<String, ProductPostItem>> {
+        val updatedList = mutableListOf<Pair<String, ProductPostItem>>()
+        for ((key, product) in productMap) {
+            val updatedImageLocations = product.imageLocations?.mapNotNull { imageLocation ->
+                imageLocation?.let { productRepository.getDownloadUrl(it) }
+            }
+            if (updatedImageLocations != null) {
+                val updatedProduct = product.copy(imageLocations = updatedImageLocations)
+                updatedList.add(key to updatedProduct)
+            }
+        }
+        return updatedList
     }
 }

@@ -8,9 +8,6 @@ import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
 
 interface MarketNetworkDataSource {
 
-    suspend fun currentUserExists(): Boolean
-    suspend fun addUser(nickname: String): ApiResponse<Map<String, String>>
-    suspend fun checkDuplicateUserName(nickname: String): Boolean
     suspend fun addProductPost(
         content: String,
         imageLocations: List<ImageContent>,
@@ -23,23 +20,25 @@ interface MarketNetworkDataSource {
         location: String,
         latLng: String,
         favoriteList: List<String?>
-    ): Boolean
-    suspend fun getMyDataId(): String?
-    suspend fun updateMyLatLng(latLng: String): Boolean
-    suspend fun getProduct(): List<Pair<String, ProductPostItem>>
-    suspend fun getProductDetail(postId: String): ProductPostItem?
-    suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?>
-    suspend fun getUserNameByUserId(uId: String): String?
-    suspend fun updateProduct(postId: String, request: PatchProductRequest): Boolean
-    suspend fun updateProductFavorite(postId: String, request: FavoriteCountRequest): Boolean
-    suspend fun buyProduct(postId: String, request: PatchBuyRequest)
-    suspend fun enterChatRoom(productId: String, otherUserName: String, otherLocation: String): String
-    suspend fun getMyUserItem(callback: (User) -> Unit)
-    suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, myUserName: String, myLocation: String, lastSentTime: String, myLatLng: String)
-    suspend fun getOtherUserItem(userId: String, callback: (User) -> Unit)
-    suspend fun getChatRooms(callback: (List<ChatRoomItem>) -> Unit)
+    ): ApiResponse<Map<String, String>>
+    suspend fun getUser(): ApiResponse<Map<String, Map<String, User>>>
+    suspend fun addUser(nickname: String): ApiResponse<Map<String, String>>
+    suspend fun updateMyLatLng(dataId: String, latLng: PatchUserLatLng): ApiResponse<Unit>
+    suspend fun getProduct(): ApiResponse<Map<String, ProductPostItem>>
+    suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem>
+    suspend fun getUserNameByUserId(): ApiResponse<Map<String, Map<String, User>>>
+    suspend fun updateProduct(postId: String, request: PatchProductRequest): ApiResponse<Unit>
+    suspend fun updateProductFavorite(postId: String, request: FavoriteCountRequest): ApiResponse<Unit>
+    suspend fun buyProduct(postId: String, request: PatchBuyRequest): ApiResponse<Unit>
+    suspend fun enterChatRoom(productId: String, otherUserName: String, otherLocation: String): ApiResponse<String>
+    suspend fun getMyUserItem() : ApiResponse<User>
+    suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, myUserName: String, myLocation: String, lastSentTime: String, myLatLng: String, dataId: String): ApiResponse<Unit>
+    suspend fun getOtherUserItem(userId: String): ApiResponse<User>
+    suspend fun getChatRooms(): ApiResponse<List<ChatRoomItem>>
     fun addChatDetailEventListener(chatRoomId: String, onChatItemAdded: (ChatItem) -> Unit): ChildEventListener
     fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String)
     suspend fun addChatRoomsValueEventListener(callback: (List<ChatRoomItem>) -> Unit): ValueEventListener
     suspend fun removeChatRoomsValueEventListener(valueEventListener: ValueEventListener?)
+    suspend fun getDownloadUrl(imageLocation: String): String
+    suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?>
 }

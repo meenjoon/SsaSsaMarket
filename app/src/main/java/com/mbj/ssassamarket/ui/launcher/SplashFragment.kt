@@ -10,6 +10,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentSplashFragementBinding
 import com.mbj.ssassamarket.ui.BaseFragment
+import com.mbj.ssassamarket.util.EventObserver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -26,16 +27,8 @@ class SplashFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel.checkCurrentUserExists()
 
-        viewModel.getUserResult.observe(viewLifecycleOwner) { currentUserExists ->
-            lifecycleScope.launch {
-                delay(2000)
-                navigateBasedOnUserState(
-                    viewModel.autoLoginState,
-                    currentUserExists,
-                    viewModel.currentUser
-                )
-            }
-        }
+        observeAccountExists()
+        observeError()
     }
 
     private fun navigateBasedOnUserState(
@@ -54,6 +47,27 @@ class SplashFragment : BaseFragment() {
             SplashFragmentDirections.actionSplashFragmentToLogInFragment()
         }
         findNavController().navigate(action)
+    }
+
+    private fun observeAccountExists() {
+        viewModel.isAccountExistsOnServer.observe(viewLifecycleOwner, EventObserver { isAccountExistsOnServer ->
+            lifecycleScope.launch {
+                delay(2000)
+                navigateBasedOnUserState(
+                    viewModel.autoLoginState,
+                    isAccountExistsOnServer,
+                    viewModel.currentUser
+                )
+            }
+        })
+    }
+
+    private fun observeError() {
+        viewModel.isError.observe(viewLifecycleOwner, EventObserver { isError ->
+            if (isError) {
+                showToast(R.string.error_message_retry)
+            }
+        })
     }
 
     private fun showToast(messageResId: Int) {

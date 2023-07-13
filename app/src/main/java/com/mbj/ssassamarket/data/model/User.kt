@@ -12,3 +12,8 @@ data class User(
     @Json(name = "latLng")
     val latLng: String? = null
 )
+
+data class PatchUserLatLng(
+    @Json(name = "latLng")
+    val latLng: String? = null
+)

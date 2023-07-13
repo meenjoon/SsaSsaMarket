@@ -9,8 +9,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.OpenableColumns
-import android.util.Log
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
@@ -25,7 +23,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.ImageContent
 import com.mbj.ssassamarket.databinding.FragmentWritingBinding
@@ -39,7 +36,6 @@ import com.mbj.ssassamarket.util.LocationManager
 import com.mbj.ssassamarket.util.ProgressDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import net.daum.mf.map.api.MapPoint
-import net.daum.mf.map.api.MapReverseGeoCoder
 
 @AndroidEntryPoint
 class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
@@ -168,15 +164,18 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
+        viewModel.getMyDataId()
         setupCategorySpinner()
         setupAdapters()
         setupRecyclerView()
         observeSelectedImageContent()
         handleBackButtonClick()
-        observeProductUploadResponse()
-        observeProductUploadSuccess()
         observeToastMessage()
-        observeProductUploadCompleted()
+        observeMyDataIdError()
+        observeUpdateMyLatLngError()
+        observePostError()
+        observeLoading()
+        observeCompleted()
     }
 
     override fun onResume() {
@@ -213,13 +212,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     private fun handleBackButtonClick() {
         binding.writingBackIv.setOnClickListener {
             findNavController().navigateUp()
-        }
-    }
-
-    private fun observeSelectedImageContent() {
-        viewModel.selectedImageList.observe(viewLifecycleOwner) { imageList ->
-            attachedImageAdapter.submitList(imageList)
-            galleryAdapter.updateSelectedImageContentSize(imageList.size)
         }
     }
 
@@ -401,15 +393,50 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         progressDialog = null
     }
 
-    private fun observeProductUploadResponse() {
-        viewModel.productUploadResponse.observe(viewLifecycleOwner) { response ->
-            viewModel.handlePostResponse(response)
+    private fun observeSelectedImageContent() {
+        viewModel.selectedImageList.observe(viewLifecycleOwner) { imageList ->
+            attachedImageAdapter.submitList(imageList)
+            galleryAdapter.updateSelectedImageContentSize(imageList.size)
         }
     }
 
-    private fun observeProductUploadSuccess() {
-        viewModel.productUploadSuccess.observe(viewLifecycleOwner, EventObserver { uploadSuccess ->
-            if (uploadSuccess) {
+    private fun observeMyDataIdError() {
+        viewModel.myDataIdError.observe(viewLifecycleOwner, EventObserver { myDataIdError ->
+            if (myDataIdError) {
+                showToast(R.string.error_message_retry)
+            }
+        })
+    }
+
+    private fun observeUpdateMyLatLngError() {
+        viewModel.updateMyLatLngError.observe(viewLifecycleOwner, EventObserver { updateMyLatLngError ->
+            if (updateMyLatLngError) {
+                showToast(R.string.error_message_retry)
+            }
+        })
+    }
+
+    private fun observePostError() {
+        viewModel.isPostError.observe(viewLifecycleOwner, EventObserver { isPostError ->
+            if (isPostError) {
+                showToast(R.string.error_message_retry)
+            }
+        })
+    }
+
+    private fun observeLoading() {
+        viewModel.isLoading.observe(viewLifecycleOwner, EventObserver { isLoading ->
+            if (isLoading) {
+                showLoadingDialog()
+            } else {
+                hideLoadingDialog()
+            }
+        })
+    }
+
+    private fun observeCompleted() {
+        viewModel.isCompleted.observe(viewLifecycleOwner, EventObserver { isCompleted ->
+            if (isCompleted) {
                 findNavController().navigateUp()
             }
         })
@@ -419,13 +446,5 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         viewModel.toastMessage.observe(viewLifecycleOwner, EventObserver { message ->
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
         })
-    }
-
-    private fun observeProductUploadCompleted() {
-        viewModel.productUploadCompleted.observe(viewLifecycleOwner) { productUploadCompleted ->
-            if (!productUploadCompleted) {
-                showLoadingDialog()
-            }
-        }
     }
 }

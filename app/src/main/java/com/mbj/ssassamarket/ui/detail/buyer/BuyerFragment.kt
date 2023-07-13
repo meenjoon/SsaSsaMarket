@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
@@ -59,6 +60,11 @@ class BuyerFragment : BaseFragment() {
         binding.viewModel = viewModel
         setupViewModel()
         setupViews()
+        viewModel.nicknameError.observe(viewLifecycleOwner, EventObserver{ nicknameError ->
+            if (nicknameError) {
+                showToast(R.string.error_message_retry)
+            }
+        })
     }
 
     private fun setupViewModel() {
@@ -67,23 +73,11 @@ class BuyerFragment : BaseFragment() {
         viewModel.getProductNickname()
         viewModel.checkProductInFavorites()
 
-        viewModel.chatRoomId.observe(viewLifecycleOwner, EventObserver { chatRoomId ->
-            viewModel.otherUserId.value?.let { otherUserId ->
-                navigateToChatDetailFragment(chatRoomId, otherUserId.peekContent())
-            }
-        })
-
-        viewModel.isLiked.observe(viewLifecycleOwner, EventObserver { isLinked ->
-            viewModel.handleFavoriteResponse()
-        })
-
-        viewModel.productFavoriteCompleted.observe(viewLifecycleOwner, EventObserver { completed ->
-            if (completed) {
-                hideLoadingDialog()
-            } else {
-                showLoadingDialog()
-            }
-        })
+        observeChatRoomId()
+        observeLoading()
+        observeLikedError()
+        observeEnterChatRoomError()
+        observeBuyError()
     }
 
     private fun setupViews() {
@@ -174,6 +168,48 @@ class BuyerFragment : BaseFragment() {
         }
     }
 
+    private fun observeChatRoomId() {
+        viewModel.chatRoomId.observe(viewLifecycleOwner, EventObserver { chatRoomId ->
+            viewModel.otherUserId.value?.let { otherUserId ->
+                navigateToChatDetailFragment(chatRoomId, otherUserId.peekContent())
+            }
+        })
+    }
+
+    private fun observeLoading() {
+        viewModel.isLoading.observe(viewLifecycleOwner, EventObserver { isLoading ->
+            if (isLoading) {
+                showLoadingDialog()
+            } else {
+                hideLoadingDialog()
+            }
+        })
+    }
+
+    private fun observeLikedError() {
+        viewModel.likedError.observe(viewLifecycleOwner, EventObserver { likedError ->
+            if (likedError) {
+                showToast(R.string.error_message_favorite)
+            }
+        })
+    }
+
+    private fun observeEnterChatRoomError() {
+        viewModel.enterChatRoomError.observe(viewLifecycleOwner, EventObserver { enterChatRoomError ->
+            if (enterChatRoomError) {
+                showToast(R.string.error_message_enter_chat)
+            }
+        })
+    }
+
+    private fun observeBuyError() {
+        viewModel.buyError.observe(viewLifecycleOwner, EventObserver { buyError ->
+            if (buyError) {
+                showToast(R.string.error_message_buy)
+            }
+        })
+    }
+
     private fun showLoadingDialog() {
         progressDialog = ProgressDialogFragment()
         progressDialog?.show(childFragmentManager, Constants.PROGRESS_DIALOG)
@@ -194,5 +230,9 @@ class BuyerFragment : BaseFragment() {
 
     private fun navigateUp() {
         findNavController().navigateUp()
+    }
+
+    private fun showToast(messageResId: Int) {
+        Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
     }
 }

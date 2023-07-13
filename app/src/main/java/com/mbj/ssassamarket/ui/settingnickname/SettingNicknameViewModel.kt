@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import com.mbj.ssassamarket.data.source.remote.network.onError
 import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.Constants
@@ -41,12 +42,11 @@ class SettingNicknameViewModel @Inject constructor(private val repository: UserI
 
     fun addUser() {
         viewModelScope.launch {
-
             if (nickname.value.isNullOrEmpty()) {
                 _responseToastMessage.value = Event(NICKNAME_REQUEST)
             } else if (!validateNickname()) {
                 _responseToastMessage.value = Event(NICKNAME_ERROR)
-            } else if (repository.checkDuplicateUserName(nickname.value.toString())) {
+            } else if (isNicknameDuplicate()) {
                 _responseToastMessage.value = Event(NICKNAME_DUPLICATE)
             } else {
                 _isLoading.value = Event(true)
@@ -78,6 +78,19 @@ class SettingNicknameViewModel @Inject constructor(private val repository: UserI
                 _nicknameErrorMessage.value = Event(NICKNAME_VALID)
                 true
             }
+        }
+    }
+
+    private suspend fun isNicknameDuplicate(): Boolean {
+        val result = repository.getUser()
+        return when (result) {
+            is ApiResultSuccess -> {
+                val users = result.data
+                users.values.flatMap { it.values }.any { userInfo ->
+                    userInfo.userName == nickname.value.toString()
+                }
+            }
+            else -> false
         }
     }
 }

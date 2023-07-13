@@ -6,28 +6,51 @@ import com.mbj.ssassamarket.data.model.ChatItem
 import com.mbj.ssassamarket.data.model.ChatRoomItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
+import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
 import javax.inject.Inject
 
 class ChatRepository @Inject constructor(private val marketNetworkDataSource: MarketNetworkDataSource) {
 
-    suspend fun enterChatRoom(productId: String, otherUserName: String, otherLocation: String): String {
+    suspend fun enterChatRoom(
+        productId: String,
+        otherUserName: String,
+        otherLocation: String
+    ): ApiResponse<String> {
         return marketNetworkDataSource.enterChatRoom(productId, otherUserName, otherLocation)
     }
 
-    suspend fun getMyUserItem(callback: (User) -> Unit) {
-        marketNetworkDataSource.getMyUserItem(callback)
+    suspend fun getMyUserItem(): ApiResponse<User> {
+        return marketNetworkDataSource.getMyUserItem()
     }
 
-    suspend fun getOtherUserItem(userId: String, callback: (User) -> Unit) {
-        marketNetworkDataSource.getOtherUserItem(userId, callback)
+    suspend fun getOtherUserItem(userId: String): ApiResponse<User> {
+        return marketNetworkDataSource.getOtherUserItem(userId)
     }
 
-    suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, myUserName: String, myLocation: String, lastSentTime: String, myLatLng: String) {
-        marketNetworkDataSource.sendMessage(chatRoomId, otherUserId, message, myUserName, myLocation, lastSentTime, myLatLng)
+    suspend fun sendMessage(
+        chatRoomId: String,
+        otherUserId: String,
+        message: String,
+        myUserName: String,
+        myLocation: String,
+        lastSentTime: String,
+        myLatLng: String,
+        dataId: String
+    ): ApiResponse<Unit> {
+        return marketNetworkDataSource.sendMessage(
+            chatRoomId,
+            otherUserId,
+            message,
+            myUserName,
+            myLocation,
+            lastSentTime,
+            myLatLng,
+            dataId
+        )
     }
 
-    suspend fun getChatRooms(callback: (List<ChatRoomItem>) -> Unit) {
-        marketNetworkDataSource.getChatRooms(callback)
+    suspend fun getChatRooms(): ApiResponse<List<ChatRoomItem>> {
+        return marketNetworkDataSource.getChatRooms()
     }
 
     fun addChatDetailEventListener(
@@ -37,12 +60,15 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         return marketNetworkDataSource.addChatDetailEventListener(chatRoomId, onChatItemAdded)
     }
 
-    fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String) {
+    fun removeChatDetailEventListener(
+        chatDetailEventListener: ChildEventListener?,
+        chatRoomId: String
+    ) {
         marketNetworkDataSource.removeChatDetailEventListener(chatDetailEventListener, chatRoomId)
     }
 
     suspend fun addChatRoomsValueEventListener(callback: (List<ChatRoomItem>) -> Unit): ValueEventListener {
-         return marketNetworkDataSource.addChatRoomsValueEventListener(callback)
+        return marketNetworkDataSource.addChatRoomsValueEventListener(callback)
     }
 
     suspend fun removeChatRoomsValueEventListener(valueEventListener: ValueEventListener) {

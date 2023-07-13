@@ -4,8 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.UserPreferenceRepository
+import com.mbj.ssassamarket.data.source.remote.network.onError
+import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -16,31 +19,32 @@ class LogInViewModel @Inject constructor(private val userInfoRepository: UserInf
 
     var autoLoginEnabled = MutableLiveData<Boolean>(userPreferenceRepository.getSaveAutoLoginState())
 
-    private val _preUploadCompleted = MutableLiveData<Boolean>()
-    val preUploadCompleted: LiveData<Boolean>
-        get() = _preUploadCompleted
+    private val _isLoading = MutableLiveData(Event(false))
+    val isLoading: LiveData<Event<Boolean>> get() =  _isLoading
 
-    private val _addUserResult = MutableLiveData<Boolean>()
-    val addUserResult: LiveData<Boolean>
-        get() = _addUserResult
+    private val _isAccountExistsOnServer = MutableLiveData<Event<Boolean>>()
+    val isAccountExistsOnServer: LiveData<Event<Boolean>> get() = _isAccountExistsOnServer
 
-    private val _uploadSuccess = MutableLiveData<Event<Boolean>>()
-    val uploadSuccess: LiveData<Event<Boolean>>
-        get() = _uploadSuccess
+    private val _isError = MutableLiveData(Event(false))
+    val isError: LiveData<Event<Boolean>> get() =  _isError
 
     fun currentUserExists() {
         viewModelScope.launch {
-            _preUploadCompleted.value = false
-            _addUserResult.value = userInfoRepository.currentUserExists()
+            _isLoading.value = Event(true)
+            val result = userInfoRepository.getUser()
+            result.onSuccess { userMap ->
+                _isLoading.value = Event(false)
+                val isExists = isAccountExistsOnServer(userMap)
+                _isAccountExistsOnServer.value = Event(isExists)
+            }.onError { code, message ->
+                _isLoading.value = Event(false)
+                _isError.value = Event(true)
+            }
         }
     }
 
-    fun handleGetResponse(responseBoolean: Boolean) {
-        if (responseBoolean) {
-            _uploadSuccess.value = Event(true)
-        } else {
-            _uploadSuccess.value = Event(false)
-        }
-        _preUploadCompleted.value = true
+    private suspend fun isAccountExistsOnServer(userMap: Map<String, Map<String, User>>): Boolean {
+        val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
+        return userMap.containsKey(uId)
     }
 }

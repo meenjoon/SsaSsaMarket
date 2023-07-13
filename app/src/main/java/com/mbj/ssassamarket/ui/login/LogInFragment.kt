@@ -24,7 +24,7 @@ import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentLogInBinding
 import com.mbj.ssassamarket.ui.BaseFragment
-import com.mbj.ssassamarket.util.Constants.PROGRESS_DIALOG
+import com.mbj.ssassamarket.util.Constants
 import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.ProgressDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,6 +37,7 @@ class LogInFragment : BaseFragment() {
 
     private lateinit var oneTapClient: SignInClient
     private lateinit var auth: FirebaseAuth
+    private var loadingProgressDialog: ProgressDialogFragment? = null
 
     private lateinit var googleOneTapSignInLauncher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var googleSignInLauncherIdentity: ActivityResultLauncher<IntentSenderRequest>
@@ -55,28 +56,9 @@ class LogInFragment : BaseFragment() {
             signInWithGoogleOneTap()
         }
         observeAutoLoginEnabled()
-        viewModel.preUploadCompleted.observe(viewLifecycleOwner) { preUploadCompleted ->
-            if (preUploadCompleted == false) {
-                ProgressDialogFragment().show(childFragmentManager, PROGRESS_DIALOG)
-            }
-        }
-        viewModel.uploadSuccess.observe(viewLifecycleOwner, EventObserver { uploadSuccess ->
-            if (uploadSuccess) {
-                showToast(R.string.setting_nickname_success)
-                navigateToHomeFragment()
-            } else {
-                navigateToSettingNicknameFragment()
-            }
-        })
-        viewModel.addUserResult.observe(viewLifecycleOwner) { addUserResult ->
-            viewModel.handleGetResponse(addUserResult)
-        }
-    }
-
-    private fun observeAutoLoginEnabled() {
-        viewModel.autoLoginEnabled.observe(viewLifecycleOwner) { isChecked ->
-            viewModel.userPreferenceRepository.saveAutoLoginState(isChecked)
-        }
+        observeAccountExistsOnServer()
+        observeLoading()
+        observeError()
     }
 
     private fun initializeSignInClients() {
@@ -205,6 +187,42 @@ class LogInFragment : BaseFragment() {
             }
     }
 
+    private fun observeAutoLoginEnabled() {
+        viewModel.autoLoginEnabled.observe(viewLifecycleOwner) { isChecked ->
+            viewModel.userPreferenceRepository.saveAutoLoginState(isChecked)
+        }
+    }
+
+    private fun observeAccountExistsOnServer() {
+        viewModel.isAccountExistsOnServer.observe(viewLifecycleOwner, EventObserver { isAccountExistsOnServer ->
+            if (isAccountExistsOnServer) {
+                hideLoadingDialog()
+                showToast(R.string.setting_nickname_success)
+                navigateToHomeFragment()
+            } else {
+                hideLoadingDialog()
+                navigateToSettingNicknameFragment()
+            }
+        })
+    }
+
+    private fun observeLoading() {
+        viewModel.isLoading.observe(viewLifecycleOwner, EventObserver { isLoading ->
+            if (isLoading) {
+                showLoadingDialog()
+            }
+        })
+    }
+
+    private fun observeError() {
+        viewModel.isError.observe(viewLifecycleOwner, EventObserver { isError ->
+            if (isError) {
+                showToast(R.string.error_message_retry)
+            }
+        })
+    }
+
+
     private fun navigateToSettingNicknameFragment() {
         val action = LogInFragmentDirections.actionLogInFragmentToSettingNicknameFragment()
         findNavController().navigate(action)
@@ -217,6 +235,16 @@ class LogInFragment : BaseFragment() {
 
     private fun showToast(messageResId: Int) {
         Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showLoadingDialog() {
+        loadingProgressDialog = ProgressDialogFragment()
+        loadingProgressDialog?.show(childFragmentManager, Constants.PROGRESS_DIALOG)
+    }
+
+    private fun hideLoadingDialog() {
+        loadingProgressDialog?.dismiss()
+        loadingProgressDialog = null
     }
 
     companion object {
