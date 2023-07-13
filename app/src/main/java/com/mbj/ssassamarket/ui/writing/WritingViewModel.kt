@@ -12,6 +12,7 @@ import com.mbj.ssassamarket.util.CategoryFormat.getCategoryLabelFromInput
 import com.mbj.ssassamarket.util.Constants.CATEGORY_REQUEST
 import com.mbj.ssassamarket.util.Constants.WRITING_POST_REQUEST_ALL
 import com.mbj.ssassamarket.util.Constants.WRITING_POST_REQUEST_CONTENT
+import com.mbj.ssassamarket.util.Constants.WRITING_POST_REQUEST_IMAGE
 import com.mbj.ssassamarket.util.Constants.WRITING_POST_REQUEST_PRICE
 import com.mbj.ssassamarket.util.Constants.WRITING_POST_REQUEST_TITLE
 import com.mbj.ssassamarket.util.Event
@@ -58,9 +59,9 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
         addSource(price) { value = areAllFieldsFilled() }
         addSource(content) { value = areAllFieldsFilled() }
         addSource(category) { value = areAllFieldsFilled() }
+        addSource(selectedImageList) { value = areAllFieldsFilled() }
     }
-    val requiredProperty: LiveData<Boolean>
-        get() = _requiredProperty
+    val requiredProperty: LiveData<Boolean> get() = _requiredProperty
 
     private val _myDataId = MutableLiveData<Event<String?>>()
     val myDataId: LiveData<Event<String?>> get() = _myDataId
@@ -107,7 +108,8 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
 
     fun registerProductWithValidation() {
         val requiredPropertyCount = listOf(title.value, price.value, content.value)
-            .count { it.isNullOrEmpty() } + if (category.value == CATEGORY_REQUEST) 1 else 0
+            .count { it.isNullOrEmpty() } + if (category.value == CATEGORY_REQUEST) 1 else 0 +
+                if (selectedImageList.value.isNullOrEmpty()) 1 else 0
         when (requiredPropertyCount) {
             0 -> {
                 viewModelScope.launch {
@@ -142,6 +144,9 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
                     _toastMessage.value = Event(WRITING_POST_REQUEST_CONTENT)
                 else if (category.value == CATEGORY_REQUEST)
                     _toastMessage.value = Event(CATEGORY_REQUEST)
+                else if (selectedImageList.value.isNullOrEmpty()) {
+                    _toastMessage.value = Event(WRITING_POST_REQUEST_IMAGE)
+                }
             }
             else -> {
                 _toastMessage.value = Event(WRITING_POST_REQUEST_ALL)
@@ -154,7 +159,8 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
         return !title.value.isNullOrEmpty() &&
                 !price.value.isNullOrEmpty() &&
                 !content.value.isNullOrEmpty() &&
-                categoryRequest
+                categoryRequest &&
+                selectedImageList.value?.isNotEmpty() == true
     }
 
     fun isPriceNullOrEmpty(price: String?): Boolean {
