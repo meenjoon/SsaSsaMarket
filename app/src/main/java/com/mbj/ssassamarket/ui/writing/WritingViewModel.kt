@@ -10,11 +10,6 @@ import com.mbj.ssassamarket.data.source.remote.network.onError
 import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.CategoryFormat.getCategoryLabelFromInput
 import com.mbj.ssassamarket.util.Constants.CATEGORY_REQUEST
-import com.mbj.ssassamarket.util.Constants.WRITING_POST_REQUEST_ALL
-import com.mbj.ssassamarket.util.Constants.WRITING_POST_REQUEST_CONTENT
-import com.mbj.ssassamarket.util.Constants.WRITING_POST_REQUEST_IMAGE
-import com.mbj.ssassamarket.util.Constants.WRITING_POST_REQUEST_PRICE
-import com.mbj.ssassamarket.util.Constants.WRITING_POST_REQUEST_TITLE
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -137,19 +132,19 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
             }
             1 -> {
                 if (title.value.isNullOrEmpty())
-                    _toastMessage.value = Event(WRITING_POST_REQUEST_TITLE)
+                    _toastMessage.value = Event("request_writing_title")
                 else if (price.value.isNullOrEmpty())
-                    _toastMessage.value = Event(WRITING_POST_REQUEST_PRICE)
+                    _toastMessage.value = Event("request_writing_price")
                 else if (content.value.isNullOrEmpty())
-                    _toastMessage.value = Event(WRITING_POST_REQUEST_CONTENT)
+                    _toastMessage.value = Event("request_writing_content")
                 else if (category.value == CATEGORY_REQUEST)
-                    _toastMessage.value = Event(CATEGORY_REQUEST)
+                    _toastMessage.value = Event("request_writing_request")
                 else if (selectedImageList.value.isNullOrEmpty()) {
-                    _toastMessage.value = Event(WRITING_POST_REQUEST_IMAGE)
+                    _toastMessage.value = Event("request_writing_image")
                 }
             }
             else -> {
-                _toastMessage.value = Event(WRITING_POST_REQUEST_ALL)
+                _toastMessage.value = Event("request_writing_all")
             }
         }
     }

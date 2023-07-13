@@ -444,7 +444,10 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
 
     private fun observeToastMessage() {
         viewModel.toastMessage.observe(viewLifecycleOwner, EventObserver { message ->
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            val messageId = resources.getIdentifier(message, "string", requireContext().packageName)
+            if (messageId != 0) {
+                showToast(messageId)
+            }
         })
     }
 }
