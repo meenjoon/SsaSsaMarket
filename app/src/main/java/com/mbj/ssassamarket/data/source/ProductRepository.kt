@@ -44,8 +44,11 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
         return marketNetworkDataSource.getDownloadUrl(imageLocation)
     }
 
-    suspend fun getProduct(): ApiResponse<Map<String, ProductPostItem>> {
-        return marketNetworkDataSource.getProduct()
+    fun getProduct(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<Map<String, ProductPostItem>>> {
+        return marketNetworkDataSource.getProduct(onComplete, onError)
     }
 
     suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem>  {

@@ -43,7 +43,10 @@ interface MarketNetworkDataSource {
         latLng: PatchUserLatLng
     ): Flow<ApiResponse<Unit>>
 
-    suspend fun getProduct(): ApiResponse<Map<String, ProductPostItem>>
+    fun getProduct(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<Map<String, ProductPostItem>>>
 
     suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem>
 

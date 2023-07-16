@@ -8,12 +8,11 @@ import com.mbj.ssassamarket.data.model.*
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
-import com.mbj.ssassamarket.data.source.remote.network.onError
-import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,22 +31,22 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
     private val _nicknameError = MutableStateFlow(false)
     val nicknameError: StateFlow<Boolean> = _nicknameError
 
-    private val _productError = MutableLiveData<Event<Boolean>>()
-    val productError: LiveData<Event<Boolean>> get() = _productError
+    private val _productError = MutableStateFlow(false)
+    val productError: StateFlow<Boolean> = _productError
 
     private var productPostItemList: List<Pair<String, ProductPostItem>>? = null
 
     fun initProductPostItemList() {
         viewModelScope.launch {
-            _isLoading.value = (true)
-            val result = productRepository.getProduct()
-            result.onSuccess { productMap ->
-                val updateProduct = updateProductsWithImageUrls(productMap)
-                productPostItemList = updateProduct
-                _isLoading.value = (false)
-            }.onError { code, message ->
-                _isLoading.value = (false)
-                _productError.value = Event(true)
+            _isLoading.value = true
+            productRepository.getProduct(
+                onComplete = { _isLoading.value = false },
+                onError = { _productError.value = true }
+            ).collectLatest { productMap ->
+                if (productMap is ApiResultSuccess) {
+                    val updateProduct = updateProductsWithImageUrls(productMap.data)
+                    productPostItemList = updateProduct
+                }
             }
             getMyFavoriteProduct()
             getMyRegisteredProduct()

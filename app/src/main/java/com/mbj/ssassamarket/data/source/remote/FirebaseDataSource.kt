@@ -152,11 +152,23 @@ class FirebaseDataSource @Inject constructor(
         }
     }.flowOn(defaultDispatcher)
 
-    override suspend fun getProduct(): ApiResponse<Map<String, ProductPostItem>> {
+    override fun getProduct(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<Map<String, ProductPostItem>>> = flow {
         val (user, idToken) = getUserAndIdToken()
         val googleIdToken = idToken ?: ""
-        return apiClient.getProduct(googleIdToken)
-    }
+        val response = apiClient.getProduct(googleIdToken)
+
+        response.onSuccess {
+            emit(response)
+            onComplete()
+        }.onError { code, message ->
+            onError("code: $code, message: $message")
+        }.onException { throwable ->
+            onError(throwable.message)
+        }
+    }.flowOn(defaultDispatcher)
 
     override suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem> {
         val (user, idToken) = getUserAndIdToken()

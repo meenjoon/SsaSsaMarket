@@ -71,6 +71,7 @@
     <string name="error_message_nickname">닉네임 정보를 가지고 오는데 문제가 발생하였습니다. 잠시 후 다시 시도해주세요</string>
     <string name="error_message_product_post">상품을 등록하는데 문제가 발생하였습니다. 잠시 후 다시 시도해주세요</string>
     <string name="error_message_latlng_post">위치정보를 등록하는데 문제가 발생하였습니다. 잠시 후 다시 시도해주세요</string>
+    <string name="error_message_product_get">상품을 가져오는데 문제가 발생하였습니다. 잠시 후 다시 시도해주세요</string>
     <string name="request_writing_title">제목을 작성해주세요.</string>
     <string name="request_writing_request">카테고리를 선택해주세요.</string>
     <string name="request_writing_price">가격을 작성해주세요.</string>
