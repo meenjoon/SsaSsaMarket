@@ -25,8 +25,13 @@ class UserInfoRepository @Inject constructor(private val marketNetworkDataSource
         return marketNetworkDataSource.addUser(onComplete, onError, nickname)
     }
 
-    suspend fun updateMyLatLng(dataId: String, latLng: PatchUserLatLng): ApiResponse<Unit> {
-        return marketNetworkDataSource.updateMyLatLng(dataId, latLng)
+    fun updateMyLatLng(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        dataId: String,
+        latLng: PatchUserLatLng
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.updateMyLatLng(onComplete, onError, dataId, latLng)
     }
 
     suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {

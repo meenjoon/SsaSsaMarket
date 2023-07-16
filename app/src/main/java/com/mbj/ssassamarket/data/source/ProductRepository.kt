@@ -3,11 +3,14 @@ package com.mbj.ssassamarket.data.source
 import com.mbj.ssassamarket.data.model.*
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
 import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class ProductRepository @Inject constructor(private val marketNetworkDataSource: MarketNetworkDataSource) {
 
-    suspend fun addProductPost(
+    fun addProductPost(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
         content: String,
         imageLocations: List<ImageContent>,
         price: Int,
@@ -19,8 +22,10 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
         location: String,
         latLng: String,
         favoriteList: List<String?>
-    ): ApiResponse<Map<String, String>> {
+    ): Flow<ApiResponse<Map<String, String>>> {
         return marketNetworkDataSource.addProductPost(
+            onComplete,
+            onError,
             content,
             imageLocations,
             price,

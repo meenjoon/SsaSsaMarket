@@ -86,7 +86,9 @@ class FirebaseDataSource @Inject constructor(
         }
     }.flowOn(defaultDispatcher)
 
-    override suspend fun addProductPost(
+    override fun addProductPost(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
         content: String,
         imageLocations: List<ImageContent>,
         price: Int,
@@ -98,7 +100,7 @@ class FirebaseDataSource @Inject constructor(
         location: String,
         latLng: String,
         favoriteList: List<String?>
-    ): ApiResponse<Map<String, String>> {
+    ): Flow<ApiResponse<Map<String, String>>> = flow {
         val (user, idToken) = getUserAndIdToken()
         val uId = user?.uid ?: ""
         val googleIdToken = idToken ?: ""
@@ -117,19 +119,38 @@ class FirebaseDataSource @Inject constructor(
             latLng,
             favoriteList
         )
-        return apiClient.addProductPost(productPostItem, googleIdToken)
-    }
+        val response = apiClient.addProductPost(productPostItem, googleIdToken)
 
+        response.onSuccess { data ->
+            emit(response)
+            onComplete()
+        }.onError { code, message ->
+            onError("code: $code, message: $message")
+        }.onException { throwable ->
+            onError(throwable.message)
+        }
+    }.flowOn(defaultDispatcher)
 
-    override suspend fun updateMyLatLng(
+    override fun updateMyLatLng(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
         dataId: String,
         latLng: PatchUserLatLng
-    ): ApiResponse<Unit> {
+    ): Flow<ApiResponse<Unit>> = flow {
         val (user, idToken) = getUserAndIdToken()
         val googleIdToken = idToken ?: ""
         val userId = user?.uid ?: ""
-        return apiClient.updateMyLatLng(userId, dataId, latLng, googleIdToken)
-    }
+        val response = apiClient.updateMyLatLng(userId, dataId, latLng, googleIdToken)
+
+        response.onSuccess {
+            emit(response)
+            onComplete()
+        }.onError { code, message ->
+            onError("code: $code, message: $message")
+        }.onException { throwable ->
+            onError(throwable.message)
+        }
+    }.flowOn(defaultDispatcher)
 
     override suspend fun getProduct(): ApiResponse<Map<String, ProductPostItem>> {
         val (user, idToken) = getUserAndIdToken()

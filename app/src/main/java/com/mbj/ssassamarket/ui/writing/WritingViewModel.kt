@@ -7,70 +7,79 @@ import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
-import com.mbj.ssassamarket.data.source.remote.network.onError
-import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.CategoryFormat.getCategoryLabelFromInput
 import com.mbj.ssassamarket.util.Constants.CATEGORY_REQUEST
-import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class WritingViewModel @Inject constructor(private val postItemRepository: ProductRepository, private val userInfoRepository: UserInfoRepository) : ViewModel() {
+class WritingViewModel @Inject constructor(
+    private val postItemRepository: ProductRepository,
+    private val userInfoRepository: UserInfoRepository
+) : ViewModel() {
 
-    private val _selectedImageList: MutableLiveData<List<ImageContent>> = MutableLiveData()
-    val selectedImageList: LiveData<List<ImageContent>>
-        get() = _selectedImageList
+    val title = MutableStateFlow("")
 
-    private val _category = MutableLiveData<String>()
-    val category: LiveData<String>
-        get() = _category
+    val price = MutableStateFlow("")
 
-    private val _location = MutableLiveData<String>()
-    val location: LiveData<String>
-        get() = _location
+    val content = MutableStateFlow("")
 
-    val title = MutableLiveData<String>()
+    private val _selectedImageList = MutableStateFlow<List<ImageContent>>(emptyList())
+    val selectedImageList: StateFlow<List<ImageContent>> = _selectedImageList
 
-    val price = MutableLiveData<String>()
+    private val _category = MutableStateFlow("")
+    val category: StateFlow<String> = _category
 
-    val content = MutableLiveData<String>()
+    private val _location = MutableStateFlow("")
+    val location: StateFlow<String> = _location
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _isCompleted = MutableLiveData(Event(false))
-    val isCompleted: LiveData<Event<Boolean>> = _isCompleted
+    private val _isCompleted = MutableStateFlow(false)
+    val isCompleted: StateFlow<Boolean> = _isCompleted
 
-    private val _isPostError = MutableLiveData(Event(false))
-    val isPostError: LiveData<Event<Boolean>> = _isPostError
+    private val _isPostError = MutableStateFlow(false)
+    val isPostError: StateFlow<Boolean> = _isPostError
 
-    private val _toastMessage = MutableLiveData<Event<String>>()
-    val toastMessage: LiveData<Event<String>>
-        get() = _toastMessage
+    private val _toastMessage = MutableStateFlow("")
+    val toastMessage: StateFlow<String> = _toastMessage
 
-    private val _requiredProperty: MutableLiveData<Boolean> = MediatorLiveData<Boolean>().apply {
-        addSource(title) { value = areAllFieldsFilled() }
-        addSource(price) { value = areAllFieldsFilled() }
-        addSource(content) { value = areAllFieldsFilled() }
-        addSource(category) { value = areAllFieldsFilled() }
-        addSource(selectedImageList) { value = areAllFieldsFilled() }
-    }
-    val requiredProperty: LiveData<Boolean> get() = _requiredProperty
+    private val _requiredProperty = MutableStateFlow(false)
+    val requiredProperty: StateFlow<Boolean> = _requiredProperty
 
-    private val _myDataId = MutableLiveData<Event<String?>>()
-    val myDataId: LiveData<Event<String?>> get() = _myDataId
+    private val _myDataId = MutableStateFlow("")
+    val myDataId: StateFlow<String> = _myDataId
 
     private val _myDataIdError = MutableStateFlow(false)
-    val myDataIdError: StateFlow<Boolean> get() = _myDataIdError
+    val myDataIdError: StateFlow<Boolean> = _myDataIdError
 
-    private val _updateMyLatLngError = MutableLiveData<Event<Boolean>>()
-    val updateMyLatLngError: LiveData<Event<Boolean>> get() = _updateMyLatLngError
+    private val _updateMyLatLngError = MutableStateFlow(false)
+    val updateMyLatLngError: StateFlow<Boolean> = _updateMyLatLngError
 
-    private var latLngString : String? = null
+    private var latLngString: String? = null
+
+    init {
+        combine(
+            title,
+            price,
+            content,
+            category,
+            selectedImageList
+        ) { titleValue, priceValue, contentValue, categoryValue, selectedImageListValue ->
+            areAllFieldsFilled(
+                titleValue,
+                priceValue,
+                contentValue,
+                categoryValue,
+                selectedImageListValue
+            )
+        }.distinctUntilChanged()
+            .onEach { _requiredProperty.value = it }
+            .launchIn(viewModelScope)
+    }
 
     fun handleGalleryResult(result: List<ImageContent>) {
         val currentList = _selectedImageList.value.orEmpty()
@@ -112,53 +121,59 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
             0 -> {
                 viewModelScope.launch {
                     _isLoading.value = (true)
-                    val result =  postItemRepository.addProductPost(
-                        title = title.value!!,
-                        category = category.value!!,
-                        price = price.value!!.toInt(),
-                        content = content.value!!,
-                        imageLocations = selectedImageList.value.orEmpty(),
-                        location = location.value!!,
+                    postItemRepository.addProductPost(
+                        onComplete = { },
+                        onError = { _isPostError.value = true },
+                        title = title.value,
+                        category = category.value,
+                        price = price.value.toInt(),
+                        content = content.value,
+                        imageLocations = selectedImageList.value,
+                        location = location.value,
                         latLng = latLngString!!,
                         soldOut = false,
                         favoriteCount = 0,
                         shoppingList = List<String?>(0) { null },
                         favoriteList = List<String?>(0) { null }
-                    )
-                    result.onSuccess {
-                        myDataId.value?.peekContent()?.let { updateMyLatLng(it) }
-                    }.onError { code, message ->
-                        _isPostError.value = Event(true)
-                        _isLoading.value = (false)
+                    ).collectLatest { response ->
+                        if (response is ApiResultSuccess) {
+                            updateMyLatLng(myDataId.value)
+                        }
                     }
                 }
             }
             1 -> {
                 if (title.value.isNullOrEmpty())
-                    _toastMessage.value = Event("request_writing_title")
+                    _toastMessage.value = "request_writing_title"
                 else if (price.value.isNullOrEmpty())
-                    _toastMessage.value = Event("request_writing_price")
+                    _toastMessage.value = "request_writing_price"
                 else if (content.value.isNullOrEmpty())
-                    _toastMessage.value = Event("request_writing_content")
+                    _toastMessage.value = "request_writing_content"
                 else if (category.value == CATEGORY_REQUEST)
-                    _toastMessage.value = Event("request_writing_request")
+                    _toastMessage.value = "request_writing_request"
                 else if (selectedImageList.value.isNullOrEmpty()) {
-                    _toastMessage.value = Event("request_writing_image")
+                    _toastMessage.value = "request_writing_image"
                 }
             }
             else -> {
-                _toastMessage.value = Event("request_writing_all")
+                _toastMessage.value = "request_writing_all"
             }
         }
     }
 
-    private fun areAllFieldsFilled(): Boolean {
-        val categoryRequest = category.value != CATEGORY_REQUEST
-        return !title.value.isNullOrEmpty() &&
-                !price.value.isNullOrEmpty() &&
-                !content.value.isNullOrEmpty() &&
+    private fun areAllFieldsFilled(
+        titleValue: String,
+        priceValue: String,
+        contentValue: String,
+        categoryValue: String,
+        selectedImageListValue: List<ImageContent>
+    ): Boolean {
+        val categoryRequest = categoryValue != CATEGORY_REQUEST
+        return !titleValue.isNullOrEmpty() &&
+                !priceValue.isNullOrEmpty() &&
+                !contentValue.isNullOrEmpty() &&
                 categoryRequest &&
-                selectedImageList.value?.isNotEmpty() == true
+                selectedImageListValue.isNotEmpty()
     }
 
     fun isPriceNullOrEmpty(price: String?): Boolean {
@@ -168,13 +183,15 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
     fun getMyDataId() {
         viewModelScope.launch {
             userInfoRepository.getUser(
-                onComplete = {_isLoading.value = false },
+                onComplete = { _isLoading.value = false },
                 onError = { _myDataIdError.value = true }
             ).collect { response ->
                 if (response is ApiResultSuccess) {
                     val users = response.data
                     val myDataId = findMyDataId(users)
-                    _myDataId.value = Event(myDataId)
+                    if (myDataId != null) {
+                        _myDataId.value = myDataId
+                    }
                 }
             }
         }
@@ -195,13 +212,13 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
     private fun updateMyLatLng(dataId: String) {
         viewModelScope.launch {
             val request = PatchUserLatLng(latLngString)
-            val result = userInfoRepository.updateMyLatLng(dataId, request)
-            result.onSuccess {
-                _isLoading.value = (false)
-                _isCompleted.value = Event(true)
-            }.onError { code, message ->
-                _updateMyLatLngError.value = Event(false)
-                _isLoading.value = (false)
+            userInfoRepository.updateMyLatLng(
+                onComplete = { _isLoading.value = false },
+                onError = { _updateMyLatLngError.value = true },
+                dataId,
+                request
+            ).collectLatest {
+                _isCompleted.value = true
             }
         }
     }
