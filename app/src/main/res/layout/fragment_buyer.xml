@@ -178,6 +178,17 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:visible="@{viewModel.nicknameError}" />
+
+        <com.mbj.ssassamarket.util.ProgressIndicatorView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:visible="@{viewModel.isLoading}" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

@@ -222,12 +222,6 @@ class SellerFragment : BaseFragment() {
         viewModel.nickname.observe(viewLifecycleOwner, EventObserver { nickname ->
             binding.detailReceiver.setDetailNicknameText(nickname)
         })
-
-        viewModel.nicknameError.observe(viewLifecycleOwner, EventObserver { nicknameError ->
-            if (nicknameError) {
-                showToast(R.string.error_message_nickname)
-            }
-        })
     }
 
     private fun observeProductData() {

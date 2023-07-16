@@ -25,10 +25,10 @@ class SplashFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.viewModel = viewModel
         viewModel.checkCurrentUserExists()
 
         observeAccountExists()
-        observeError()
     }
 
     private fun navigateBasedOnUserState(
@@ -58,14 +58,6 @@ class SplashFragment : BaseFragment() {
                     isAccountExistsOnServer,
                     viewModel.currentUser
                 )
-            }
-        })
-    }
-
-    private fun observeError() {
-        viewModel.isError.observe(viewLifecycleOwner, EventObserver { isError ->
-            if (isError) {
-                showToast(R.string.error_message_retry)
             }
         })
     }

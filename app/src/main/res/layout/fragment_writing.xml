@@ -235,5 +235,18 @@
 
         </androidx.core.widget.NestedScrollView>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/error_message_retry"
+            app:visible="@{viewModel.myDataIdError}" />
+
+        <com.mbj.ssassamarket.util.ProgressIndicatorView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:visible="@{viewModel.isLoading}" />
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

@@ -5,6 +5,7 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.ValueEventListener
 import com.mbj.ssassamarket.data.model.*
 import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
+import kotlinx.coroutines.flow.Flow
 
 interface MarketNetworkDataSource {
 
@@ -21,8 +22,15 @@ interface MarketNetworkDataSource {
         latLng: String,
         favoriteList: List<String?>
     ): ApiResponse<Map<String, String>>
-    suspend fun getUser(): ApiResponse<Map<String, Map<String, User>>>
-    suspend fun addUser(nickname: String): ApiResponse<Map<String, String>>
+    fun getUser(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<Map<String, Map<String, User>>>>
+    fun addUser(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        nickname: String
+    ): Flow<ApiResponse<Map<String, String>>>
     suspend fun updateMyLatLng(dataId: String, latLng: PatchUserLatLng): ApiResponse<Unit>
     suspend fun getProduct(): ApiResponse<Map<String, ProductPostItem>>
     suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem>

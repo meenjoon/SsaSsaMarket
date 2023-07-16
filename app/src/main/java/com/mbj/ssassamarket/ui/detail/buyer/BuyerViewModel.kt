@@ -11,10 +11,13 @@ import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.ChatRepository
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import com.mbj.ssassamarket.data.source.remote.network.onError
 import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,8 +37,8 @@ class BuyerViewModel @Inject constructor(
     private val _nickname = MutableLiveData<Event<String?>>()
     val nickname: LiveData<Event<String?>> get() = _nickname
 
-    private val _nicknameError = MutableLiveData<Event<Boolean>>()
-    val nicknameError: LiveData<Event<Boolean>> get() = _nicknameError
+    private val _nicknameError = MutableStateFlow(false)
+    val nicknameError: StateFlow<Boolean> = _nicknameError
 
     private val _isLiked = MutableLiveData<Event<Boolean>>()
     val isLiked: LiveData<Event<Boolean>> get() = _isLiked
@@ -43,8 +46,8 @@ class BuyerViewModel @Inject constructor(
     private val _likedError = MutableLiveData<Event<Boolean>>()
     val likedError: LiveData<Event<Boolean>> get() = _likedError
 
-    private val _isLoading = MutableLiveData(Event(false))
-    val isLoading: LiveData<Event<Boolean>> = _isLoading
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _enterChatRoomError = MutableLiveData<Event<Boolean>>()
     val enterChatRoomError: LiveData<Event<Boolean>> get() = _enterChatRoomError
@@ -73,12 +76,15 @@ class BuyerViewModel @Inject constructor(
             val productUid = productPostItem?.id
 
             if (productUid != null) {
-                val result = userInfoRepository.getUser()
-                result.onSuccess { users ->
-                    val nickname = findNicknameByUserId(users, productUid)
-                    _nickname.value = Event(nickname)
-                }.onError { code, message ->
-                    _nicknameError.value = Event(true)
+                userInfoRepository.getUser(
+                    onComplete = {_isLoading.value = false },
+                    onError = { _nicknameError.value = (true) }
+                ).collect { response ->
+                    if (response is ApiResultSuccess) {
+                        val users = response.data
+                        val nickname = findNicknameByUserId(users, productUid)
+                        _nickname.value = Event(nickname)
+                    }
                 }
             }
         }
@@ -86,7 +92,7 @@ class BuyerViewModel @Inject constructor(
 
     fun onChatButtonClicked() {
         viewModelScope.launch {
-            _isLoading.value = Event(true)
+            _isLoading.value = (true)
             if (nickname.value?.peekContent() != null && productPostItem?.location != null) {
                 val result = chatRepository.enterChatRoom(
                     otherUserId.value?.peekContent()!!,
@@ -95,10 +101,10 @@ class BuyerViewModel @Inject constructor(
                 )
                 result.onSuccess { chatRoomId ->
                     _chatRoomId.value = Event(chatRoomId)
-                    _isLoading.value = Event(false)
+                    _isLoading.value = (false)
                 }.onError { code, message ->
                     _enterChatRoomError.value = Event(true)
-                    _isLoading.value = Event(false)
+                    _isLoading.value = (false)
                 }
             }
         }
@@ -110,7 +116,7 @@ class BuyerViewModel @Inject constructor(
             val patchRequest = PatchBuyRequest(true, listOf(uId))
 
             if (postId != null) {
-                _isLoading.value = Event(true)
+                _isLoading.value = (true)
                 val result = productRepository.buyProduct(postId!!, patchRequest)
                 result.onSuccess {
                     val enterChatRoomResult = chatRepository.enterChatRoom(
@@ -120,14 +126,14 @@ class BuyerViewModel @Inject constructor(
                     )
                     enterChatRoomResult.onSuccess { chatRoomId ->
                         _chatRoomId.value = Event(chatRoomId)
-                        _isLoading.value = Event(false)
+                        _isLoading.value = (false)
                     }.onError { code, message ->
                         _enterChatRoomError.value = Event(true)
-                        _isLoading.value = Event(false)
+                        _isLoading.value = (false)
                     }
                 }.onError { code, message ->
                     _buyError.value = Event(true)
-                    _isLoading.value = Event(false)
+                    _isLoading.value = (false)
                 }
             }
         }
@@ -135,7 +141,7 @@ class BuyerViewModel @Inject constructor(
 
     private fun likeProduct() {
         viewModelScope.launch {
-            _isLoading.value = Event(true)
+            _isLoading.value = (true)
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
 
             if (postId != null) {
@@ -150,13 +156,13 @@ class BuyerViewModel @Inject constructor(
                     val result = productRepository.updateProductFavorite(postId!!, request)
                     result.onSuccess {
                         toggleIsLiked()
-                        _isLoading.value = Event(false)
+                        _isLoading.value = (false)
                     }.onError { code, message ->
-                        _isLoading.value = Event(false)
+                        _isLoading.value = (false)
                         _likedError.value = Event(true)
                     }
                 }.onError { code, message ->
-                    _isLoading.value = Event(false)
+                    _isLoading.value = (false)
                     _likedError.value = Event(true)
                 }
             }
@@ -165,7 +171,7 @@ class BuyerViewModel @Inject constructor(
 
     private fun unlikeProduct() {
         viewModelScope.launch {
-            _isLoading.value = Event(true)
+            _isLoading.value = (true)
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
 
             if (postId != null) {
@@ -180,13 +186,13 @@ class BuyerViewModel @Inject constructor(
                     val result = productRepository.updateProductFavorite(postId!!, request)
                     result.onSuccess {
                         toggleIsLiked()
-                        _isLoading.value = Event(false)
+                        _isLoading.value = (false)
                     }.onError { code, message ->
-                        _isLoading.value = Event(false)
+                        _isLoading.value = (false)
                         _likedError.value = Event(true)
                     }
                 }.onError { code, message ->
-                    _isLoading.value = Event(false)
+                    _isLoading.value = (false)
                     _likedError.value = Event(true)
                 }
             }
@@ -207,13 +213,13 @@ class BuyerViewModel @Inject constructor(
 
     fun checkProductInFavorites() {
         viewModelScope.launch {
-            _isLoading.value = Event(true)
+            _isLoading.value = (true)
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             if (postId != null) {
                 val result = productRepository.getProductDetail(postId!!)
                 result.onSuccess { product ->
                     _isLiked.value = Event(product.favoriteList?.contains(uId) == true)
-                    _isLoading.value = Event(false)
+                    _isLoading.value = (false)
                 }.onError { code, message ->
                     _likedError.value = Event(true)
                 }

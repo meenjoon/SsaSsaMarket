@@ -9,6 +9,7 @@ import com.mbj.ssassamarket.data.model.ChatItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.ChatRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import com.mbj.ssassamarket.data.source.remote.network.onError
 import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
@@ -16,6 +17,8 @@ import com.mbj.ssassamarket.util.Event
 import com.mbj.ssassamarket.util.location.LocationFormat.calculateDistance
 import com.mbj.ssassamarket.util.location.LocationFormat.formatDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -52,11 +55,11 @@ class ChatDetailViewModel @Inject constructor(
     val location: LiveData<Event<String>>
         get() = _location
 
-    private val _myDataId = MutableLiveData<Event<String?>>()
-    val myDataId: LiveData<Event<String?>> get() = _myDataId
+    private val _myDataId = MutableStateFlow("")
+    val myDataId: StateFlow<String> = _myDataId
 
-    private val _myDataIdError = MutableLiveData<Event<Boolean>>()
-    val myDataIdError: LiveData<Event<Boolean>> get() = _myDataIdError
+    private val _myDataIdError = MutableLiveData(false)
+    val myDataIdError: LiveData<Boolean> = _myDataIdError
 
     private val _myUserDataError = MutableLiveData<Event<Boolean>>()
     val myUserDataError: LiveData<Event<Boolean>> get() = _myUserDataError
@@ -66,6 +69,9 @@ class ChatDetailViewModel @Inject constructor(
 
     private val _sendMessageError = MutableLiveData<Event<Boolean>>()
     val sendMessageError: LiveData<Event<Boolean>> get() = _sendMessageError
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     private var latLngState: String? = null
     private var otherUserItemState: User? = null
@@ -165,12 +171,17 @@ class ChatDetailViewModel @Inject constructor(
 
     fun getMyDataId() {
         viewModelScope.launch {
-            val result = userInfoRepository.getUser()
-            result.onSuccess { users ->
-                val myDataId = findMyDataId(users)
-                _myDataId.value = Event(myDataId)
-            }.onError { code, message ->
-                _myDataIdError.value = Event(true)
+            userInfoRepository.getUser(
+                onComplete = { _isLoading.value = false},
+                onError = { _myDataIdError.value = true }
+            ).collect { response ->
+                if (response is ApiResultSuccess) {
+                    val users = response.data
+                    val myDataId = findMyDataId(users)
+                    if (myDataId != null) {
+                        _myDataId.value = myDataId
+                    }
+                }
             }
         }
     }

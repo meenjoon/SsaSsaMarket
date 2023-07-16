@@ -26,7 +26,13 @@ import com.mbj.ssassamarket.util.Constants.USER
 import com.mbj.ssassamarket.util.Constants.USER_ID
 import com.mbj.ssassamarket.util.Constants.USER_NAME
 import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.tasks.await
 import java.util.*
 import javax.inject.Inject
@@ -36,22 +42,49 @@ class FirebaseDataSource @Inject constructor(
     private val storage: FirebaseStorage
 ) : MarketNetworkDataSource {
 
-    private val chatRoomsRef = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference.child(CHAT_ROOMS)
+    private val chatRoomsRef =
+        Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference.child(CHAT_ROOMS)
     private val chatRef = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference.child(CHATS)
     private val database = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 
-    override suspend fun getUser(): ApiResponse<Map<String, Map<String, User>>> {
+    override fun getUser(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<Map<String, Map<String, User>>>> = flow {
         val (user, idToken) = getUserAndIdToken()
         val googleIdToken = idToken ?: ""
-        return apiClient.getUser(googleIdToken)
-    }
+        val response = apiClient.getUser(googleIdToken)
+        response.onSuccess {
+            emit(response)
+        }.onError { code, message ->
+            onError("code: $code, message: $message")
+        }.onException {
+            onError(it.message)
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
 
-    override suspend fun addUser(nickname: String): ApiResponse<Map<String, String>> {
+    override fun addUser(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        nickname: String
+    ): Flow<ApiResponse<Map<String, String>>> = flow {
         val (user, idToken) = getUserAndIdToken()
         val googleIdToken = idToken ?: ""
         val userItem = User(user?.uid, nickname, null)
-        return apiClient.addUser(user?.uid ?: "", userItem, googleIdToken)
-    }
+        val response = apiClient.addUser(user?.uid ?: "", userItem, googleIdToken)
+
+        response.onSuccess { data ->
+            emit(response)
+            onComplete()
+        }.onError { code, message ->
+            onError("code: $code, message: $message")
+        }.onException { throwable ->
+            onError(throwable.message)
+        }
+    }.flowOn(defaultDispatcher)
 
     override suspend fun addProductPost(
         content: String,

@@ -171,10 +171,8 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         observeSelectedImageContent()
         handleBackButtonClick()
         observeToastMessage()
-        observeMyDataIdError()
         observeUpdateMyLatLngError()
         observePostError()
-        observeLoading()
         observeCompleted()
     }
 
@@ -400,14 +398,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         }
     }
 
-    private fun observeMyDataIdError() {
-        viewModel.myDataIdError.observe(viewLifecycleOwner, EventObserver { myDataIdError ->
-            if (myDataIdError) {
-                showToast(R.string.error_message_retry)
-            }
-        })
-    }
-
     private fun observeUpdateMyLatLngError() {
         viewModel.updateMyLatLngError.observe(viewLifecycleOwner, EventObserver { updateMyLatLngError ->
             if (updateMyLatLngError) {
@@ -420,16 +410,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         viewModel.isPostError.observe(viewLifecycleOwner, EventObserver { isPostError ->
             if (isPostError) {
                 showToast(R.string.error_message_retry)
-            }
-        })
-    }
-
-    private fun observeLoading() {
-        viewModel.isLoading.observe(viewLifecycleOwner, EventObserver { isLoading ->
-            if (isLoading) {
-                showLoadingDialog()
-            } else {
-                hideLoadingDialog()
             }
         })
     }

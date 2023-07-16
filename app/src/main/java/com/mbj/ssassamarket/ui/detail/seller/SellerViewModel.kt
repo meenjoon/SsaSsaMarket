@@ -10,10 +10,13 @@ import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import com.mbj.ssassamarket.data.source.remote.network.onError
 import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -38,14 +41,17 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
     private val _productUpdateError = MutableLiveData(Event(false))
     val productUpdateError: LiveData<Event<Boolean>> = _productUpdateError
 
-    private val _nicknameError = MutableLiveData<Event<Boolean>>()
-    val nicknameError: LiveData<Event<Boolean>> get() = _nicknameError
+    private val _nicknameError = MutableStateFlow(false)
+    val nicknameError: StateFlow<Boolean> = _nicknameError
 
     private val _nicknameLoading = MutableLiveData<Event<Boolean>>()
     val nicknameLoading: LiveData<Event<Boolean>> get() = _nicknameLoading
 
     private var originalProduct: ProductPostItem? = null
     private var postId: String? = null
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> get() = _isLoading
 
     fun initializeProduct(inputPostId: String, productPostItem: ProductPostItem) {
         if(postId == null){
@@ -74,15 +80,18 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
             _nicknameLoading.value = Event(true)
             val productUid = product.value?.peekContent()?.id
             if (productUid != null) {
-                val result = userInfoRepository.getUser()
-                result.onSuccess { users ->
-                    val nickname = findNicknameByUserId(users, productUid)
-                    _nicknameLoading.value = Event(false)
-                    _nickname.value = Event(nickname)
-                }.onError { code, message ->
-                    _nicknameLoading.value = Event(false)
-                    _nicknameError.value = Event(true)
+                userInfoRepository.getUser(
+                    onComplete = { _isLoading.value = (false) },
+                    onError = { _nicknameError.value = (true) }
+                ).collect { response ->
+                    if (response is ApiResultSuccess) {
+                        val users = response.data
+                        val nickname = findNicknameByUserId(users, productUid)
+                        _nickname.value = Event(nickname)
+                    }
                 }
+            } else {
+                _nicknameLoading.value = Event(false)
             }
         }
     }

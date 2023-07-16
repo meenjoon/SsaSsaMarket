@@ -57,8 +57,6 @@ class LogInFragment : BaseFragment() {
         }
         observeAutoLoginEnabled()
         observeAccountExistsOnServer()
-        observeLoading()
-        observeError()
     }
 
     private fun initializeSignInClients() {
@@ -205,23 +203,6 @@ class LogInFragment : BaseFragment() {
             }
         })
     }
-
-    private fun observeLoading() {
-        viewModel.isLoading.observe(viewLifecycleOwner, EventObserver { isLoading ->
-            if (isLoading) {
-                showLoadingDialog()
-            }
-        })
-    }
-
-    private fun observeError() {
-        viewModel.isError.observe(viewLifecycleOwner, EventObserver { isError ->
-            if (isError) {
-                showToast(R.string.error_message_retry)
-            }
-        })
-    }
-
 
     private fun navigateToSettingNicknameFragment() {
         val action = LogInFragmentDirections.actionLogInFragmentToSettingNicknameFragment()

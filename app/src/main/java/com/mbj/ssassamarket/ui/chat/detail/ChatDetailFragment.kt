@@ -35,6 +35,7 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.viewModel = viewModel
         adapter = ChatDetailAdapter()
         binding.chatDetailRv.adapter = adapter
         args.otherImageColor?.let { adapter.updateOtherImageColor(it) }
@@ -57,7 +58,6 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
         observeOtherUserItem()
         observeLatLngString()
         observeDistanceDiff()
-        observeMyDataIdError()
         observeMyUserDataError()
         observeOtherUserDataError()
         observeSendMessageError()
@@ -111,7 +111,7 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
                 showToast(R.string.empty_message_error)
                 return@setOnClickListener
             }
-            viewModel.sendMessage(message, viewModel.myDataId.value?.peekContent()!!)
+            viewModel.sendMessage(message, viewModel.myDataId.value)
             binding.chatDetailTiev.text?.clear()
         }
     }
@@ -164,14 +164,6 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
     private fun observeDistanceDiff() {
         viewModel.distanceDiff.observe(viewLifecycleOwner, EventObserver { distanceDiff ->
             binding.chatDetailLocationDiffTv.text = distanceDiff
-        })
-    }
-
-    private fun observeMyDataIdError() {
-        viewModel.myDataIdError.observe(viewLifecycleOwner, EventObserver { myDataIdError ->
-            if (myDataIdError) {
-                showToast(R.string.error_message_retry)
-            }
         })
     }
 

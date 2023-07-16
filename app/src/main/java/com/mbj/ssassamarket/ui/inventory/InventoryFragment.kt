@@ -31,7 +31,6 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
 
         observeInventoryDataList(adapter)
         observeNickname()
-        observeNicknameError()
         observeProductError()
     }
 
@@ -44,14 +43,6 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
     private fun observeNickname() {
         viewModel.nickname.observe(viewLifecycleOwner, EventObserver { nickname ->
             binding.inventoryNicknameTv.text = nickname
-        })
-    }
-
-    private fun observeNicknameError() {
-        viewModel.nicknameError.observe(viewLifecycleOwner, EventObserver { nicknameError ->
-            if (nicknameError) {
-                showToast(R.string.error_message_retry)
-            }
         })
     }
 

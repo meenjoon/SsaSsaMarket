@@ -6,12 +6,15 @@ import com.mbj.ssassamarket.data.model.PatchUserLatLng
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import com.mbj.ssassamarket.data.source.remote.network.onError
 import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.CategoryFormat.getCategoryLabelFromInput
 import com.mbj.ssassamarket.util.Constants.CATEGORY_REQUEST
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,8 +39,8 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
 
     val content = MutableLiveData<String>()
 
-    private val _isLoading = MutableLiveData(Event(false))
-    val isLoading: LiveData<Event<Boolean>> = _isLoading
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _isCompleted = MutableLiveData(Event(false))
     val isCompleted: LiveData<Event<Boolean>> = _isCompleted
@@ -61,8 +64,8 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
     private val _myDataId = MutableLiveData<Event<String?>>()
     val myDataId: LiveData<Event<String?>> get() = _myDataId
 
-    private val _myDataIdError = MutableLiveData<Event<Boolean>>()
-    val myDataIdError: LiveData<Event<Boolean>> get() = _myDataIdError
+    private val _myDataIdError = MutableStateFlow(false)
+    val myDataIdError: StateFlow<Boolean> get() = _myDataIdError
 
     private val _updateMyLatLngError = MutableLiveData<Event<Boolean>>()
     val updateMyLatLngError: LiveData<Event<Boolean>> get() = _updateMyLatLngError
@@ -108,7 +111,7 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
         when (requiredPropertyCount) {
             0 -> {
                 viewModelScope.launch {
-                    _isLoading.value = Event(true)
+                    _isLoading.value = (true)
                     val result =  postItemRepository.addProductPost(
                         title = title.value!!,
                         category = category.value!!,
@@ -126,7 +129,7 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
                         myDataId.value?.peekContent()?.let { updateMyLatLng(it) }
                     }.onError { code, message ->
                         _isPostError.value = Event(true)
-                        _isLoading.value = Event(false)
+                        _isLoading.value = (false)
                     }
                 }
             }
@@ -164,12 +167,15 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
 
     fun getMyDataId() {
         viewModelScope.launch {
-            val result = userInfoRepository.getUser()
-            result.onSuccess { users ->
-                val myDataId = findMyDataId(users)
-                _myDataId.value = Event(myDataId)
-            }.onError { code, message ->
-                _myDataIdError.value = Event(true)
+            userInfoRepository.getUser(
+                onComplete = {_isLoading.value = false },
+                onError = { _myDataIdError.value = true }
+            ).collect { response ->
+                if (response is ApiResultSuccess) {
+                    val users = response.data
+                    val myDataId = findMyDataId(users)
+                    _myDataId.value = Event(myDataId)
+                }
             }
         }
     }
@@ -191,11 +197,11 @@ class WritingViewModel @Inject constructor(private val postItemRepository: Produ
             val request = PatchUserLatLng(latLngString)
             val result = userInfoRepository.updateMyLatLng(dataId, request)
             result.onSuccess {
-                _isLoading.value = Event(false)
+                _isLoading.value = (false)
                 _isCompleted.value = Event(true)
             }.onError { code, message ->
                 _updateMyLatLngError.value = Event(false)
-                _isLoading.value = Event(false)
+                _isLoading.value = (false)
             }
         }
     }

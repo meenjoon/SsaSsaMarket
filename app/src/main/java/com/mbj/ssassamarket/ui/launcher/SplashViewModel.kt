@@ -1,6 +1,5 @@
 package com.mbj.ssassamarket.ui.launcher
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,10 +8,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.UserPreferenceRepository
-import com.mbj.ssassamarket.data.source.remote.network.onError
-import com.mbj.ssassamarket.data.source.remote.network.onSuccess
+import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,20 +22,23 @@ class SplashViewModel @Inject constructor(private val repository: UserInfoReposi
     private val _isAccountExistsOnServer = MutableLiveData<Event<Boolean>>()
     val isAccountExistsOnServer: LiveData<Event<Boolean>> get() = _isAccountExistsOnServer
 
-    private val _isError = MutableLiveData(Event(false))
-    val isError: LiveData<Event<Boolean>> = _isError
+    private val _isError = MutableStateFlow(false)
+    val isError: StateFlow<Boolean> = _isError
 
     val autoLoginState = userPreferenceRepository.getSaveAutoLoginState()
     val currentUser = FirebaseAuth.getInstance().currentUser
 
     fun checkCurrentUserExists() {
         viewModelScope.launch {
-            val result = repository.getUser()
-            result.onSuccess { userMap ->
-                val isExists = isAccountExistsOnServer(userMap)
-                _isAccountExistsOnServer.value = Event(isExists)
-            }.onError { code, message ->
-                _isError.value = Event(true)
+            repository.getUser(
+                onComplete = {},
+                onError = { _isError.value = (true) }
+            ).collect { response ->
+                if (response is ApiResultSuccess) {
+                    val userMap = response.data
+                    val isExists = isAccountExistsOnServer(userMap)
+                    _isAccountExistsOnServer.value = Event(isExists)
+                }
             }
         }
     }

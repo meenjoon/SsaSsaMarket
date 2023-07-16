@@ -3,89 +3,61 @@ package com.mbj.ssassamarket.ui.settingnickname
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentSettingNicknameBinding
 import com.mbj.ssassamarket.ui.BaseFragment
-import com.mbj.ssassamarket.util.Constants
 import com.mbj.ssassamarket.util.Constants.NICKNAME_DUPLICATE
 import com.mbj.ssassamarket.util.Constants.NICKNAME_ERROR
 import com.mbj.ssassamarket.util.Constants.NICKNAME_REQUEST
-import com.mbj.ssassamarket.util.Constants.NICKNAME_VALID
 import com.mbj.ssassamarket.util.Constants.SUCCESS
-import com.mbj.ssassamarket.util.EventObserver
-import com.mbj.ssassamarket.util.ProgressDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class SettingNicknameFragment : BaseFragment() {
 
     override val binding get() = _binding as FragmentSettingNicknameBinding
     override val layoutId: Int get() = R.layout.fragment_setting_nickname
-    private var loadingProgressDialog: ProgressDialogFragment? = null
-    private val viewModel:SettingNicknameViewModel by viewModels()
+
+    private val viewModel: SettingNicknameViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
 
-        viewModel.nickname.observe(viewLifecycleOwner) { nickname ->
-            viewModel.validateNickname()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.nickname.collectLatest { nickname ->
+                        viewModel.validateNickname()
+                    }
+                }
+                launch {
+                    viewModel.isCompleted.collectLatest { isCompleted ->
+                        if (isCompleted) {
+                            navigateToHomeFragment()
+                            showToast(R.string.setting_nickname_success)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.responseToastMessage.collectLatest { responseToastMessage ->
+                        when (responseToastMessage) {
+                            SUCCESS -> showToast(R.string.setting_nickname_success)
+                            NICKNAME_DUPLICATE -> showToast(R.string.setting_nickname_duplicate)
+                            NICKNAME_REQUEST -> showToast(R.string.setting_nickname_request_nickname)
+                            NICKNAME_ERROR -> showToast(R.string.setting_nickname_error_nickname)
+                        }
+                    }
+                }
+            }
         }
-        viewModel.nicknameErrorMessage.observe(viewLifecycleOwner, EventObserver { nicknameErrorMessage ->
-            when (nicknameErrorMessage) {
-                NICKNAME_REQUEST -> {
-                    setButtonBackground(R.color.orange_100)
-                    binding.settingNicknameTil.error =
-                        getString(R.string.setting_nickname_request_nickname)
-                }
-                NICKNAME_ERROR -> {
-                    setButtonBackground(R.color.orange_100)
-                    binding.settingNicknameTil.error =
-                        getString(R.string.setting_nickname_error_nickname)
-                }
-                NICKNAME_VALID -> {
-                    setButtonBackground(R.color.orange_700)
-                    binding.settingNicknameTil.error = null
-                }
-            }
-        })
-
-        viewModel.isLoading.observe(viewLifecycleOwner, EventObserver{ isLoading ->
-            if (isLoading) {
-                showLoadingDialog()
-            }
-        })
-
-        viewModel.isCompleted.observe(viewLifecycleOwner, EventObserver { isCompleted ->
-            if (isCompleted) {
-                hideLoadingDialog()
-                navigateToHomeFragment()
-                showToast(R.string.setting_nickname_success)
-            }
-        })
-
-        viewModel.isError.observe(viewLifecycleOwner, EventObserver { isCompleted ->
-            if (isCompleted) {
-                showToast(R.string.error_message_retry)
-            }
-        })
-
-        viewModel.responseToastMessage.observe(viewLifecycleOwner, EventObserver { message ->
-            when (message) {
-                SUCCESS -> showToast(R.string.setting_nickname_success)
-                NICKNAME_DUPLICATE -> showToast(R.string.setting_nickname_duplicate)
-                NICKNAME_REQUEST -> showToast(R.string.setting_nickname_request_nickname)
-                NICKNAME_ERROR -> showToast(R.string.setting_nickname_error_nickname)
-            }
-        })
-    }
-
-    private fun setButtonBackground(colorResId: Int) {
-        val color = ContextCompat.getColor(requireContext(), colorResId)
-        binding.settingNicknameRegisterBt.setBackgroundColor(color)
     }
 
     private fun navigateToHomeFragment() {
@@ -95,15 +67,5 @@ class SettingNicknameFragment : BaseFragment() {
 
     private fun showToast(messageResId: Int) {
         Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun showLoadingDialog() {
-        loadingProgressDialog = ProgressDialogFragment()
-        loadingProgressDialog?.show(childFragmentManager, Constants.PROGRESS_DIALOG)
-    }
-
-    private fun hideLoadingDialog() {
-        loadingProgressDialog?.dismiss()
-        loadingProgressDialog = null
     }
 }

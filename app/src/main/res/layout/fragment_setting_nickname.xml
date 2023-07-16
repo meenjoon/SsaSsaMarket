@@ -33,10 +33,12 @@
             android:paddingEnd="16dp"
             app:counterEnabled="true"
             app:counterMaxLength="8"
+            app:errorEnabled="@{!viewModel.nicknameErrorMessage.isEmpty}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/guideline_horizontal_50"
-            app:layout_constraintVertical_chainStyle="packed">
+            app:layout_constraintVertical_chainStyle="packed"
+            app:nicknameErrorText="@{viewModel.nicknameErrorMessage}">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/setting_nickname_tiet"
@@ -59,7 +61,27 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/setting_nickname_til"
-            app:layout_constraintTop_toTopOf="@id/guideline_horizontal_65" />
+            app:layout_constraintTop_toTopOf="@id/guideline_horizontal_65"
+            app:nicknameValidColor="@{viewModel.nicknameErrorMessage}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/error_message_retry"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.isError}" />
+
+        <com.mbj.ssassamarket.util.ProgressIndicatorView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.isLoading}" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline_horizontal_20"

@@ -60,11 +60,6 @@ class BuyerFragment : BaseFragment() {
         binding.viewModel = viewModel
         setupViewModel()
         setupViews()
-        viewModel.nicknameError.observe(viewLifecycleOwner, EventObserver{ nicknameError ->
-            if (nicknameError) {
-                showToast(R.string.error_message_retry)
-            }
-        })
     }
 
     private fun setupViewModel() {
@@ -74,7 +69,7 @@ class BuyerFragment : BaseFragment() {
         viewModel.checkProductInFavorites()
 
         observeChatRoomId()
-        observeLoading()
+//        observeLoading()
         observeLikedError()
         observeEnterChatRoomError()
         observeBuyError()
@@ -176,15 +171,15 @@ class BuyerFragment : BaseFragment() {
         })
     }
 
-    private fun observeLoading() {
-        viewModel.isLoading.observe(viewLifecycleOwner, EventObserver { isLoading ->
-            if (isLoading) {
-                showLoadingDialog()
-            } else {
-                hideLoadingDialog()
-            }
-        })
-    }
+//    private fun observeLoading() {
+//        viewModel.isLoading.observe(viewLifecycleOwner, EventObserver { isLoading ->
+//            if (isLoading) {
+//                showLoadingDialog()
+//            } else {
+//                hideLoadingDialog()
+//            }
+//        })
+//    }
 
     private fun observeLikedError() {
         viewModel.likedError.observe(viewLifecycleOwner, EventObserver { likedError ->
