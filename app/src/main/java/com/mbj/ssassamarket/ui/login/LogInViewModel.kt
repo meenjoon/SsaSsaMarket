@@ -1,14 +1,11 @@
 package com.mbj.ssassamarket.ui.login
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.UserPreferenceRepository
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
-import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,13 +15,13 @@ import javax.inject.Inject
 @HiltViewModel
 class LogInViewModel @Inject constructor(private val userInfoRepository: UserInfoRepository, val userPreferenceRepository: UserPreferenceRepository) : ViewModel() {
 
-    var autoLoginEnabled = MutableLiveData<Boolean>(userPreferenceRepository.getSaveAutoLoginState())
+    var autoLoginEnabled = MutableStateFlow(userPreferenceRepository.getSaveAutoLoginState())
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> =  _isLoading
 
-    private val _isAccountExistsOnServer = MutableLiveData<Event<Boolean>>()
-    val isAccountExistsOnServer: LiveData<Event<Boolean>> get() = _isAccountExistsOnServer
+    private val _isAccountExistsOnServer = MutableStateFlow<Boolean?>(null)
+    val isAccountExistsOnServer: StateFlow<Boolean?> = _isAccountExistsOnServer
 
     private val _isError = MutableStateFlow(false)
     val isError: StateFlow<Boolean> =  _isError
@@ -39,14 +36,14 @@ class LogInViewModel @Inject constructor(private val userInfoRepository: UserInf
                 if (response is ApiResultSuccess) {
                     val userMap = response.data
                     val isExists = isAccountExistsOnServer(userMap)
-                    _isAccountExistsOnServer.value = Event(isExists)
+                    _isAccountExistsOnServer.value = isExists
                 }
             }
         }
     }
 
     private suspend fun isAccountExistsOnServer(userMap: Map<String, Map<String, User>>): Boolean {
-        val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
-        return userMap.containsKey(uId)
+        val uid = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
+        return userMap.containsKey(uid)
     }
 }

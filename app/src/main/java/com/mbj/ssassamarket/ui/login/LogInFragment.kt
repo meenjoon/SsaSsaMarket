@@ -11,6 +11,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.GetSignInIntentRequest
@@ -24,10 +27,9 @@ import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentLogInBinding
 import com.mbj.ssassamarket.ui.BaseFragment
-import com.mbj.ssassamarket.util.Constants
-import com.mbj.ssassamarket.util.EventObserver
-import com.mbj.ssassamarket.util.ProgressDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LogInFragment : BaseFragment() {
@@ -37,7 +39,6 @@ class LogInFragment : BaseFragment() {
 
     private lateinit var oneTapClient: SignInClient
     private lateinit var auth: FirebaseAuth
-    private var loadingProgressDialog: ProgressDialogFragment? = null
 
     private lateinit var googleOneTapSignInLauncher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var googleSignInLauncherIdentity: ActivityResultLauncher<IntentSenderRequest>
@@ -55,8 +56,28 @@ class LogInFragment : BaseFragment() {
         binding.logInBt.setOnClickListener {
             signInWithGoogleOneTap()
         }
-        observeAutoLoginEnabled()
-        observeAccountExistsOnServer()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.autoLoginEnabled.collectLatest { autoLoginEnabled ->
+                        viewModel.userPreferenceRepository.saveAutoLoginState(autoLoginEnabled)
+                    }
+                }
+                launch {
+                    viewModel.isAccountExistsOnServer.collectLatest { isAccountExistsOnServer ->
+                        if(isAccountExistsOnServer != null) {
+                            if (isAccountExistsOnServer) {
+                                showToast(R.string.setting_nickname_success)
+                                navigateToHomeFragment()
+                            } else {
+                                navigateToSettingNicknameFragment()
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun initializeSignInClients() {
@@ -185,25 +206,6 @@ class LogInFragment : BaseFragment() {
             }
     }
 
-    private fun observeAutoLoginEnabled() {
-        viewModel.autoLoginEnabled.observe(viewLifecycleOwner) { isChecked ->
-            viewModel.userPreferenceRepository.saveAutoLoginState(isChecked)
-        }
-    }
-
-    private fun observeAccountExistsOnServer() {
-        viewModel.isAccountExistsOnServer.observe(viewLifecycleOwner, EventObserver { isAccountExistsOnServer ->
-            if (isAccountExistsOnServer) {
-                hideLoadingDialog()
-                showToast(R.string.setting_nickname_success)
-                navigateToHomeFragment()
-            } else {
-                hideLoadingDialog()
-                navigateToSettingNicknameFragment()
-            }
-        })
-    }
-
     private fun navigateToSettingNicknameFragment() {
         val action = LogInFragmentDirections.actionLogInFragmentToSettingNicknameFragment()
         findNavController().navigate(action)
@@ -216,16 +218,6 @@ class LogInFragment : BaseFragment() {
 
     private fun showToast(messageResId: Int) {
         Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun showLoadingDialog() {
-        loadingProgressDialog = ProgressDialogFragment()
-        loadingProgressDialog?.show(childFragmentManager, Constants.PROGRESS_DIALOG)
-    }
-
-    private fun hideLoadingDialog() {
-        loadingProgressDialog?.dismiss()
-        loadingProgressDialog = null
     }
 
     companion object {
