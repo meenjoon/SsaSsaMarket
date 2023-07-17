@@ -29,6 +29,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
+            android:text="@{viewModel.nickname}"
             android:textColor="@color/orange_700"
             android:textSize="26sp"
             app:layout_constraintBottom_toBottomOf="@id/inventory_user_iv"
