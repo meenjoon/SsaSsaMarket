@@ -6,6 +6,7 @@ import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.util.Constants.CURRENT_DATE_PATTERN
 import com.mbj.ssassamarket.util.Constants.PATTERN_COMMA_THOUSANDS
 import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
+import com.mbj.ssassamarket.util.TextFormat
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -53,4 +54,9 @@ fun TextView.setFormattedPrice(price: Int) {
     val formattedPrice = decimalFormat.format(price)
     val currencySymbol = context.getString(R.string.korean_currency)
     text = "$formattedPrice $currencySymbol"
+}
+
+@BindingAdapter("initialLetter")
+fun TextView.setInitialLetter(nickname: String) {
+    text = TextFormat.getInitialLetter(nickname)
 }

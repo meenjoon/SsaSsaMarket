@@ -36,16 +36,9 @@ class ChatListAdapter@Inject constructor(
     class ChatListViewHolder(private val binding: RecyclerviewItemChatRoomBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(chatRoomItem: ChatRoomItem, chatListClickListener: ChatListClickListener, colors: Colors) {
-            val randomColor = colors.randomColor
-            binding.chatListLastSentTimeTv.text = chatRoomItem.lastSentTime?.let { getFormattedElapsedTime(it) }
-            binding.chatListUserIv.setColorFilter(Color.parseColor(randomColor), PorterDuff.Mode.SRC_IN)
-            binding.chatListNicknameTv.text = chatRoomItem.otherUserName
-            binding.chatListFirstNicknameTv.text = chatRoomItem.otherUserName?.let { getInitialLetter(it) }
-            binding.chatListLastMessageTv.text = chatRoomItem.lastMessage
-            binding.chatListLocationTv.text = chatRoomItem.otherLocation
-            binding.root.setOnClickListener {
-                chatListClickListener.onChatRoomClicked(chatRoomItem, randomColor)
-            }
+            binding.chatRoomItem = chatRoomItem
+            binding.chatListClickListener = chatListClickListener
+            binding.randomColor = colors.randomColor
         }
 
         companion object {
