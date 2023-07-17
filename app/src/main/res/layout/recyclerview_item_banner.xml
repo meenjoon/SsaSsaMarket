@@ -17,10 +17,9 @@
             android:id="@+id/banner_iv"
             android:layout_width="@dimen/viewpager_item_width"
             android:layout_height="0dp"
-            android:layout_marginStart="@dimen/viewpager_item_margin"
             android:scaleType="centerCrop"
             app:imageUrl="@{imageUrl}"
-            app:layout_constraintDimensionRatio="h, 2:1"
+            app:layout_constraintDimensionRatio="h, 1:1.5"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

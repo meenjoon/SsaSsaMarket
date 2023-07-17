@@ -35,6 +35,7 @@ fun ImageView.loadFirstImage(imageLocations: List<String?>?) {
 @BindingAdapter("imageUrl")
 fun ImageView.loadImage(imageUrl: String) {
     this.load(imageUrl) {
+        transformations(RoundedCornersTransformation(15f))
         error(R.drawable.null_icon)
     }
 }

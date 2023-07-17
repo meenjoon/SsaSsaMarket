@@ -75,7 +75,7 @@
                 <androidx.viewpager2.widget.ViewPager2
                     android:id="@+id/detail_vp2"
                     android:layout_width="0dp"
-                    android:layout_height="200dp"
+                    android:layout_height="wrap_content"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -112,7 +112,8 @@
                     tools:detailNicknameText="1312"
                     tools:detailPriceText="1,000"
                     tools:detailTimeText="1분전"
-                    tools:detailTitleText="포켓몬 쁘띠씰 팝니다~~" />
+                    tools:detailTitleText="포켓몬 쁘띠씰 팝니다~~"
+                    android:layout_marginBottom="70dp"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

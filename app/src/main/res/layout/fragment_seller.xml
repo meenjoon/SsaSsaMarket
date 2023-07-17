@@ -98,7 +98,7 @@
                 <androidx.viewpager2.widget.ViewPager2
                     android:id="@+id/detail_vp2"
                     android:layout_width="0dp"
-                    android:layout_height="200dp"
+                    android:layout_height="320dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -133,7 +133,8 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/detail_tl" />
+                    app:layout_constraintTop_toBottomOf="@id/detail_tl"
+                    android:layout_marginBottom="60dp"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
