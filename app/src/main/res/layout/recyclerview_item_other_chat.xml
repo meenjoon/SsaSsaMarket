@@ -5,6 +5,19 @@
 
     <data>
 
+        <import type="android.graphics.Color" />
+
+        <variable
+            name="chatItem"
+            type="com.mbj.ssassamarket.data.model.ChatItem" />
+
+        <variable
+            name="otherUser"
+            type="com.mbj.ssassamarket.data.model.User" />
+
+        <variable
+            name="otherImageColor"
+            type="String" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -16,6 +29,7 @@
             android:id="@+id/chat_other_user_iv"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:tint="@{Color.parseColor(otherImageColor)}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -27,6 +41,7 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:textStyle="bold"
+            app:initialLetter="@{otherUser.userName}"
             app:layout_constraintBottom_toBottomOf="@id/chat_other_user_iv"
             app:layout_constraintEnd_toEndOf="@id/chat_other_user_iv"
             app:layout_constraintStart_toStartOf="@id/chat_other_user_iv"
@@ -38,6 +53,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:text="@{otherUser.userName}"
             android:textColor="@color/black"
             android:textSize="13sp"
             app:layout_constraintStart_toEndOf="@id/chat_other_user_iv"
@@ -56,6 +72,7 @@
             android:paddingTop="8dp"
             android:paddingEnd="10dp"
             android:paddingBottom="8dp"
+            android:text="@{chatItem.message}"
             android:textColor="@color/black"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -68,6 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="3dp"
+            app:formattedElapsedTime="@{chatItem.lastSentTime}"
             app:layout_constraintBottom_toBottomOf="@id/chat_other_message_tv"
             app:layout_constraintStart_toEndOf="@id/chat_other_message_tv"
             tools:text="방금전" />
