@@ -55,13 +55,33 @@ interface MarketNetworkDataSource {
         request: PatchProductRequest
     ): Flow<ApiResponse<Unit>>
 
-    suspend fun buyProduct(postId: String, request: PatchBuyRequest): ApiResponse<Unit>
+    fun buyProduct(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postId: String,
+        request: PatchBuyRequest,
+    ): Flow<ApiResponse<Unit>>
 
-    suspend fun enterChatRoom(productId: String, otherUserName: String, otherLocation: String): ApiResponse<String>
+    fun enterChatRoom(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        ohterUserId: String,
+        otherUserName: String,
+        otherLocation: String
+    ): Flow<ApiResponse<String>>
 
-    suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem>
+    fun getProductDetail(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postId: String
+    ): Flow<ApiResponse<ProductPostItem>>
 
-    suspend fun updateProductFavorite(postId: String, request: FavoriteCountRequest): ApiResponse<Unit>
+    fun updateProductFavorite(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postId: String,
+        request: FavoriteCountRequest
+    ): Flow<ApiResponse<Unit>>
 
     suspend fun getMyUserItem() : ApiResponse<User>
 

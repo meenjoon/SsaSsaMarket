@@ -190,26 +190,43 @@ class FirebaseDataSource @Inject constructor(
         }
     }.flowOn(defaultDispatcher)
 
-    override suspend fun buyProduct(postId: String, request: PatchBuyRequest): ApiResponse<Unit> {
+    override fun buyProduct(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postId: String,
+        request: PatchBuyRequest,
+    ): Flow<ApiResponse<Unit>> = flow {
         val (user, idToken) = getUserAndIdToken()
         val googleIdToken = idToken ?: ""
-        return apiClient.buyProduct(postId, request, googleIdToken)
-    }
+        val response = apiClient.buyProduct(postId, request, googleIdToken)
 
-    override suspend fun enterChatRoom(
+        response.onSuccess {
+            emit(response)
+            onComplete()
+        }.onError { code, message ->
+            onError("code: $code, message: $message")
+        }.onException { throwable ->
+            onError(throwable.message)
+        }
+    }.flowOn(defaultDispatcher)
+
+    override fun enterChatRoom(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
         ohterUserId: String,
         otherUserName: String,
         otherLocation: String
-    ): ApiResponse<String> {
+    ): Flow<ApiResponse<String>> = flow {
         val userId = getUserAndIdToken().first?.uid ?: ""
 
         val chatRoomDB = chatRoomsRef.child(userId).child(ohterUserId)
         val dataSnapshot = chatRoomDB.get().await()
 
-        return if (dataSnapshot.value != null) {
+        if (dataSnapshot.value != null) {
             val chatRoom = dataSnapshot.getValue(ChatRoomItem::class.java)
             val chatRoomId = chatRoom?.chatRoomId ?: ""
-            ApiResultSuccess(chatRoomId)
+            emit(ApiResultSuccess(chatRoomId))
+            onComplete()
         } else {
             try {
                 val chatRoomId = UUID.randomUUID().toString()
@@ -220,27 +237,52 @@ class FirebaseDataSource @Inject constructor(
                     otherLocation = otherLocation,
                 )
                 chatRoomDB.setValue(newChatRoom).await()
-                ApiResultSuccess(chatRoomId)
+                emit(ApiResultSuccess(chatRoomId))
+                onComplete()
             } catch (e: Exception) {
-                ApiResultError(code = 400, message = e.message ?: "Failed to create chat room")
+                onError(e.message)
             }
         }
-    }
+    }.flowOn(defaultDispatcher)
 
-    override suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem> {
+    override fun getProductDetail(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postId: String
+    ): Flow<ApiResponse<ProductPostItem>> = flow {
         val (user, idToken) = getUserAndIdToken()
         val googleIdToken = idToken ?: ""
-        return apiClient.getProductDetail(postId, googleIdToken)
-    }
+        val response = apiClient.getProductDetail(postId, googleIdToken)
 
-    override suspend fun updateProductFavorite(
+        response.onSuccess { productItem ->
+            emit(ApiResultSuccess(productItem))
+            onComplete()
+        }.onError { code, message ->
+            onError("code: $code, message: $message")
+        }.onException { throwable ->
+            onError(throwable.message)
+        }
+    }.flowOn(defaultDispatcher)
+
+    override fun updateProductFavorite(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
         postId: String,
         request: FavoriteCountRequest
-    ): ApiResponse<Unit> {
+    ): Flow<ApiResponse<Unit>> = flow {
         val (user, idToken) = getUserAndIdToken()
         val googleIdToken = idToken ?: ""
-        return apiClient.updateProductFavorite(postId, request, googleIdToken)
-    }
+        val response = apiClient.updateProductFavorite(postId, request, googleIdToken)
+
+        response.onSuccess {
+            emit(ApiResultSuccess(Unit))
+            onComplete()
+        }.onError { code, message ->
+            onError("code: $code, message: $message")
+        }.onException { throwable ->
+            onError(throwable.message)
+        }
+    }.flowOn(defaultDispatcher)
 
     override suspend fun getMyUserItem(): ApiResponse<User> {
         val userId = getUserAndIdToken().first?.uid ?: ""

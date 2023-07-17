@@ -43,7 +43,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:onClick="@{() -> viewModel.onHeartClicked()}"
-                        android:src="@{viewModel.isLiked.peekContent() ? @drawable/heart_full_icon : @drawable/heart_empty_icon}"
+                        android:src="@{viewModel.isLiked ? @drawable/heart_full_icon : @drawable/heart_empty_icon}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="@id/guideline_vertical_93"
                         app:layout_constraintTop_toTopOf="parent"
@@ -95,10 +95,11 @@
                     android:id="@+id/detail_receiver"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="70dp"
                     app:detailContentEnabled="false"
                     app:detailContentText="@{viewModel.productPostItem.content}"
                     app:detailLocationText="@{viewModel.productPostItem.location}"
-                    app:detailNicknameText="@{viewModel.nickname.peekContent()}"
+                    app:detailNicknameText="@{viewModel.nickname}"
                     app:detailPriceEnabled="false"
                     app:detailPriceText="@{Integer.toString(viewModel.productPostItem.price)}"
                     app:detailTimeText="@{viewModel.productPostItem.createdDate}"
@@ -112,8 +113,7 @@
                     tools:detailNicknameText="1312"
                     tools:detailPriceText="1,000"
                     tools:detailTimeText="1분전"
-                    tools:detailTitleText="포켓몬 쁘띠씰 팝니다~~"
-                    android:layout_marginBottom="70dp"/>
+                    tools:detailTitleText="포켓몬 쁘띠씰 팝니다~~" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -184,6 +184,24 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             app:visible="@{viewModel.nicknameError}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:visible="@{viewModel.buyError}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:visible="@{viewModel.enterChatRoomError}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:visible="@{viewModel.likedError}" />
 
         <com.mbj.ssassamarket.util.ProgressIndicatorView
             android:layout_width="wrap_content"

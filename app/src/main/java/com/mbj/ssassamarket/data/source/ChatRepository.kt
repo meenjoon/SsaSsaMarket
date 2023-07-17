@@ -7,16 +7,19 @@ import com.mbj.ssassamarket.data.model.ChatRoomItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
 import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class ChatRepository @Inject constructor(private val marketNetworkDataSource: MarketNetworkDataSource) {
 
-    suspend fun enterChatRoom(
-        productId: String,
+    fun enterChatRoom(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        ohterUserId: String,
         otherUserName: String,
         otherLocation: String
-    ): ApiResponse<String> {
-        return marketNetworkDataSource.enterChatRoom(productId, otherUserName, otherLocation)
+    ): Flow<ApiResponse<String>> {
+        return marketNetworkDataSource.enterChatRoom(onComplete, onError, ohterUserId, otherUserName, otherLocation)
     }
 
     suspend fun getMyUserItem(): ApiResponse<User> {
