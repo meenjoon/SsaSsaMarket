@@ -22,15 +22,24 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         return marketNetworkDataSource.enterChatRoom(onComplete, onError, ohterUserId, otherUserName, otherLocation)
     }
 
-    suspend fun getMyUserItem(): ApiResponse<User> {
-        return marketNetworkDataSource.getMyUserItem()
+    fun getMyUserItem(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<User>> {
+        return marketNetworkDataSource.getMyUserItem(onComplete, onError)
     }
 
-    suspend fun getOtherUserItem(userId: String): ApiResponse<User> {
-        return marketNetworkDataSource.getOtherUserItem(userId)
+    fun getOtherUserItem(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        userId: String
+    ): Flow<ApiResponse<User>> {
+        return marketNetworkDataSource.getOtherUserItem(onComplete, onError, userId)
     }
 
-    suspend fun sendMessage(
+    fun sendMessage(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
         chatRoomId: String,
         otherUserId: String,
         message: String,
@@ -38,9 +47,11 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         myLocation: String,
         lastSentTime: String,
         myLatLng: String,
-        dataId: String
-    ): ApiResponse<Unit> {
+        dataId: String,
+    ): Flow<ApiResponse<Unit>> {
         return marketNetworkDataSource.sendMessage(
+            onComplete,
+            onError,
             chatRoomId,
             otherUserId,
             message,

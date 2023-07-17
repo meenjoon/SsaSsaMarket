@@ -284,10 +284,13 @@ class FirebaseDataSource @Inject constructor(
         }
     }.flowOn(defaultDispatcher)
 
-    override suspend fun getMyUserItem(): ApiResponse<User> {
+    override fun getMyUserItem(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<User>> = flow {
         val userId = getUserAndIdToken().first?.uid ?: ""
 
-        return try {
+        try {
             val dataSnapshot = database.child(USER).child(userId).get().await()
 
             for (childSnapshot in dataSnapshot.children) {
@@ -296,16 +299,23 @@ class FirebaseDataSource @Inject constructor(
                 val myLatLng = childSnapshot.child(LAT_LNG).getValue(String::class.java)
 
                 val myUserItem = User(myUserId, myUserName, myLatLng)
-                return ApiResultSuccess(myUserItem)
+                emit(ApiResultSuccess(myUserItem))
+                onComplete()
+                return@flow
             }
-            ApiResultError(code = 400, message = "My User data not found")
+            emit(ApiResultError(code = 400, message = "My User data not found"))
         } catch (e: Exception) {
-            ApiResultError(code = 500, message = e.message ?: "Failed to get my user")
+            onError(e.message)
+            emit(ApiResultError(code = 500, message = e.message ?: "Failed to get my user"))
         }
-    }
+    }.flowOn(defaultDispatcher)
 
-    override suspend fun getOtherUserItem(userId: String): ApiResponse<User> {
-        return try {
+    override fun getOtherUserItem(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        userId: String
+    ): Flow<ApiResponse<User>> = flow {
+        try {
             val dataSnapshot = database.child(USER).child(userId).get().await()
             val user = dataSnapshot.children.mapNotNull { childSnapshot ->
                 val otherUserId = childSnapshot.child(USER_ID).getValue(String::class.java)
@@ -320,16 +330,21 @@ class FirebaseDataSource @Inject constructor(
             }.firstOrNull()
 
             if (user != null) {
-                ApiResultSuccess(user)
+                emit(ApiResultSuccess(user))
+                onComplete()
             } else {
-                ApiResultError(code = 400, message = "Other User data not found")
+                onError("Other User data not found")
+                emit(ApiResultError(code = 400, message = "Other User data not found"))
             }
         } catch (e: Exception) {
-            ApiResultError(code = 500, message = e.message ?: "Failed to get other user")
+            onError(e.message)
+            emit(ApiResultError(code = 500, message = e.message ?: "Failed to get other user"))
         }
-    }
+    }.flowOn(defaultDispatcher)
 
-    override suspend fun sendMessage(
+    override fun sendMessage(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
         chatRoomId: String,
         otherUserId: String,
         message: String,
@@ -337,9 +352,9 @@ class FirebaseDataSource @Inject constructor(
         myLocation: String,
         lastSentTime: String,
         myLatLng: String,
-        dataId: String
-    ): ApiResponse<Unit> {
-        return try {
+        dataId: String,
+    ): Flow<ApiResponse<Unit>> = flow {
+        try {
             val userId = getUserAndIdToken().first?.uid ?: ""
 
             val newChatItem = ChatItem(
@@ -367,11 +382,13 @@ class FirebaseDataSource @Inject constructor(
             )
             database.updateChildren(updates)
 
-            ApiResultSuccess(Unit)
+            emit(ApiResultSuccess(Unit))
+            onComplete()
         } catch (e: Exception) {
-            ApiResultError(code = 400, message = e.message ?: "Failed to send message")
+            onError(e.message)
+            emit(ApiResultError(code = 400, message = e.message ?: "Failed to send message"))
         }
-    }
+    }.flowOn(defaultDispatcher)
 
     override suspend fun getChatRooms(): ApiResponse<List<ChatRoomItem>> {
         val userId = getUserAndIdToken().first?.uid ?: ""

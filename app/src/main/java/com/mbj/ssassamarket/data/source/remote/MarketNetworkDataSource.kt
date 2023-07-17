@@ -83,11 +83,29 @@ interface MarketNetworkDataSource {
         request: FavoriteCountRequest
     ): Flow<ApiResponse<Unit>>
 
-    suspend fun getMyUserItem() : ApiResponse<User>
+    fun getMyUserItem(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<User>>
 
-    suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, myUserName: String, myLocation: String, lastSentTime: String, myLatLng: String, dataId: String): ApiResponse<Unit>
+    fun getOtherUserItem(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        userId: String
+    ): Flow<ApiResponse<User>>
 
-    suspend fun getOtherUserItem(userId: String): ApiResponse<User>
+    fun sendMessage(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        chatRoomId: String,
+        otherUserId: String,
+        message: String,
+        myUserName: String,
+        myLocation: String,
+        lastSentTime: String,
+        myLatLng: String,
+        dataId: String,
+    ): Flow<ApiResponse<Unit>>
 
     suspend fun getChatRooms(): ApiResponse<List<ChatRoomItem>>
 
