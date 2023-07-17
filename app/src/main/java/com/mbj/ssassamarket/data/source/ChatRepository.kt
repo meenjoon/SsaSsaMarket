@@ -63,8 +63,11 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         )
     }
 
-    suspend fun getChatRooms(): ApiResponse<List<ChatRoomItem>> {
-        return marketNetworkDataSource.getChatRooms()
+    fun getChatRooms(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<List<ChatRoomItem>>> {
+        return marketNetworkDataSource.getChatRooms(onComplete, onError)
     }
 
     fun addChatDetailEventListener(

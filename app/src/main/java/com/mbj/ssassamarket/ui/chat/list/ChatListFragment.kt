@@ -10,6 +10,9 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mbj.ssassamarket.R
@@ -18,9 +21,10 @@ import com.mbj.ssassamarket.databinding.FragmentChatListBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.ChatListClickListener
 import com.mbj.ssassamarket.util.Colors
-import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.LocationManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -74,12 +78,12 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.viewModel = viewModel
         viewModel.getChatRooms()
         viewModel.addChatRoomsValueEventListener()
 
         initRecyclerView()
         observeChatRooms()
-        observeChatRoomsError()
     }
 
     override fun onResume() {
@@ -146,17 +150,12 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
     }
 
     private fun observeChatRooms() {
-        viewModel.chatRooms.observe(viewLifecycleOwner, EventObserver{ chatRooms ->
-            adapter.submitList(chatRooms)
-        })
-    }
-
-    private fun observeChatRoomsError() {
-        viewModel.chatRoomsError.observe(viewLifecycleOwner, EventObserver { chatRoomsError ->
-            if (chatRoomsError) {
-                showToast(R.string.error_message_chat_room)
-            }
-        })
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.chatRooms.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collectLatest { chatRooms ->
+                    adapter.submitList(chatRooms)
+                }
+        }
     }
 
     override fun onChatRoomClicked(chatRoomItem: ChatRoomItem, otherImageColor: String) {

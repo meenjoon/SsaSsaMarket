@@ -107,7 +107,10 @@ interface MarketNetworkDataSource {
         dataId: String,
     ): Flow<ApiResponse<Unit>>
 
-    suspend fun getChatRooms(): ApiResponse<List<ChatRoomItem>>
+    fun getChatRooms(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<List<ChatRoomItem>>>
 
     fun addChatDetailEventListener(chatRoomId: String, onChatItemAdded: (ChatItem) -> Unit): ChildEventListener
 

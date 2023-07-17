@@ -1,37 +1,41 @@
 package com.mbj.ssassamarket.ui.chat.list
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.ValueEventListener
 import com.mbj.ssassamarket.data.model.ChatRoomItem
 import com.mbj.ssassamarket.data.source.ChatRepository
-import com.mbj.ssassamarket.data.source.remote.network.onError
-import com.mbj.ssassamarket.data.source.remote.network.onSuccess
-import com.mbj.ssassamarket.util.Event
+import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ChatListViewModel @Inject constructor(private val chatRepository: ChatRepository) : ViewModel() {
 
-    private val _chatRooms = MutableLiveData<Event<List<ChatRoomItem>>>()
-    val chatRooms: LiveData<Event<List<ChatRoomItem>>> = _chatRooms
+    private val _chatRooms = MutableStateFlow<List<ChatRoomItem>>(emptyList())
+    val chatRooms: StateFlow<List<ChatRoomItem>> = _chatRooms
 
-    private val _chatRoomsError = MutableLiveData<Event<Boolean>>()
-    val chatRoomsError: LiveData<Event<Boolean>> get() = _chatRoomsError
+    private val _chatRoomsError = MutableStateFlow(false)
+    val chatRoomsError: StateFlow<Boolean> = _chatRoomsError
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     private var chatRoomsValueEventListener: ValueEventListener? = null
 
     fun getChatRooms() {
         viewModelScope.launch {
-            val result = chatRepository.getChatRooms()
-            result.onSuccess { chatRoomList ->
-                _chatRooms.value = Event(chatRoomList)
-            }.onError { code, message ->
-                _chatRoomsError.value = Event(true)
+            chatRepository.getChatRooms(
+                onComplete = { _isLoading.value = false },
+                onError = { _chatRoomsError.value = true }
+            ).collectLatest { chatRoomList ->
+                if (chatRoomList is ApiResultSuccess) {
+                    _chatRooms.value = chatRoomList.data
+                }
             }
         }
     }
@@ -40,7 +44,7 @@ class ChatListViewModel @Inject constructor(private val chatRepository: ChatRepo
         viewModelScope.launch {
             chatRoomsValueEventListener =
                 chatRepository.addChatRoomsValueEventListener { chatRoomList ->
-                    _chatRooms.value = Event(chatRoomList)
+                    _chatRooms.value = chatRoomList
                 }
         }
     }

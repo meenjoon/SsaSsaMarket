@@ -390,28 +390,33 @@ class FirebaseDataSource @Inject constructor(
         }
     }.flowOn(defaultDispatcher)
 
-    override suspend fun getChatRooms(): ApiResponse<List<ChatRoomItem>> {
+    override fun getChatRooms(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<List<ChatRoomItem>>> = flow {
         val userId = getUserAndIdToken().first?.uid ?: ""
         val chatRoomsDB = Firebase.database(BuildConfig.FIREBASE_BASE_URL)
             .reference.child(CHAT_ROOMS)
             .child(userId)
 
-        return try {
+        try {
             val chatRoomsSnapshot = chatRoomsDB.get().await()
             val chatRoomItemList = mutableListOf<ChatRoomItem>()
 
             for (childSnapshot in chatRoomsSnapshot.children) {
                 val chatRoomItem = childSnapshot.getValue(ChatRoomItem::class.java)
-                if (chatRoomItem != null) {
-                    chatRoomItemList.add(chatRoomItem)
+                chatRoomItem?.let {
+                    chatRoomItemList.add(it)
                 }
             }
-
-            ApiResultSuccess(chatRoomItemList)
+            emit(ApiResultSuccess<List<ChatRoomItem>>(chatRoomItemList))
+            onComplete()
         } catch (e: Exception) {
-            ApiResultError(code = 400, message = e.message ?: "Failed to get chat rooms")
+            val errorResponse = ApiResultError<List<ChatRoomItem>>(code = 400, message = e.message ?: "Failed to get chat rooms")
+            emit(ApiResultError<List<ChatRoomItem>>(code = 400, message = e.message ?: "Failed to get chat rooms"))
+            onError(errorResponse.message)
         }
-    }
+    }.flowOn(defaultDispatcher)
 
     override fun addChatDetailEventListener(
         chatRoomId: String,
