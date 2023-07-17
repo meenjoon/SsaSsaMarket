@@ -170,41 +170,25 @@ class FirebaseDataSource @Inject constructor(
         }
     }.flowOn(defaultDispatcher)
 
-    override suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem> {
-        val (user, idToken) = getUserAndIdToken()
-        val googleIdToken = idToken ?: ""
-        return apiClient.getProductDetail(postId, googleIdToken)
-    }
-
-    override suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
-        val user = FirebaseAuth.getInstance().currentUser
-        val idToken = user?.getIdToken(true)?.await()?.token
-        return Pair(user, idToken)
-    }
-
-    override suspend fun getUserNameByUserId(): ApiResponse<Map<String, Map<String, User>>> {
-        val (user, idToken) = getUserAndIdToken()
-        val googleIdToken = idToken ?: ""
-        return apiClient.getUser(googleIdToken)
-    }
-
-    override suspend fun updateProduct(
+    override fun updateProduct(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
         postId: String,
         request: PatchProductRequest
-    ): ApiResponse<Unit> {
+    ): Flow<ApiResponse<Unit>> = flow {
         val (user, idToken) = getUserAndIdToken()
         val googleIdToken = idToken ?: ""
-        return apiClient.updateProduct(postId, request, googleIdToken)
-    }
+        val response = apiClient.updateProduct(postId, request, googleIdToken)
 
-    override suspend fun updateProductFavorite(
-        postId: String,
-        request: FavoriteCountRequest
-    ): ApiResponse<Unit> {
-        val (user, idToken) = getUserAndIdToken()
-        val googleIdToken = idToken ?: ""
-        return apiClient.updateProductFavorite(postId, request, googleIdToken)
-    }
+        response.onSuccess {
+            emit(response)
+            onComplete()
+        }.onError { code, message ->
+            onError("code: $code, message: $message")
+        }.onException { throwable ->
+            onError(throwable.message)
+        }
+    }.flowOn(defaultDispatcher)
 
     override suspend fun buyProduct(postId: String, request: PatchBuyRequest): ApiResponse<Unit> {
         val (user, idToken) = getUserAndIdToken()
@@ -241,6 +225,21 @@ class FirebaseDataSource @Inject constructor(
                 ApiResultError(code = 400, message = e.message ?: "Failed to create chat room")
             }
         }
+    }
+
+    override suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem> {
+        val (user, idToken) = getUserAndIdToken()
+        val googleIdToken = idToken ?: ""
+        return apiClient.getProductDetail(postId, googleIdToken)
+    }
+
+    override suspend fun updateProductFavorite(
+        postId: String,
+        request: FavoriteCountRequest
+    ): ApiResponse<Unit> {
+        val (user, idToken) = getUserAndIdToken()
+        val googleIdToken = idToken ?: ""
+        return apiClient.updateProductFavorite(postId, request, googleIdToken)
     }
 
     override suspend fun getMyUserItem(): ApiResponse<User> {
@@ -425,6 +424,12 @@ class FirebaseDataSource @Inject constructor(
             .downloadUrl
             .await()
             .toString()
+    }
+
+    override suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
+        val user = FirebaseAuth.getInstance().currentUser
+        val idToken = user?.getIdToken(true)?.await()?.token
+        return Pair(user, idToken)
     }
 
     private suspend fun uploadImages(imageContentList: List<ImageContent>): List<String> =

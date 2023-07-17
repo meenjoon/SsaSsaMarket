@@ -48,17 +48,20 @@ interface MarketNetworkDataSource {
         onError: (message: String?) -> Unit
     ): Flow<ApiResponse<Map<String, ProductPostItem>>>
 
-    suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem>
-
-    suspend fun getUserNameByUserId(): ApiResponse<Map<String, Map<String, User>>>
-
-    suspend fun updateProduct(postId: String, request: PatchProductRequest): ApiResponse<Unit>
-
-    suspend fun updateProductFavorite(postId: String, request: FavoriteCountRequest): ApiResponse<Unit>
+    fun updateProduct(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postId: String,
+        request: PatchProductRequest
+    ): Flow<ApiResponse<Unit>>
 
     suspend fun buyProduct(postId: String, request: PatchBuyRequest): ApiResponse<Unit>
 
     suspend fun enterChatRoom(productId: String, otherUserName: String, otherLocation: String): ApiResponse<String>
+
+    suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem>
+
+    suspend fun updateProductFavorite(postId: String, request: FavoriteCountRequest): ApiResponse<Unit>
 
     suspend fun getMyUserItem() : ApiResponse<User>
 

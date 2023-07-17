@@ -5,6 +5,10 @@
     <data>
 
         <variable
+            name="editMode"
+            type="com.mbj.ssassamarket.data.model.EditMode" />
+
+        <variable
             name="viewModel"
             type="com.mbj.ssassamarket.ui.detail.seller.SellerViewModel" />
     </data>
@@ -50,7 +54,8 @@
                         android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toEndOf="@id/detail_back_iv"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:visibleEdit="@{viewModel.editMode}" />
 
                     <TextView
                         android:id="@+id/detail_submit_tv"
@@ -58,13 +63,14 @@
                         android:layout_height="0dp"
                         android:gravity="end|center"
                         android:text="@string/success"
-                        android:textColor="@color/grey_300"
+                        android:textColor="@color/orange_700"
                         android:textSize="23sp"
                         android:textStyle="bold"
                         android:visibility="invisible"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="@id/guideline_vertical_93"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:visibleEdit="@{viewModel.editMode}" />
 
                     <androidx.constraintlayout.widget.Guideline
                         android:id="@+id/guideline_vertical_93"
@@ -112,7 +118,18 @@
                     android:id="@+id/detail_receiver"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:detailNicknameText="@{viewModel.nickname.peekContent()}"
+                    app:detailContentEnabled="@{viewModel.editMode == editMode.EDIT}"
+                    app:detailContentText="@{viewModel.product.content}"
+                    app:detailContentTextColor="@{viewModel.editMode == editMode.READ_ONLY ? @color/black : @color/grey_100}"
+                    app:detailLocationText="@{viewModel.product.location}"
+                    app:detailNicknameText="@{viewModel.nickname}"
+                    app:detailPriceEnabled="@{viewModel.editMode == editMode.EDIT}"
+                    app:detailPriceText="@{String.valueOf(viewModel.product.price)}"
+                    app:detailPriceTextColor="@{viewModel.editMode == editMode.READ_ONLY ? @color/black : @color/grey_100}"
+                    app:detailTimeText="@{viewModel.product.createdDate}"
+                    app:detailTitleEnabled="@{viewModel.editMode == editMode.EDIT}"
+                    app:detailTitleText="@{viewModel.product.title}"
+                    app:detailTitleTextColor="@{viewModel.editMode == editMode.READ_ONLY ? @color/black : @color/grey_100}"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -131,14 +148,22 @@
             android:gravity="center"
             android:text="@string/seller_edit"
             android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            app:visibleReadOnly="@{viewModel.editMode}" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/error_message_retry"
+            android:text="@string/error_message_nickname"
             app:visible="@{viewModel.nicknameError}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/error_message_product_update"
+            app:visible="@{viewModel.productUpdateError}" />
 
         <com.mbj.ssassamarket.util.ProgressIndicatorView
             android:layout_width="wrap_content"

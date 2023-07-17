@@ -51,19 +51,27 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
         return marketNetworkDataSource.getProduct(onComplete, onError)
     }
 
-    suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem>  {
-        return marketNetworkDataSource.getProductDetail(postId)
-    }
-
-    suspend fun updateProduct(postId: String, request: PatchProductRequest): ApiResponse<Unit> {
-        return marketNetworkDataSource.updateProduct(postId, request)
-    }
-
-    suspend fun updateProductFavorite(postId: String, request: FavoriteCountRequest): ApiResponse<Unit> {
-        return marketNetworkDataSource.updateProductFavorite(postId, request)
+    fun updateProduct(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postId: String,
+        request: PatchProductRequest
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.updateProduct(onComplete, onError, postId, request)
     }
 
     suspend fun buyProduct(postId: String, request: PatchBuyRequest): ApiResponse<Unit> {
         return marketNetworkDataSource.buyProduct(postId, request)
+    }
+
+    suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem> {
+        return marketNetworkDataSource.getProductDetail(postId)
+    }
+
+    suspend fun updateProductFavorite(
+        postId: String,
+        request: FavoriteCountRequest
+    ): ApiResponse<Unit> {
+        return marketNetworkDataSource.updateProductFavorite(postId, request)
     }
 }

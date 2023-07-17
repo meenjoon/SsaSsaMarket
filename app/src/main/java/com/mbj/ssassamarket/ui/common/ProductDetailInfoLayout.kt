@@ -1,7 +1,6 @@
 package com.mbj.ssassamarket.ui.common
 
 import android.content.Context
-import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -94,17 +93,6 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
     fun setDetailLocationText(text: CharSequence?) {
         binding.detailLocationTv.setText(text)
     }
-    fun setDetailTitleTextChangeListener(textWatcher: TextWatcher) {
-        binding.detailTitleTiev.addTextChangedListener(textWatcher)
-    }
-
-    fun setDetailPriceTextChangeListener(textWatcher: TextWatcher) {
-        binding.detailPriceTiev.addTextChangedListener(textWatcher)
-    }
-
-    fun setDetailContentTextChangeListener(textWatcher: TextWatcher) {
-        binding.detailContentTiev.addTextChangedListener(textWatcher)
-    }
 
     fun setDetailTitleTextColor(colorResourceId: Int) {
         if (colorResourceId != 0) {
@@ -122,5 +110,17 @@ class ProductDetailInfoLayout (context: Context, attrs: AttributeSet) : Constrai
         if (colorResourceId != 0) {
             binding.detailContentTiev.setTextColor(colorResourceId)
         }
+    }
+
+    fun getDetailTitleText(): String {
+        return binding.detailTitleTiev.text.toString()
+    }
+
+    fun getDetailPriceText(): String {
+        return binding.detailPriceTiev.text.toString()
+    }
+
+    fun getDetailContentText(): String {
+        return binding.detailContentTiev.text.toString()
     }
 }

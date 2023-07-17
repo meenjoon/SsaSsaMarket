@@ -52,8 +52,8 @@ class BuyerViewModel @Inject constructor(
     private val _enterChatRoomError = MutableLiveData<Event<Boolean>>()
     val enterChatRoomError: LiveData<Event<Boolean>> get() = _enterChatRoomError
 
-    private val _buyError = MutableLiveData<Event<Boolean>>()
-    val buyError: LiveData<Event<Boolean>> get() = _buyError
+    private val _buyError = MutableStateFlow(false)
+    val buyError: StateFlow<Boolean> = _buyError
 
     private var postId: String? = null
     private var productPostItem: ProductPostItem? = null
@@ -78,7 +78,7 @@ class BuyerViewModel @Inject constructor(
             if (productUid != null) {
                 userInfoRepository.getUser(
                     onComplete = {_isLoading.value = false },
-                    onError = { _nicknameError.value = (true) }
+                    onError = { _nicknameError.value = true }
                 ).collect { response ->
                     if (response is ApiResultSuccess) {
                         val users = response.data
@@ -101,10 +101,10 @@ class BuyerViewModel @Inject constructor(
                 )
                 result.onSuccess { chatRoomId ->
                     _chatRoomId.value = Event(chatRoomId)
-                    _isLoading.value = (false)
+                    _isLoading.value = false
                 }.onError { code, message ->
                     _enterChatRoomError.value = Event(true)
-                    _isLoading.value = (false)
+                    _isLoading.value = false
                 }
             }
         }
@@ -132,8 +132,8 @@ class BuyerViewModel @Inject constructor(
                         _isLoading.value = (false)
                     }
                 }.onError { code, message ->
-                    _buyError.value = Event(true)
-                    _isLoading.value = (false)
+                    _buyError.value = true
+                    _isLoading.value = false
                 }
             }
         }

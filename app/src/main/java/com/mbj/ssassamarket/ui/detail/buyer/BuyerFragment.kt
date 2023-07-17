@@ -72,7 +72,7 @@ class BuyerFragment : BaseFragment() {
 //        observeLoading()
         observeLikedError()
         observeEnterChatRoomError()
-        observeBuyError()
+//        observeBuyError()
     }
 
     private fun setupViews() {
@@ -197,13 +197,13 @@ class BuyerFragment : BaseFragment() {
         })
     }
 
-    private fun observeBuyError() {
-        viewModel.buyError.observe(viewLifecycleOwner, EventObserver { buyError ->
-            if (buyError) {
-                showToast(R.string.error_message_buy)
-            }
-        })
-    }
+//    private fun observeBuyError() {
+//        viewModel.buyError.observe(viewLifecycleOwner, EventObserver { buyError ->
+//            if (buyError) {
+//                showToast(R.string.error_message_buy)
+//            }
+//        })
+//    }
 
     private fun showLoadingDialog() {
         progressDialog = ProgressDialogFragment()
