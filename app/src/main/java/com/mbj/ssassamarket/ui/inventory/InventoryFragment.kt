@@ -3,6 +3,8 @@ package com.mbj.ssassamarket.ui.inventory
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.mbj.ssassamarket.R
@@ -35,7 +37,7 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
 
     private fun observeInventoryDataList(adapter: InventoryOuterAdapter) {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.inventoryDataList.collectLatest { inventoryDataList ->
+            viewModel.inventoryDataList.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED).collectLatest { inventoryDataList ->
                 adapter.submitList(inventoryDataList)
             }
         }
