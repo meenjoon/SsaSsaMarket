@@ -1,7 +1,5 @@
 package com.mbj.ssassamarket.ui.chat.detail
 
-import android.graphics.Color
-import android.graphics.PorterDuff
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -11,8 +9,6 @@ import com.mbj.ssassamarket.data.model.ChatItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.databinding.RecyclerviewItemMeChatBinding
 import com.mbj.ssassamarket.databinding.RecyclerviewItemOtherChatBinding
-import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
-import com.mbj.ssassamarket.util.TextFormat.getInitialLetter
 
 class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatListDiffCallback()) {
 
@@ -72,8 +68,7 @@ class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatL
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(chatItem: ChatItem) {
-            binding.chatMeMessageTv.text = chatItem.message
-            binding.chatMeLastSentTimeTv.text = chatItem.lastSentTime?.let { getFormattedElapsedTime(it) }
+            binding.chatItem = chatItem
         }
     }
 
@@ -81,13 +76,9 @@ class ChatDetailAdapter() : ListAdapter<ChatItem, RecyclerView.ViewHolder>(ChatL
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(chatItem: ChatItem, otherImageColor: String?) {
-            if (otherImageColor != null) {
-                binding.chatOtherUserIv.setColorFilter(Color.parseColor(otherImageColor), PorterDuff.Mode.SRC_IN)
-            }
-            binding.chatOtherNicknameTv.text = otherUser?.userName
-            binding.chatOtherMessageTv.text = chatItem.message
-            binding.chatOtherUserFirstNicknameTv.text = otherUser?.userName?.let { getInitialLetter(it) }
-            binding.chatOtherLastSentTimeTv.text = chatItem.lastSentTime?.let { getFormattedElapsedTime(it) }
+            binding.chatItem = chatItem
+            binding.otherUser = otherUser
+            binding.otherImageColor = otherImageColor
         }
     }
 

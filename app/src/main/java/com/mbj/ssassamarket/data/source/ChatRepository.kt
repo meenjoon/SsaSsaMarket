@@ -7,27 +7,39 @@ import com.mbj.ssassamarket.data.model.ChatRoomItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
 import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class ChatRepository @Inject constructor(private val marketNetworkDataSource: MarketNetworkDataSource) {
 
-    suspend fun enterChatRoom(
-        productId: String,
+    fun enterChatRoom(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        ohterUserId: String,
         otherUserName: String,
         otherLocation: String
-    ): ApiResponse<String> {
-        return marketNetworkDataSource.enterChatRoom(productId, otherUserName, otherLocation)
+    ): Flow<ApiResponse<String>> {
+        return marketNetworkDataSource.enterChatRoom(onComplete, onError, ohterUserId, otherUserName, otherLocation)
     }
 
-    suspend fun getMyUserItem(): ApiResponse<User> {
-        return marketNetworkDataSource.getMyUserItem()
+    fun getMyUserItem(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<User>> {
+        return marketNetworkDataSource.getMyUserItem(onComplete, onError)
     }
 
-    suspend fun getOtherUserItem(userId: String): ApiResponse<User> {
-        return marketNetworkDataSource.getOtherUserItem(userId)
+    fun getOtherUserItem(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        userId: String
+    ): Flow<ApiResponse<User>> {
+        return marketNetworkDataSource.getOtherUserItem(onComplete, onError, userId)
     }
 
-    suspend fun sendMessage(
+    fun sendMessage(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
         chatRoomId: String,
         otherUserId: String,
         message: String,
@@ -35,9 +47,11 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         myLocation: String,
         lastSentTime: String,
         myLatLng: String,
-        dataId: String
-    ): ApiResponse<Unit> {
+        dataId: String,
+    ): Flow<ApiResponse<Unit>> {
         return marketNetworkDataSource.sendMessage(
+            onComplete,
+            onError,
             chatRoomId,
             otherUserId,
             message,
@@ -49,8 +63,11 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         )
     }
 
-    suspend fun getChatRooms(): ApiResponse<List<ChatRoomItem>> {
-        return marketNetworkDataSource.getChatRooms()
+    fun getChatRooms(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<List<ChatRoomItem>>> {
+        return marketNetworkDataSource.getChatRooms(onComplete, onError)
     }
 
     fun addChatDetailEventListener(

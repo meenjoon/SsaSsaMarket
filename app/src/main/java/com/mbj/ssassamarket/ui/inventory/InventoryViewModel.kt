@@ -1,50 +1,49 @@
 package com.mbj.ssassamarket.ui.inventory
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mbj.ssassamarket.data.model.*
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
-import com.mbj.ssassamarket.data.source.remote.network.onError
-import com.mbj.ssassamarket.data.source.remote.network.onSuccess
-import com.mbj.ssassamarket.util.Event
+import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class InventoryViewModel @Inject constructor(private val productRepository: ProductRepository, private val userInfoRepository: UserInfoRepository) : ViewModel() {
 
-    private val _inventoryDataList = MutableLiveData<Event<List<InventoryData>>>()
-    val inventoryDataList: LiveData<Event<List<InventoryData>>> get() = _inventoryDataList
+    private val _inventoryDataList = MutableStateFlow<List<InventoryData>>(emptyList())
+    val inventoryDataList: StateFlow<List<InventoryData>> = _inventoryDataList
 
-    private val _isLoading = MutableLiveData(Event(false))
-    val isLoading: LiveData<Event<Boolean>> = _isLoading
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _nickname = MutableLiveData<Event<String?>>()
-    val nickname: LiveData<Event<String?>> get() = _nickname
+    private val _nickname = MutableStateFlow("")
+    val nickname: StateFlow<String> = _nickname
 
-    private val _nicknameError = MutableLiveData<Event<Boolean>>()
-    val nicknameError: LiveData<Event<Boolean>> get() = _nicknameError
+    private val _nicknameError = MutableStateFlow(false)
+    val nicknameError: StateFlow<Boolean> = _nicknameError
 
-    private val _productError = MutableLiveData<Event<Boolean>>()
-    val productError: LiveData<Event<Boolean>> get() = _productError
+    private val _productError = MutableStateFlow(false)
+    val productError: StateFlow<Boolean> = _productError
 
     private var productPostItemList: List<Pair<String, ProductPostItem>>? = null
 
     fun initProductPostItemList() {
         viewModelScope.launch {
-            _isLoading.value = Event(true)
-            val result = productRepository.getProduct()
-            result.onSuccess { productMap ->
-                val updateProduct = updateProductsWithImageUrls(productMap)
-                productPostItemList = updateProduct
-                _isLoading.value = Event(false)
-            }.onError { code, message ->
-                _isLoading.value = Event(false)
-                _productError.value = Event(true)
+            _isLoading.value = true
+            productRepository.getProduct(
+                onComplete = { },
+                onError = { _productError.value = true }
+            ).collectLatest { productMap ->
+                if (productMap is ApiResultSuccess) {
+                    val updateProduct = updateProductsWithImageUrls(productMap.data)
+                    productPostItemList = updateProduct
+                }
             }
             getMyFavoriteProduct()
             getMyRegisteredProduct()
@@ -66,7 +65,8 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
                 inventoryDataList.add(InventoryData.ProductType(InventoryType.FAVORITE))
                 inventoryDataList.add(InventoryData.ProductItem(favoriteProductList))
             }
-            _inventoryDataList.value = Event(inventoryDataList)
+            _inventoryDataList.value = inventoryDataList
+            _isLoading.value = false
         }
     }
 
@@ -84,7 +84,8 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
                 inventoryDataList.add(InventoryData.ProductType(InventoryType.REGISTER_PRODUCT))
                 inventoryDataList.add(InventoryData.ProductItem(registeredProductList))
             }
-            _inventoryDataList.value = Event(inventoryDataList)
+            _inventoryDataList.value = inventoryDataList
+            _isLoading.value = false
         }
     }
 
@@ -102,19 +103,25 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
                 inventoryDataList.add(InventoryData.ProductType(InventoryType.SHOPPING_PRODUCT))
                 inventoryDataList.add(InventoryData.ProductItem(purchasedProductList))
             }
-            _inventoryDataList.value = Event(inventoryDataList)
+            _inventoryDataList.value = inventoryDataList
+            _isLoading.value = false
         }
     }
 
-    fun getNickname() {
+    fun getMyNickname() {
         viewModelScope.launch {
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
-            val result = userInfoRepository.getUser()
-            result.onSuccess { users ->
-                val nickname = findNicknameByUserId(users, uId)
-                _nickname.value = Event(nickname)
-            }.onError { code, message ->
-                _nicknameError.value = Event(true)
+            userInfoRepository.getUser(
+                onComplete = { },
+                onError = { _nicknameError.value = true }
+            ).collectLatest { response ->
+                if (response is ApiResultSuccess) {
+                    val users = response.data
+                    val nickname = findNicknameByUserId(users, uId)
+                    if (nickname != null) {
+                        _nickname.value = nickname
+                    }
+                }
             }
         }
     }

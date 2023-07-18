@@ -7,10 +7,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -19,11 +21,10 @@ import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentBuyerBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.detail.BannerAdapter
-import com.mbj.ssassamarket.util.Constants
-import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.LocationManager
-import com.mbj.ssassamarket.util.ProgressDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class BuyerFragment : BaseFragment() {
@@ -36,8 +37,6 @@ class BuyerFragment : BaseFragment() {
 
     private lateinit var locationManager: LocationManager
     private lateinit var bannerAdapter: BannerAdapter
-
-    private var progressDialog: ProgressDialogFragment? = null
 
     private val requestLocationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -60,11 +59,20 @@ class BuyerFragment : BaseFragment() {
         binding.viewModel = viewModel
         setupViewModel()
         setupViews()
-        viewModel.nicknameError.observe(viewLifecycleOwner, EventObserver{ nicknameError ->
-            if (nicknameError) {
-                showToast(R.string.error_message_retry)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.chatRoomId.collectLatest { chatRoomId ->
+                        viewModel.resetChatRoomSuccess()
+                        if (chatRoomId.isNotEmpty()) {
+                            viewModel.getOtherUserId()
+                                ?.let { navigateToChatDetailFragment(chatRoomId, it) }
+                        }
+                    }
+                }
             }
-        })
+        }
     }
 
     private fun setupViewModel() {
@@ -72,12 +80,6 @@ class BuyerFragment : BaseFragment() {
         viewModel.initializeProduct(args.postId, args.product)
         viewModel.getProductNickname()
         viewModel.checkProductInFavorites()
-
-        observeChatRoomId()
-        observeLoading()
-        observeLikedError()
-        observeEnterChatRoomError()
-        observeBuyError()
     }
 
     private fun setupViews() {
@@ -168,58 +170,6 @@ class BuyerFragment : BaseFragment() {
         }
     }
 
-    private fun observeChatRoomId() {
-        viewModel.chatRoomId.observe(viewLifecycleOwner, EventObserver { chatRoomId ->
-            viewModel.otherUserId.value?.let { otherUserId ->
-                navigateToChatDetailFragment(chatRoomId, otherUserId.peekContent())
-            }
-        })
-    }
-
-    private fun observeLoading() {
-        viewModel.isLoading.observe(viewLifecycleOwner, EventObserver { isLoading ->
-            if (isLoading) {
-                showLoadingDialog()
-            } else {
-                hideLoadingDialog()
-            }
-        })
-    }
-
-    private fun observeLikedError() {
-        viewModel.likedError.observe(viewLifecycleOwner, EventObserver { likedError ->
-            if (likedError) {
-                showToast(R.string.error_message_favorite)
-            }
-        })
-    }
-
-    private fun observeEnterChatRoomError() {
-        viewModel.enterChatRoomError.observe(viewLifecycleOwner, EventObserver { enterChatRoomError ->
-            if (enterChatRoomError) {
-                showToast(R.string.error_message_enter_chat)
-            }
-        })
-    }
-
-    private fun observeBuyError() {
-        viewModel.buyError.observe(viewLifecycleOwner, EventObserver { buyError ->
-            if (buyError) {
-                showToast(R.string.error_message_buy)
-            }
-        })
-    }
-
-    private fun showLoadingDialog() {
-        progressDialog = ProgressDialogFragment()
-        progressDialog?.show(childFragmentManager, Constants.PROGRESS_DIALOG)
-    }
-
-    private fun hideLoadingDialog() {
-        progressDialog?.dismiss()
-        progressDialog = null
-    }
-
     private fun navigateToChatDetailFragment(chatRoomId: String, otherId: String) {
         val action = BuyerFragmentDirections.actionBuyerFragmentToChatDetailFragment(
             chatRoomId = chatRoomId,
@@ -230,9 +180,5 @@ class BuyerFragment : BaseFragment() {
 
     private fun navigateUp() {
         findNavController().navigateUp()
-    }
-
-    private fun showToast(messageResId: Int) {
-        Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
     }
 }

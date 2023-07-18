@@ -3,8 +3,10 @@ package com.mbj.ssassamarket.ui.home
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
-import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.Category
@@ -15,8 +17,9 @@ import com.mbj.ssassamarket.databinding.FragmentHomeProductBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.ProductClickListener
 import com.mbj.ssassamarket.util.Constants.KEY_HOME_PRODUCT
-import com.mbj.ssassamarket.util.EventObserver
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeProductFragment : BaseFragment(), ProductClickListener {
@@ -24,6 +27,7 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
     override val binding get() = _binding as FragmentHomeProductBinding
     override val layoutId: Int get() = R.layout.fragment_home_product
 
+    private lateinit var adapter: HomeAdapter
     private val viewModel: HomeViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -31,13 +35,12 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
         binding.viewModel = viewModel
         setupViews()
         setAdapter()
-        observeError()
+        observeSearchAndItems()
     }
 
     private fun setupViews() {
         setupSwipeRefreshLayout()
         setupSpinner()
-        observeSearchText()
     }
 
     private fun setupSwipeRefreshLayout() {
@@ -67,21 +70,29 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
         }
     }
 
-    private fun observeSearchText() {
-        viewModel.searchText.observe(viewLifecycleOwner) {
-            viewModel.updateSearchText()
-        }
-    }
-
     private fun setAdapter() {
         val category = arguments?.getSerializable(KEY_HOME_PRODUCT) as? Category
         if (category != null) {
-            val adapter = HomeAdapter(this)
+            adapter = HomeAdapter(this)
             binding.homeProductRv.adapter = adapter
             viewModel.updateCategory(category)
-            viewModel.items.observe(viewLifecycleOwner, EventObserver { productList ->
-                adapter.submitList(productList)
-            })
+        }
+    }
+
+    private fun observeSearchAndItems() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.searchText.collectLatest { searchText ->
+                        viewModel.updateSearchText()
+                    }
+                }
+                launch {
+                    viewModel.items.collectLatest { productList ->
+                        adapter.submitList(productList)
+                    }
+                }
+            }
         }
     }
 
@@ -104,18 +115,6 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
                 }
             }
         }
-    }
-
-    private fun observeError() {
-        viewModel.isError.observe(viewLifecycleOwner, EventObserver { isError ->
-            if (isError) {
-                showToast(R.string.error_message_retry)
-            }
-        })
-    }
-
-    private fun showToast(messageResId: Int) {
-        Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
     }
 
     companion object {

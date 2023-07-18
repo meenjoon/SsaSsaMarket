@@ -5,20 +5,33 @@ import com.mbj.ssassamarket.data.model.PatchUserLatLng
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
 import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class UserInfoRepository @Inject constructor(private val marketNetworkDataSource: MarketNetworkDataSource) {
 
-    suspend fun getUser(): ApiResponse<Map<String, Map<String, User>>> {
-        return marketNetworkDataSource.getUser()
+    fun getUser(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<Map<String, Map<String, User>>>> {
+        return marketNetworkDataSource.getUser(onComplete, onError)
     }
 
-    suspend fun addUser(nickname: String): ApiResponse<Map<String, String>> {
-        return marketNetworkDataSource.addUser(nickname)
+    fun addUser(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        nickname: String
+    ): Flow<ApiResponse<Map<String, String>>> {
+        return marketNetworkDataSource.addUser(onComplete, onError, nickname)
     }
 
-    suspend fun updateMyLatLng(dataId: String, latLng: PatchUserLatLng): ApiResponse<Unit> {
-        return marketNetworkDataSource.updateMyLatLng(dataId, latLng)
+    fun updateMyLatLng(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        dataId: String,
+        latLng: PatchUserLatLng
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.updateMyLatLng(onComplete, onError, dataId, latLng)
     }
 
     suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {

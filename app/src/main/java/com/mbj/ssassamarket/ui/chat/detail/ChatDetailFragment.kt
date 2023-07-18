@@ -4,17 +4,19 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentChatDetailBinding
 import com.mbj.ssassamarket.ui.BaseFragment
-import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.LocateFormat
 import com.mbj.ssassamarket.util.LocationManager
 import com.mbj.ssassamarket.util.location.LocationFormat.parseLatLng
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import net.daum.mf.map.api.MapPoint
 
@@ -35,11 +37,13 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.viewModel = viewModel
         adapter = ChatDetailAdapter()
         binding.chatDetailRv.adapter = adapter
         args.otherImageColor?.let { adapter.updateOtherImageColor(it) }
         setupViewModel()
         setupUI()
+        observeChatRoomData()
     }
 
     override fun onResume() {
@@ -53,14 +57,6 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
         getMyDataId()
         getMyUserItem()
         getOtherUserItem()
-        observeChatItemList()
-        observeOtherUserItem()
-        observeLatLngString()
-        observeDistanceDiff()
-        observeMyDataIdError()
-        observeMyUserDataError()
-        observeOtherUserDataError()
-        observeSendMessageError()
     }
 
     private fun setChatRoomId() {
@@ -88,18 +84,6 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
         viewModel.getOtherUserItem(otherUserId)
     }
 
-    private fun observeChatItemList() {
-        viewModel.chatItemList.observe(viewLifecycleOwner, EventObserver { chatItemList ->
-            adapter.submitList(chatItemList)
-
-            if (chatItemList.isNotEmpty()) {
-                binding.chatDetailRv.post {
-                    binding.chatDetailRv.smoothScrollToPosition(chatItemList.size - 1)
-                }
-            }
-        })
-    }
-
     private fun setupUI() {
         binding.chatDetailBackIv.setOnClickListener {
             findNavController().navigateUp()
@@ -111,7 +95,7 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
                 showToast(R.string.empty_message_error)
                 return@setOnClickListener
             }
-            viewModel.sendMessage(message, viewModel.myDataId.value?.peekContent()!!)
+            viewModel.sendMessage(message, viewModel.myDataId.value)
             binding.chatDetailTiev.text?.clear()
         }
     }
@@ -132,71 +116,50 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
             reverseGeoCoder.startFindingAddress()
         }
     }
+    private fun observeChatRoomData() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.otherUserItem.collectLatest { otherUser ->
+                        if (otherUser != null) {
+                            adapter.updateOtherUserItem(otherUser)
+                            viewModel.setOtherUserItemState(otherUser)
+                            viewModel.processLocationData()
 
-    private fun observeOtherUserItem() {
-        viewModel.otherUserItem.observe(viewLifecycleOwner, EventObserver { otherUserItem ->
-            adapter.updateOtherUserItem(otherUserItem)
-            binding.chatDetailNicknameAbTv.text = otherUserItem.userName
-
-            viewModel.setOtherUserItemState(otherUserItem)
-            viewModel.processLocationData()
-
-            val coordinates = parseLatLng(otherUserItem.latLng)
-            if(coordinates != null) {
-                val (latitude, longitude) = coordinates
-                val mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude)
-                val reverseGeoCoder = locationManager.createReverseGeoCoder(requireActivity(),mapPoint) { addressString ->
-                    val location = LocateFormat.getSelectedAddress(addressString, 2)
-                    binding.chatDetailLocationTv.text = location
+                            val coordinates = parseLatLng(otherUser.latLng)
+                            if(coordinates != null) {
+                                val (latitude, longitude) = coordinates
+                                val mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude)
+                                val reverseGeoCoder = locationManager.createReverseGeoCoder(requireActivity(),mapPoint) { addressString ->
+                                    val location = LocateFormat.getSelectedAddress(addressString, 2)
+                                    viewModel.setOtherLocation(location)
+                                }
+                                reverseGeoCoder.startFindingAddress()
+                            }
+                        }
+                    }
                 }
-                reverseGeoCoder.startFindingAddress()
+                launch {
+                    viewModel.chatItemList.collectLatest { chatItemList ->
+                        adapter.submitList(chatItemList)
+
+                        if (chatItemList.isNotEmpty()) {
+                            binding.chatDetailRv.post {
+                                binding.chatDetailRv.smoothScrollToPosition(chatItemList.size - 1)
+                            }
+                        }
+                    }
+                }
+                launch {
+                    viewModel.latLngString.collectLatest { myLatLng ->
+                        if (myLatLng.isNotEmpty()) {
+                            viewModel.setLngState(myLatLng)
+                            viewModel.processLocationData()
+                        }
+                    }
+                }
             }
-        })
-    }
-
-    private fun observeLatLngString() {
-        viewModel.latLngString.observe(viewLifecycleOwner, EventObserver { myLatLng ->
-            viewModel.setLngState(myLatLng)
-            viewModel.processLocationData()
-        })
-    }
-
-    private fun observeDistanceDiff() {
-        viewModel.distanceDiff.observe(viewLifecycleOwner, EventObserver { distanceDiff ->
-            binding.chatDetailLocationDiffTv.text = distanceDiff
-        })
-    }
-
-    private fun observeMyDataIdError() {
-        viewModel.myDataIdError.observe(viewLifecycleOwner, EventObserver { myDataIdError ->
-            if (myDataIdError) {
-                showToast(R.string.error_message_retry)
-            }
-        })
-    }
-
-    private fun observeMyUserDataError() {
-        viewModel.myUserDataError.observe(viewLifecycleOwner, EventObserver { myUserDataError ->
-            if (myUserDataError) {
-                showToast(R.string.error_message_user_data)
-            }
-        })
-    }
-
-    private fun observeOtherUserDataError() {
-        viewModel.otherUserDataError.observe(viewLifecycleOwner, EventObserver { otherUserDataError ->
-            if (otherUserDataError) {
-                showToast(R.string.error_message_user_data)
-            }
-        })
-    }
-
-    private fun observeSendMessageError() {
-        viewModel.sendMessageError.observe(viewLifecycleOwner, EventObserver { sendMessageError ->
-            if (sendMessageError) {
-                showToast(R.string.error_message_send_message)
-            }
-        })
+        }
     }
 
     override fun onPause() {

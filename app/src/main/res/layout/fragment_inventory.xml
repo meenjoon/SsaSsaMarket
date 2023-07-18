@@ -29,6 +29,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
+            android:text="@{viewModel.nickname}"
             android:textColor="@color/orange_700"
             android:textSize="26sp"
             app:layout_constraintBottom_toBottomOf="@id/inventory_user_iv"
@@ -66,7 +67,27 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:visible="@{viewModel.isLoading().peekContent()}" />
+            app:visible="@{viewModel.isLoading}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/error_message_nickname"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.nicknameError}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/error_message_product_get"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.productError}" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline_vertical_5"

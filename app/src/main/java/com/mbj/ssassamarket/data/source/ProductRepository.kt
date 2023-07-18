@@ -3,11 +3,14 @@ package com.mbj.ssassamarket.data.source
 import com.mbj.ssassamarket.data.model.*
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
 import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class ProductRepository @Inject constructor(private val marketNetworkDataSource: MarketNetworkDataSource) {
 
-    suspend fun addProductPost(
+    fun addProductPost(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
         content: String,
         imageLocations: List<ImageContent>,
         price: Int,
@@ -19,8 +22,10 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
         location: String,
         latLng: String,
         favoriteList: List<String?>
-    ): ApiResponse<Map<String, String>> {
+    ): Flow<ApiResponse<Map<String, String>>> {
         return marketNetworkDataSource.addProductPost(
+            onComplete,
+            onError,
             content,
             imageLocations,
             price,
@@ -39,23 +44,45 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
         return marketNetworkDataSource.getDownloadUrl(imageLocation)
     }
 
-    suspend fun getProduct(): ApiResponse<Map<String, ProductPostItem>> {
-        return marketNetworkDataSource.getProduct()
+    fun getProduct(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<Map<String, ProductPostItem>>> {
+        return marketNetworkDataSource.getProduct(onComplete, onError)
     }
 
-    suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem>  {
-        return marketNetworkDataSource.getProductDetail(postId)
+    fun updateProduct(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postId: String,
+        request: PatchProductRequest
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.updateProduct(onComplete, onError, postId, request)
     }
 
-    suspend fun updateProduct(postId: String, request: PatchProductRequest): ApiResponse<Unit> {
-        return marketNetworkDataSource.updateProduct(postId, request)
+    fun buyProduct(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postId: String,
+        request: PatchBuyRequest,
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.buyProduct(onComplete, onError, postId, request)
     }
 
-    suspend fun updateProductFavorite(postId: String, request: FavoriteCountRequest): ApiResponse<Unit> {
-        return marketNetworkDataSource.updateProductFavorite(postId, request)
+    fun getProductDetail(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postId: String
+    ): Flow<ApiResponse<ProductPostItem>> {
+        return marketNetworkDataSource.getProductDetail(onComplete, onError, postId)
     }
 
-    suspend fun buyProduct(postId: String, request: PatchBuyRequest): ApiResponse<Unit> {
-        return marketNetworkDataSource.buyProduct(postId, request)
+    fun updateProductFavorite(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postId: String,
+        request: FavoriteCountRequest
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.updateProductFavorite(onComplete, onError, postId, request)
     }
 }

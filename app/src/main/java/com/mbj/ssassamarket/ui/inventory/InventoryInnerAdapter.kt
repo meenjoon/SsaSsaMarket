@@ -26,10 +26,9 @@ class InventoryInnerAdapter(private val productClickListener: ProductClickListen
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(productItem: Pair<String, ProductPostItem>, productClickListener: ProductClickListener) {
+            binding.productPostItemAndPostId = productItem
             binding.productPostItem = productItem.second
-            binding.root.setOnClickListener {
-                productClickListener.onProductClick(productItem)
-            }
+            binding.productClickListener = productClickListener
         }
 
         companion object {

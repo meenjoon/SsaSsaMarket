@@ -22,10 +22,9 @@ class HomeAdapter(private val productClickListener: ProductClickListener) : List
     class HomeViewHolder(val binding: RecyclerviewItemHomeProductBinding) : ViewHolder(binding.root) {
 
         fun bind(productPostItem: Pair<String, ProductPostItem>, productClickListener: ProductClickListener) {
+            binding.productPostItemAndPostId = productPostItem
             binding.productPostItem = productPostItem.second
-            binding.root.setOnClickListener {
-                productClickListener.onProductClick(productPostItem)
-            }
+            binding.productClickListener = productClickListener
         }
 
         companion object {

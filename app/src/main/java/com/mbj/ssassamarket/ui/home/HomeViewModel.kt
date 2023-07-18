@@ -7,37 +7,35 @@ import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.model.UserType
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
-import com.mbj.ssassamarket.data.source.remote.network.onError
-import com.mbj.ssassamarket.data.source.remote.network.onSuccess
-import com.mbj.ssassamarket.util.Event
+import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(private val productRepository: ProductRepository, private val userInfoRepository: UserInfoRepository) : ViewModel() {
 
-    private val _items = MutableLiveData<Event<List<Pair<String, ProductPostItem>>>>()
-    val items: LiveData<Event<List<Pair<String, ProductPostItem>>>>
-        get() = _items
+    private val _items = MutableStateFlow<List<Pair<String, ProductPostItem>>>(emptyList())
+    val items: StateFlow<List<Pair<String, ProductPostItem>>> = _items
 
-    private val _filterType = MutableLiveData<FilterType>()
-    val filterType: LiveData<FilterType>
-        get() = _filterType
+    private val _filterType = MutableStateFlow<FilterType>(FilterType.LATEST)
+    val filterType: StateFlow<FilterType> = _filterType
 
-    private val _category = MutableLiveData<Category>()
-    val category: LiveData<Category>
-        get() = _category
+    private val _category = MutableStateFlow<Category?>(null)
+    val category: StateFlow<Category?> = _category
 
-    private val _isLoading = MutableLiveData<Event<Boolean>>()
-    val isLoading: LiveData<Event<Boolean>> get() = _isLoading
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _isError = MutableLiveData<Event<Boolean>>()
-    val isError: LiveData<Event<Boolean>> get() = _isError
+    private val _isError = MutableStateFlow(false)
+    val isError: StateFlow<Boolean> = _isError
 
-    val searchText = MutableLiveData<String>()
+    val searchText = MutableStateFlow("")
 
-    private val productList = MediatorLiveData<List<Pair<String, ProductPostItem>>>()
+    private val productList = MutableStateFlow<List<Pair<String, ProductPostItem>>>(emptyList())
 
     init {
         loadAllProducts()
@@ -45,41 +43,40 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
 
     private fun loadAllProducts() {
         viewModelScope.launch {
-            _isLoading.value = Event(true)
-            val result = productRepository.getProduct()
-            result.onSuccess { productMap ->
-                val updatedProducts = filterAndMapProducts(productMap)
-                productList.value = updatedProducts
-                _isLoading.value = Event(false)
-                setupProductList()
-            }.onError { code, message ->
-                _isLoading.value = Event(false)
-                _isError.value = Event(true)
+            productRepository.getProduct(
+                onComplete = { _isLoading.value = false },
+                onError = { _isError.value = true }
+            ).collectLatest { productMap ->
+                if (productMap is ApiResultSuccess) {
+                    val updatedProducts = filterAndMapProducts(productMap.data)
+                    productList.value = updatedProducts
+                    setupProductList()
+                }
             }
         }
     }
 
-    private fun setupProductList() {
+    private suspend fun setupProductList() {
         val currentCategory = category.value
         val currentFilterType = filterType.value
 
-        productList.addSource(category) { category ->
-            currentCategory?.let {
-                applyFilters()
+        productList.collectLatest { products ->
+            val filteredProducts = products.filter { (_, product) ->
+                product.category == currentCategory?.label &&
+                        (searchText.value.isNullOrBlank() || product.title.contains(
+                            searchText.value,
+                            ignoreCase = true
+                        ))
+            }.toMutableList()
+
+            when (currentFilterType) {
+                FilterType.LATEST -> filteredProducts.sortByDescending { (_, product) -> product.createdDate }
+                FilterType.PRICE -> filteredProducts.sortBy { (_, product) -> product.price }
+                FilterType.FAVORITE -> filteredProducts.sortByDescending { (_, product) -> product.favoriteCount }
             }
-        }
 
-        productList.addSource(filterType) { filterType ->
-            currentFilterType?.let {
-                applyFilters()
-            }
+            _items.value = filteredProducts
         }
-
-        productList.addSource(searchText) {
-            applyFilters()
-        }
-
-        applyFilters()
     }
 
     fun updateFilterType(filterType: FilterType) {
@@ -97,16 +94,16 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
     }
 
     private fun applyFilters() {
-        val currentFilterType = filterType.value ?: FilterType.LATEST
+        val currentFilterType = filterType.value
         val currentCategory = category.value
         val currentSearchText = searchText.value
 
         if (currentCategory == null) {
-            _items.value = Event(emptyList())
+            _items.value = emptyList()
             return
         }
 
-        val filteredProducts = productList.value.orEmpty().filter { (_, product) ->
+        val filteredProducts = productList.value.filter { (_, product) ->
             product.category == currentCategory.label &&
                     (currentSearchText.isNullOrBlank() || product.title.contains(
                         currentSearchText,
@@ -120,7 +117,7 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
             FilterType.FAVORITE -> filteredProducts.sortByDescending { (_, product) -> product.favoriteCount }
         }
 
-        _items.value = Event(filteredProducts)
+        _items.value = filteredProducts
     }
 
     fun navigateBasedOnUserType(productIdToken: String, callback: (UserType) -> Unit) {
@@ -135,16 +132,16 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
 
     fun refreshData() {
         viewModelScope.launch {
-            _isLoading.value = Event(true)
-            val result = productRepository.getProduct()
-            result.onSuccess { productMap ->
-                val updatedProducts = filterAndMapProducts(productMap)
-                productList.value = updatedProducts
-                _isLoading.value = Event(false)
-                applyFilters()
-            }.onError { code, message ->
-                _isLoading.value = Event(true)
-                _isError.value = Event(true)
+            _isLoading.value = true
+            productRepository.getProduct(
+                onComplete = { _isLoading.value = false },
+                onError = { _isError.value = true }
+            ).collectLatest { productMap ->
+                if (productMap is ApiResultSuccess) {
+                    val updatedProducts = filterAndMapProducts(productMap.data)
+                    productList.value = updatedProducts
+                    applyFilters()
+                }
             }
         }
     }

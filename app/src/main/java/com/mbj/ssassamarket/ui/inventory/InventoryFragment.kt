@@ -2,8 +2,10 @@ package com.mbj.ssassamarket.ui.inventory
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.ProductPostItem
@@ -11,8 +13,9 @@ import com.mbj.ssassamarket.data.model.UserType
 import com.mbj.ssassamarket.databinding.FragmentInventoryBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.ProductClickListener
-import com.mbj.ssassamarket.util.EventObserver
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class InventoryFragment : BaseFragment(), ProductClickListener {
@@ -26,45 +29,18 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
         val adapter = InventoryOuterAdapter(this)
         binding.viewModel = viewModel
         binding.inventoryOuterRv.adapter = adapter
-        viewModel.getNickname()
+        viewModel.getMyNickname()
         viewModel.initProductPostItemList()
 
         observeInventoryDataList(adapter)
-        observeNickname()
-        observeNicknameError()
-        observeProductError()
     }
 
     private fun observeInventoryDataList(adapter: InventoryOuterAdapter) {
-        viewModel.inventoryDataList.observe(viewLifecycleOwner, EventObserver { inventoryDataList ->
-            adapter.submitList(inventoryDataList)
-        })
-    }
-
-    private fun observeNickname() {
-        viewModel.nickname.observe(viewLifecycleOwner, EventObserver { nickname ->
-            binding.inventoryNicknameTv.text = nickname
-        })
-    }
-
-    private fun observeNicknameError() {
-        viewModel.nicknameError.observe(viewLifecycleOwner, EventObserver { nicknameError ->
-            if (nicknameError) {
-                showToast(R.string.error_message_retry)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.inventoryDataList.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED).collectLatest { inventoryDataList ->
+                adapter.submitList(inventoryDataList)
             }
-        })
-    }
-
-    private fun observeProductError() {
-        viewModel.productError.observe(viewLifecycleOwner, EventObserver { productError ->
-            if (productError) {
-                showToast(R.string.error_message_retry)
-            }
-        })
-    }
-
-    private fun showToast(messageResId: Int) {
-        Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onProductClick(productPostItem: Pair<String, ProductPostItem>) {

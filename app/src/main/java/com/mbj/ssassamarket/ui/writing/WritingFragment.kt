@@ -15,11 +15,15 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -30,15 +34,16 @@ import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.GalleryClickListener
 import com.mbj.ssassamarket.ui.common.ImageRemoveListener
 import com.mbj.ssassamarket.util.Constants.PROGRESS_DIALOG
-import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.LocateFormat
 import com.mbj.ssassamarket.util.LocationManager
 import com.mbj.ssassamarket.util.ProgressDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import net.daum.mf.map.api.MapPoint
 
 @AndroidEntryPoint
-class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
+class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, GalleryClickListener, ImageRemoveListener {
 
     override val binding get() = _binding as FragmentWritingBinding
     override val layoutId: Int get() = R.layout.fragment_writing
@@ -47,117 +52,25 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     private lateinit var attachedImageAdapter: AttachedImageAdapter
 
     private lateinit var locationManager: LocationManager
+    private lateinit var galleryLauncher: ActivityResultLauncher<Intent>
+    private lateinit var pickMultipleVisualMediaLauncher: ActivityResultLauncher<PickVisualMediaRequest>
+    private lateinit var permissionResultLauncher: ActivityResultLauncher<String>
+    private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
 
     private var isLocationPermissionChecked = false
     private var isSystemSettingsExited = false
-
     private var progressDialog: ProgressDialogFragment? = null
 
     private val viewModel: WritingViewModel by viewModels()
 
-    private val onGallerySelectedListener = object : GalleryClickListener {
-        override fun onGalleryClick() {
-            openGallery()
-        }
-    }
-    private val onImageContentRemoveListener = object : ImageRemoveListener {
-        override fun onImageRemoveListener(imageContent: ImageContent) {
-            viewModel.removeSelectedImage(imageContent)
-        }
-    }
-    private val galleryLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data = result.data
-                if (data != null) {
-                    val clipData = data.clipData
-                    val imageList = mutableListOf<ImageContent>()
-                    if (clipData != null) {
-                        // 다중 이미지 선택
-                        for (i in 0 until clipData.itemCount) {
-                            val uri = clipData.getItemAt(i).uri
-                            val fileName = getFileName(uri)
-                            if (fileName != null) {
-                                val image = ImageContent(uri, fileName)
-                                imageList.add(image)
-                            }
-                        }
-                    } else {
-                        // 단일 이미지 선택
-                        val uri = data.data
-                        if (uri != null) {
-                            val fileName = getFileName(uri)
-                            if (fileName != null) {
-                                val image = ImageContent(uri, fileName)
-                                imageList.add(image)
-                            }
-                        }
-                    }
-                    viewModel.handleGalleryResult(imageList)
-                }
-            }
-        }
-    private val pickMultipleVisualMediaLauncher =
-        registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
-            if (uris.isNotEmpty()) {
-                val imageList = mutableListOf<ImageContent>()
-                for (uri in uris) {
-                    val fileName = getFileName(uri)
-                    if (fileName != null) {
-                        val image = ImageContent(uri, fileName)
-                        imageList.add(image)
-                    }
-                }
-                viewModel.handleGalleryResult(imageList)
-            }
-        }
-    private val permissionResultLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                openGallery()
-            } else {
-                val shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(
-                    requireActivity(),
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                )
-                if (!shouldShowRationale) {
-                    showGalleryPermissionDeniedDialog()
-                } else {
-                    showToast(R.string.gallery_permission_cancel)
-                }
-            }
-        }
-
-    private val locationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions: Map<String, Boolean> ->
-            val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
-            val coarseLocationGranted =
-                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
-
-            if (!(fineLocationGranted || coarseLocationGranted)) {
-                // 위치 권한이 거부된 경우
-                val shouldShowRationaleFine = ActivityCompat.shouldShowRequestPermissionRationale(
-                    requireActivity(),
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-                val shouldShowRationaleCoarse = ActivityCompat.shouldShowRequestPermissionRationale(
-                    requireActivity(),
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-
-                if (!shouldShowRationaleFine || !shouldShowRationaleCoarse) {
-                    // 권한 요청이 다시 보여지지 않는 경우
-                    showLocationPermissionDeniedDialog()
-                } else {
-                    // 권한 요청이 다시 보여지는 경우
-                    findNavController().navigateUp()
-                    showToast(R.string.location_permission_cancel)
-                }
-            }
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initializeGalleryLauncher()
+        initializePickMultipleVisualMediaLauncher()
+        initializePermissionResultLauncher()
+        initializeGalleryLauncher()
+        initializeLocationPermissionLauncher()
         locationManager = LocationManager(requireContext(), 10000L, 10000.0F, this)
     }
 
@@ -168,14 +81,41 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         setupCategorySpinner()
         setupAdapters()
         setupRecyclerView()
-        observeSelectedImageContent()
         handleBackButtonClick()
-        observeToastMessage()
-        observeMyDataIdError()
-        observeUpdateMyLatLngError()
-        observePostError()
-        observeLoading()
-        observeCompleted()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.isCompleted.collectLatest { isCompleted ->
+                        if (isCompleted) {
+                            hideLoadingDialog()
+                        } else {
+                            showLoadingDialog()
+                        }
+                    }
+                }
+                launch {
+                    viewModel.isSuccess.collectLatest { isSuccess ->
+                        if (isSuccess) {
+                            findNavController().navigateUp()
+                        }
+                    }
+                }
+                launch {
+                    viewModel.selectedImageList.collectLatest { selectedImageList ->
+                        attachedImageAdapter.submitList(selectedImageList)
+                        galleryAdapter.updateSelectedImageContentSize(selectedImageList.size)
+                    }
+                }
+                launch {
+                    viewModel.toastMessage.collectLatest { toastMessage ->
+                        val messageId = resources.getIdentifier(toastMessage, "string", requireContext().packageName)
+                        if (messageId != 0) {
+                            showToast(messageId)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -189,8 +129,8 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
     }
 
     private fun setupAdapters() {
-        attachedImageAdapter = AttachedImageAdapter(onImageContentRemoveListener)
-        galleryAdapter = GalleryAdapter(onGallerySelectedListener)
+        attachedImageAdapter = AttachedImageAdapter(this)
+        galleryAdapter = GalleryAdapter(this)
     }
 
     private fun setupRecyclerView() {
@@ -358,7 +298,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
             val reverseGeoCoder = locationManager.createReverseGeoCoder(requireActivity(),mapPoint) { addressString ->
                 val location = LocateFormat.getSelectedAddress(addressString, 2)
                 viewModel.setLocation(location)
-                hideLoadingDialog()
             }
             reverseGeoCoder.startFindingAddress()
         }
@@ -377,10 +316,103 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
                 isLocationPermissionChecked = true
             }
         }
-        if (locationManager.isAnyLocationPermissionGranted() && isLocationPermissionChecked) {
-            showLoadingDialog()
-        }
         locationManager.startLocationTracking()
+    }
+
+    private fun initializeGalleryLauncher()  {
+        galleryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data = result.data
+                if (data != null) {
+                    val clipData = data.clipData
+                    val imageList = mutableListOf<ImageContent>()
+                    if (clipData != null) {
+                        // 다중 이미지 선택
+                        for (i in 0 until clipData.itemCount) {
+                            val uri = clipData.getItemAt(i).uri
+                            val fileName = getFileName(uri)
+                            if (fileName != null) {
+                                val image = ImageContent(uri, fileName)
+                                imageList.add(image)
+                            }
+                        }
+                    } else {
+                        // 단일 이미지 선택
+                        val uri = data.data
+                        if (uri != null) {
+                            val fileName = getFileName(uri)
+                            if (fileName != null) {
+                                val image = ImageContent(uri, fileName)
+                                imageList.add(image)
+                            }
+                        }
+                    }
+                    viewModel.handleGalleryResult(imageList)
+                }
+            }
+        }
+    }
+
+    private fun initializePickMultipleVisualMediaLauncher() {
+        pickMultipleVisualMediaLauncher = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
+            if (uris.isNotEmpty()) {
+                val imageList = mutableListOf<ImageContent>()
+                for (uri in uris) {
+                    val fileName = getFileName(uri)
+                    if (fileName != null) {
+                        val image = ImageContent(uri, fileName)
+                        imageList.add(image)
+                    }
+                }
+                viewModel.handleGalleryResult(imageList)
+            }
+        }
+    }
+
+    private fun initializePermissionResultLauncher() {
+        permissionResultLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                openGallery()
+            } else {
+                val shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+                if (!shouldShowRationale) {
+                    showGalleryPermissionDeniedDialog()
+                } else {
+                    showToast(R.string.gallery_permission_cancel)
+                }
+            }
+        }
+    }
+
+    private fun initializeLocationPermissionLauncher() {
+        locationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions: Map<String, Boolean> ->
+            val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+            val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+
+            if (!(fineLocationGranted || coarseLocationGranted)) {
+                // 위치 권한이 거부된 경우
+                val shouldShowRationaleFine = ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+                val shouldShowRationaleCoarse = ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+
+                if (!shouldShowRationaleFine || !shouldShowRationaleCoarse) {
+                    // 권한 요청이 다시 보여지지 않는 경우
+                    showLocationPermissionDeniedDialog()
+                } else {
+                    // 권한 요청이 다시 보여지는 경우
+                    findNavController().navigateUp()
+                    showToast(R.string.location_permission_cancel)
+                }
+            }
+        }
     }
 
     private fun showLoadingDialog() {
@@ -393,61 +425,11 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener {
         progressDialog = null
     }
 
-    private fun observeSelectedImageContent() {
-        viewModel.selectedImageList.observe(viewLifecycleOwner) { imageList ->
-            attachedImageAdapter.submitList(imageList)
-            galleryAdapter.updateSelectedImageContentSize(imageList.size)
-        }
+    override fun onGalleryClick() {
+        openGallery()
     }
 
-    private fun observeMyDataIdError() {
-        viewModel.myDataIdError.observe(viewLifecycleOwner, EventObserver { myDataIdError ->
-            if (myDataIdError) {
-                showToast(R.string.error_message_retry)
-            }
-        })
-    }
-
-    private fun observeUpdateMyLatLngError() {
-        viewModel.updateMyLatLngError.observe(viewLifecycleOwner, EventObserver { updateMyLatLngError ->
-            if (updateMyLatLngError) {
-                showToast(R.string.error_message_retry)
-            }
-        })
-    }
-
-    private fun observePostError() {
-        viewModel.isPostError.observe(viewLifecycleOwner, EventObserver { isPostError ->
-            if (isPostError) {
-                showToast(R.string.error_message_retry)
-            }
-        })
-    }
-
-    private fun observeLoading() {
-        viewModel.isLoading.observe(viewLifecycleOwner, EventObserver { isLoading ->
-            if (isLoading) {
-                showLoadingDialog()
-            } else {
-                hideLoadingDialog()
-            }
-        })
-    }
-
-    private fun observeCompleted() {
-        viewModel.isCompleted.observe(viewLifecycleOwner, EventObserver { isCompleted ->
-            if (isCompleted) {
-                findNavController().navigateUp()
-            }
-        })
-    }
-
-    private fun observeToastMessage() {
-        viewModel.toastMessage.observe(viewLifecycleOwner, EventObserver { message ->
-            val messageId = resources.getIdentifier(message, "string", requireContext().packageName)
-            if (messageId != 0) {
-                showToast(messageId)
-            }
-        })
+    override fun onImageRemoveListener(imageContent: ImageContent) {
+        viewModel.removeSelectedImage(imageContent)
     }
 }

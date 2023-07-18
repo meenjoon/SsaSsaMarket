@@ -4,15 +4,17 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseUser
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentSplashFragementBinding
 import com.mbj.ssassamarket.ui.BaseFragment
-import com.mbj.ssassamarket.util.EventObserver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -25,10 +27,9 @@ class SplashFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.viewModel = viewModel
         viewModel.checkCurrentUserExists()
-
-        observeAccountExists()
-        observeError()
+        observeAccountExistence()
     }
 
     private fun navigateBasedOnUserState(
@@ -49,25 +50,19 @@ class SplashFragment : BaseFragment() {
         findNavController().navigate(action)
     }
 
-    private fun observeAccountExists() {
-        viewModel.isAccountExistsOnServer.observe(viewLifecycleOwner, EventObserver { isAccountExistsOnServer ->
-            lifecycleScope.launch {
+    private fun observeAccountExistence() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isAccountExistsOnServer.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED).collectLatest { isAccountExistsOnServer ->
                 delay(2000)
-                navigateBasedOnUserState(
-                    viewModel.autoLoginState,
-                    isAccountExistsOnServer,
-                    viewModel.currentUser
-                )
+                if (isAccountExistsOnServer != null) {
+                    navigateBasedOnUserState(
+                        viewModel.autoLoginState,
+                        isAccountExistsOnServer,
+                        viewModel.currentUser
+                    )
+                }
             }
-        })
-    }
-
-    private fun observeError() {
-        viewModel.isError.observe(viewLifecycleOwner, EventObserver { isError ->
-            if (isError) {
-                showToast(R.string.error_message_retry)
-            }
-        })
+        }
     }
 
     private fun showToast(messageResId: Int) {

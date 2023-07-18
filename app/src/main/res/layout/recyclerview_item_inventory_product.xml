@@ -5,15 +5,26 @@
 
     <data>
 
+        <import type="kotlin.Pair" />
+
+        <variable
+            name="productPostItemAndPostId"
+            type="Pair&lt;String, com.mbj.ssassamarket.data.model.ProductPostItem&gt;" />
+
         <variable
             name="productPostItem"
             type="com.mbj.ssassamarket.data.model.ProductPostItem" />
+
+        <variable
+            name="productClickListener"
+            type="com.mbj.ssassamarket.ui.common.ProductClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="170dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp">
+        android:layout_marginEnd="10dp"
+        android:onClick="@{() -> productClickListener.onProductClick(productPostItemAndPostId)}">
 
         <ImageView
             android:id="@+id/inventory_inner_product_iv"

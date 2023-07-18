@@ -1,50 +1,49 @@
 package com.mbj.ssassamarket.ui.login
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.UserPreferenceRepository
-import com.mbj.ssassamarket.data.source.remote.network.onError
-import com.mbj.ssassamarket.data.source.remote.network.onSuccess
-import com.mbj.ssassamarket.util.Event
+import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LogInViewModel @Inject constructor(private val userInfoRepository: UserInfoRepository, val userPreferenceRepository: UserPreferenceRepository) : ViewModel() {
 
-    var autoLoginEnabled = MutableLiveData<Boolean>(userPreferenceRepository.getSaveAutoLoginState())
+    var autoLoginEnabled = MutableStateFlow(userPreferenceRepository.getSaveAutoLoginState())
 
-    private val _isLoading = MutableLiveData(Event(false))
-    val isLoading: LiveData<Event<Boolean>> get() =  _isLoading
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> =  _isLoading
 
-    private val _isAccountExistsOnServer = MutableLiveData<Event<Boolean>>()
-    val isAccountExistsOnServer: LiveData<Event<Boolean>> get() = _isAccountExistsOnServer
+    private val _isAccountExistsOnServer = MutableStateFlow<Boolean?>(null)
+    val isAccountExistsOnServer: StateFlow<Boolean?> = _isAccountExistsOnServer
 
-    private val _isError = MutableLiveData(Event(false))
-    val isError: LiveData<Event<Boolean>> get() =  _isError
+    private val _isError = MutableStateFlow(false)
+    val isError: StateFlow<Boolean> =  _isError
 
     fun currentUserExists() {
         viewModelScope.launch {
-            _isLoading.value = Event(true)
-            val result = userInfoRepository.getUser()
-            result.onSuccess { userMap ->
-                _isLoading.value = Event(false)
-                val isExists = isAccountExistsOnServer(userMap)
-                _isAccountExistsOnServer.value = Event(isExists)
-            }.onError { code, message ->
-                _isLoading.value = Event(false)
-                _isError.value = Event(true)
+            _isLoading.value = (true)
+            userInfoRepository.getUser(
+                onComplete = { _isLoading.value = (false)},
+                onError = { _isError.value = (true)}
+            ).collect { response ->
+                if (response is ApiResultSuccess) {
+                    val userMap = response.data
+                    val isExists = isAccountExistsOnServer(userMap)
+                    _isAccountExistsOnServer.value = isExists
+                }
             }
         }
     }
 
     private suspend fun isAccountExistsOnServer(userMap: Map<String, Map<String, User>>): Boolean {
-        val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
-        return userMap.containsKey(uId)
+        val uid = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
+        return userMap.containsKey(uid)
     }
 }
