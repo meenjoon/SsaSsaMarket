@@ -18,4 +18,16 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/recyclerview_item_inventory_product" />
 
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="30dp"
+        app:dividerColor="@color/grey_100"
+        app:dividerInsetEnd="150dp"
+        app:dividerInsetStart="150dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/inventory_inner_product_list_rv" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

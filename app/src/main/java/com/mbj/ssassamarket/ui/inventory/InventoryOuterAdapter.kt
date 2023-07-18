@@ -7,24 +7,28 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.mbj.ssassamarket.data.model.InventoryData
 import com.mbj.ssassamarket.databinding.RecyclerviewItemInventoryProductListBinding
 import com.mbj.ssassamarket.databinding.RecyclerviewItemInventoryTypeBinding
+import com.mbj.ssassamarket.ui.common.ProductClickListener
 
 private const val VIEW_TYPE_INVENTORY = 0
 private const val VIEW_TYPE_PRODUCT_LIST = 1
 
-class InventoryOuterAdapter : RecyclerView.Adapter<ViewHolder>() {
+class InventoryOuterAdapter(private val productClickListener: ProductClickListener) : RecyclerView.Adapter<ViewHolder>() {
 
     private val inventoryDataList = mutableListOf<InventoryData>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return when (viewType) {
             VIEW_TYPE_INVENTORY -> InventoryTypeViewHolder.from(parent)
-            VIEW_TYPE_PRODUCT_LIST -> InventoryProductListViewHolder.from(parent)
+            VIEW_TYPE_PRODUCT_LIST -> InventoryProductListViewHolder.from(
+                parent,
+                productClickListener
+            )
             else -> throw  java.lang.ClassCastException("Unknown viewType $viewType")
         }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        when(holder) {
+        when (holder) {
             is InventoryTypeViewHolder -> {
                 val inventoryData = inventoryDataList[position] as InventoryData.ProductType
                 holder.bind(inventoryData)
@@ -48,15 +52,15 @@ class InventoryOuterAdapter : RecyclerView.Adapter<ViewHolder>() {
     }
 
     fun submitList(list: List<InventoryData>) {
-        inventoryDataList.clear()
         inventoryDataList.addAll(list)
         notifyDataSetChanged()
     }
 
-    class InventoryTypeViewHolder(val binding: RecyclerviewItemInventoryTypeBinding) : ViewHolder(binding.root) {
+    class InventoryTypeViewHolder(val binding: RecyclerviewItemInventoryTypeBinding) :
+        ViewHolder(binding.root) {
 
         fun bind(categoryItem: InventoryData.ProductType) {
-            binding.savedOuterType.text = categoryItem.inventoryType.label
+            binding.productType = categoryItem
         }
 
         companion object {
@@ -72,9 +76,12 @@ class InventoryOuterAdapter : RecyclerView.Adapter<ViewHolder>() {
         }
     }
 
-    class InventoryProductListViewHolder(val binding: RecyclerviewItemInventoryProductListBinding) : ViewHolder(binding.root) {
+    class InventoryProductListViewHolder(
+        val binding: RecyclerviewItemInventoryProductListBinding,
+        private val productClickListener: ProductClickListener
+    ) : ViewHolder(binding.root) {
 
-        private val inventoryInnerAdapter = InventoryInnerAdapter()
+        private val inventoryInnerAdapter = InventoryInnerAdapter(productClickListener)
 
         init {
             binding.inventoryInnerProductListRv.adapter = inventoryInnerAdapter
@@ -85,13 +92,16 @@ class InventoryOuterAdapter : RecyclerView.Adapter<ViewHolder>() {
         }
 
         companion object {
-            fun from(parent: ViewGroup): InventoryProductListViewHolder {
+            fun from(
+                parent: ViewGroup,
+                productClickListener: ProductClickListener
+            ): InventoryProductListViewHolder {
                 return InventoryProductListViewHolder(
                     RecyclerviewItemInventoryProductListBinding.inflate(
                         LayoutInflater.from(parent.context),
                         parent,
                         false
-                    )
+                    ), productClickListener
                 )
             }
         }

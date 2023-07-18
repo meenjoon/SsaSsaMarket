@@ -81,8 +81,9 @@ class BuyerViewModel @Inject constructor(
     }
 
     fun onBuyButtonClicked() {
-        val patchRequest = PatchBuyRequest(true, listOf(productPostItem?.id))
         viewModelScope.launch {
+            val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
+            val patchRequest = PatchBuyRequest(true, listOf(uId))
             postId?.let { productRepository.buyProduct(it, patchRequest) }
             if (nickname.value?.peekContent() != null && productPostItem?.location != null) {
                 _chatRoomId.value = Event(
@@ -100,14 +101,14 @@ class BuyerViewModel @Inject constructor(
         viewModelScope.launch {
             _productFavoriteCompleted.value = Event(false)
 
-            val productId = productPostItem?.id
+            val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             val currentProductPostItem = postId?.let { productRepository.getProductDetail(it) }
             val currentFavoriteCount = currentProductPostItem?.favoriteCount
 
-            if (productId != null && currentFavoriteCount != null && postId != null) {
+            if (currentFavoriteCount != null && postId != null) {
                 val newFavoriteCount = currentFavoriteCount + 1
                 val newFavoriteList = currentProductPostItem.favoriteList.orEmpty().toMutableList().apply {
-                    add(productId)
+                    add(uId)
                 }
 
                 val request = FavoriteCountRequest(newFavoriteCount, newFavoriteList)
@@ -121,14 +122,14 @@ class BuyerViewModel @Inject constructor(
         viewModelScope.launch {
             _productFavoriteCompleted.value = Event(false)
 
-            val productId = productPostItem?.id
+            val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             val currentProductPostItem = postId?.let { productRepository.getProductDetail(it) }
             val currentFavoriteCount = currentProductPostItem?.favoriteCount
 
-            if (productId != null && currentFavoriteCount != null && postId != null) {
+            if (currentFavoriteCount != null && postId != null) {
                 val newFavoriteCount = currentFavoriteCount - 1
                 val newFavoriteList = currentProductPostItem.favoriteList.orEmpty().toMutableList().apply {
-                    remove(productId)
+                    remove(uId)
                 }
 
                 val request = FavoriteCountRequest(newFavoriteCount, newFavoriteList)
@@ -152,9 +153,10 @@ class BuyerViewModel @Inject constructor(
 
     fun checkProductInFavorites() {
         viewModelScope.launch {
+            val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             _productFavoriteCompleted.value = Event(false)
             val product = postId?.let { productRepository.getProductDetail(it) }
-            _productFavoriteResponse.value = Event(product?.favoriteList?.contains(product.id) == true)
+            _productFavoriteResponse.value = Event(product?.favoriteList?.contains(uId) == true)
             _isLiked.value = productFavoriteResponse.value?.let { Event(it.peekContent()) }
         }
     }

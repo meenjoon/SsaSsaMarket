@@ -11,7 +11,7 @@ sealed class InventoryData {
             get() = VIEW_TYPE_INVENTORY
     }
 
-    data class ProductItem(val productList: List<ProductPostItem>) : InventoryData() {
+    data class ProductItem(val productList: List<Pair<String, ProductPostItem>>) : InventoryData() {
         override val id: Int
             get() = VIEW_TYPE_PRODUCT_LIST
     }

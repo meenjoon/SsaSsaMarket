@@ -73,7 +73,14 @@
     <fragment
         android:id="@+id/navigation_inventory"
         android:name="com.mbj.ssassamarket.ui.inventory.InventoryFragment"
-        android:label="InventoryFragment" />
+        android:label="InventoryFragment" >
+        <action
+            android:id="@+id/action_navigation_inventory_to_sellerFragment"
+            app:destination="@id/sellerFragment" />
+        <action
+            android:id="@+id/action_navigation_inventory_to_buyerFragment"
+            app:destination="@id/buyerFragment" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_setting"
         android:name="com.mbj.ssassamarket.ui.setting.SettingFragment"

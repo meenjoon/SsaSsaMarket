@@ -41,13 +41,14 @@
             android:textSize="22sp"
             app:layout_constraintBottom_toBottomOf="@id/inventory_nickname_tv"
             app:layout_constraintStart_toEndOf="@id/inventory_nickname_tv"
-            tools:text="님" />
+            android:text="@string/text_greeting_suffix" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/inventory_outer_rv"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="25dp"
+            android:layout_marginBottom="50dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

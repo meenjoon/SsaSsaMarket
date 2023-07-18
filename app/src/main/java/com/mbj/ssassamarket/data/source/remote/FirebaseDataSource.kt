@@ -299,7 +299,7 @@ class FirebaseDataSource @Inject constructor(
         return Pair(user, idToken)
     }
 
-    override suspend fun getUserNameByUserId(userIdToken: String): String? {
+    override suspend fun getUserNameByUserId(uId: String): String? {
         val (user, idToken) = getUserAndIdToken()
         if (idToken != null) {
             try {
@@ -308,7 +308,7 @@ class FirebaseDataSource @Inject constructor(
                     val users = response.body()
                     if (users != null) {
                         val matchingUser = users.values.flatMap { it.values }.find { userInfo ->
-                            userInfo.userId == userIdToken
+                            userInfo.userId == uId
                         }
                         return matchingUser?.userName
                     }
