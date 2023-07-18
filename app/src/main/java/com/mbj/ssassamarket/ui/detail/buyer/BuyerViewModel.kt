@@ -146,9 +146,9 @@ class BuyerViewModel @Inject constructor(
         }
     }
 
-    private fun likeProduct() {
+    fun toggleProductFavorite() {
         viewModelScope.launch {
-            _isLoading.value = (true)
+            _isLoading.value = true
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
 
             if (postId != null) {
@@ -159,11 +159,22 @@ class BuyerViewModel @Inject constructor(
                 ).collectLatest { product ->
                     if (product is ApiResultSuccess) {
                         val currentFavoriteCount = product.data.favoriteCount
-                        val newFavoriteCount = currentFavoriteCount + 1
-                        val newFavoriteList =
-                            product.data.favoriteList.orEmpty().toMutableList().apply {
+                        val isLiked = product.data.favoriteList?.contains(uId) == true
+
+                        val newFavoriteCount = if (isLiked) {
+                            currentFavoriteCount - 1
+                        } else {
+                            currentFavoriteCount + 1
+                        }
+
+                        val newFavoriteList = product.data.favoriteList.orEmpty().toMutableList().apply {
+                            if (isLiked) {
+                                remove(uId)
+                            } else {
                                 add(uId)
                             }
+                        }
+
                         val request = FavoriteCountRequest(newFavoriteCount, newFavoriteList)
                         productRepository.updateProductFavorite(
                             onComplete = { _isLoading.value = false },
@@ -172,60 +183,13 @@ class BuyerViewModel @Inject constructor(
                             request
                         ).collectLatest { response ->
                             if (response is ApiResultSuccess) {
-                                toggleIsLiked()
+                                _isLiked.value = !isLiked
                             }
                         }
                     }
                 }
             }
         }
-    }
-
-    private fun unlikeProduct() {
-        viewModelScope.launch {
-            _isLoading.value = (true)
-            val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
-
-            if (postId != null) {
-                productRepository.getProductDetail(
-                    onComplete = { _isLoading.value = false },
-                    onError = { _likedError.value = true },
-                    postId!!
-                ).collectLatest { product ->
-                    if (product is ApiResultSuccess) {
-                        val currentFavoriteCount = product.data.favoriteCount
-                        val newFavoriteCount = currentFavoriteCount - 1
-                        val newFavoriteList =
-                            product.data.favoriteList.orEmpty().toMutableList().apply {
-                                remove(uId)
-                            }
-                        val request = FavoriteCountRequest(newFavoriteCount, newFavoriteList)
-                        productRepository.updateProductFavorite(
-                            onComplete = { _isLoading.value = false },
-                            onError = { _likedError.value = true },
-                            postId!!,
-                            request
-                        ).collectLatest { response ->
-                            if (response is ApiResultSuccess) {
-                                toggleIsLiked()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    fun onHeartClicked() {
-        if (isLiked.value) {
-            unlikeProduct()
-        } else {
-            likeProduct()
-        }
-    }
-
-    private fun toggleIsLiked() {
-        _isLiked.value = isLiked.value.not()
     }
 
     fun checkProductInFavorites() {

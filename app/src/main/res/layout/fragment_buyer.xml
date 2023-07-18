@@ -42,7 +42,7 @@
                         android:id="@+id/detail_heart"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:onClick="@{() -> viewModel.onHeartClicked()}"
+                        android:onClick="@{() -> viewModel.toggleProductFavorite()}"
                         android:src="@{viewModel.isLiked ? @drawable/heart_full_icon : @drawable/heart_empty_icon}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="@id/guideline_vertical_93"
