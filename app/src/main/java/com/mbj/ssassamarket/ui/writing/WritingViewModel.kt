@@ -82,7 +82,7 @@ class WritingViewModel @Inject constructor(
     }
 
     fun handleGalleryResult(result: List<ImageContent>) {
-        val currentList = _selectedImageList.value.orEmpty()
+        val currentList = _selectedImageList.value
         val totalImages = currentList.size + result.size
         val availableCapacity = 10 - currentList.size
 
@@ -97,8 +97,9 @@ class WritingViewModel @Inject constructor(
     }
 
     fun removeSelectedImage(imageContent: ImageContent) {
-        _selectedImageList.value = _selectedImageList.value.orEmpty()
-            .filter { it != imageContent }
+        _selectedImageList.value = _selectedImageList.value
+            .toMutableList()
+            .apply { remove(imageContent) }
     }
 
     fun setCategoryLabel(category: String) {
