@@ -5,8 +5,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
-import coil.transform.RoundedCornersTransformation
 import com.mbj.ssassamarket.data.model.ImageContent
 import com.mbj.ssassamarket.databinding.RecyclerviewItemAttachedImageBinding
 import com.mbj.ssassamarket.ui.common.ImageRemoveListener
@@ -27,12 +25,8 @@ class AttachedImageAdapter(private val imageRemoveListener: ImageRemoveListener)
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(selectedImage: ImageContent) {
-            binding.writingAttachedIv.load(selectedImage.uri)  {
-                transformations(RoundedCornersTransformation(15f))
-            }
-            binding.writingImageRemoveIv.setOnClickListener {
-                imageRemoveListener.onImageRemoveListener(selectedImage)
-            }
+            binding.selectedImage = selectedImage
+            binding.imageRemoveListener = imageRemoveListener
         }
 
         companion object {
