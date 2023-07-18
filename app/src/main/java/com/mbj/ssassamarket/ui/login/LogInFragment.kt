@@ -53,30 +53,9 @@ class LogInFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
+        observeAutoLoginAndAccountExistence()
         binding.logInBt.setOnClickListener {
             signInWithGoogleOneTap()
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.autoLoginEnabled.collectLatest { autoLoginEnabled ->
-                        viewModel.userPreferenceRepository.saveAutoLoginState(autoLoginEnabled)
-                    }
-                }
-                launch {
-                    viewModel.isAccountExistsOnServer.collectLatest { isAccountExistsOnServer ->
-                        if(isAccountExistsOnServer != null) {
-                            if (isAccountExistsOnServer) {
-                                showToast(R.string.setting_nickname_success)
-                                navigateToHomeFragment()
-                            } else {
-                                navigateToSettingNicknameFragment()
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -204,6 +183,30 @@ class LogInFragment : BaseFragment() {
                     }
                 }
             }
+    }
+
+    private fun observeAutoLoginAndAccountExistence() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.autoLoginEnabled.collectLatest { autoLoginEnabled ->
+                        viewModel.userPreferenceRepository.saveAutoLoginState(autoLoginEnabled)
+                    }
+                }
+                launch {
+                    viewModel.isAccountExistsOnServer.collectLatest { isAccountExistsOnServer ->
+                        if (isAccountExistsOnServer != null) {
+                            if (isAccountExistsOnServer) {
+                                showToast(R.string.setting_nickname_success)
+                                navigateToHomeFragment()
+                            } else {
+                                navigateToSettingNicknameFragment()
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun navigateToSettingNicknameFragment() {
