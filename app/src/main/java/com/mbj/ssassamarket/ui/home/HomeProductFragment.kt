@@ -3,6 +3,7 @@ package com.mbj.ssassamarket.ui.home
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.mbj.ssassamarket.R
@@ -13,10 +14,8 @@ import com.mbj.ssassamarket.data.model.UserType
 import com.mbj.ssassamarket.databinding.FragmentHomeProductBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.ProductClickListener
-import com.mbj.ssassamarket.util.Constants
 import com.mbj.ssassamarket.util.Constants.KEY_HOME_PRODUCT
 import com.mbj.ssassamarket.util.EventObserver
-import com.mbj.ssassamarket.util.ProgressDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -26,16 +25,13 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
     override val layoutId: Int get() = R.layout.fragment_home_product
 
     private val viewModel: HomeViewModel by viewModels()
-    private var progressDialog: ProgressDialogFragment? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
         setupViews()
         setAdapter()
-        observeRefreshResponse()
-        observeRefreshSuccess()
-        observeRefreshCompletion()
+        observeError()
     }
 
     private fun setupViews() {
@@ -53,7 +49,12 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
 
     private fun setupSpinner() {
         binding.homeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 val filter = when (position) {
                     0 -> FilterType.LATEST
                     1 -> FilterType.PRICE
@@ -72,28 +73,6 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
         }
     }
 
-    private fun observeRefreshResponse() {
-        viewModel.itemRefreshResponse.observe(viewLifecycleOwner, EventObserver { response ->
-            viewModel.handleUpdateResponse(response)
-        })
-    }
-
-    private fun observeRefreshSuccess() {
-        viewModel.itemRefreshSuccess.observe(viewLifecycleOwner, EventObserver { success ->
-            // Handle refresh success if needed
-        })
-    }
-
-    private fun observeRefreshCompletion() {
-        viewModel.itemRefreshCompleted.observe(viewLifecycleOwner, EventObserver { completed ->
-            if (completed) {
-                dismissLoadingDialog()
-            } else {
-                showLoadingDialog()
-            }
-        })
-    }
-
     private fun setAdapter() {
         val category = arguments?.getSerializable(KEY_HOME_PRODUCT) as? Category
         if (category != null) {
@@ -106,29 +85,37 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
         }
     }
 
-    override fun onProductClick(productPostItem: Pair<String,ProductPostItem>) {
+    override fun onProductClick(productPostItem: Pair<String, ProductPostItem>) {
         viewModel.navigateBasedOnUserType(productPostItem.second.id) { userType ->
             when (userType) {
                 UserType.SELLER -> {
-                    val action = HomeFragmentDirections.actionNavigationHomeToSellerFragment(productPostItem.first, productPostItem.second)
+                    val action = HomeFragmentDirections.actionNavigationHomeToSellerFragment(
+                        productPostItem.first,
+                        productPostItem.second
+                    )
                     findNavController().navigate(action)
                 }
                 UserType.BUYER -> {
-                    val action = HomeFragmentDirections.actionNavigationHomeToBuyerFragment(productPostItem.first, productPostItem.second)
+                    val action = HomeFragmentDirections.actionNavigationHomeToBuyerFragment(
+                        productPostItem.first,
+                        productPostItem.second
+                    )
                     findNavController().navigate(action)
                 }
             }
         }
     }
 
-    private fun showLoadingDialog() {
-        progressDialog = ProgressDialogFragment()
-        progressDialog?.show(childFragmentManager, Constants.PROGRESS_DIALOG)
+    private fun observeError() {
+        viewModel.isError.observe(viewLifecycleOwner, EventObserver { isError ->
+            if (isError) {
+                showToast(R.string.error_message_retry)
+            }
+        })
     }
 
-    private fun dismissLoadingDialog() {
-        progressDialog?.dismiss()
-        progressDialog = null
+    private fun showToast(messageResId: Int) {
+        Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
     }
 
     companion object {

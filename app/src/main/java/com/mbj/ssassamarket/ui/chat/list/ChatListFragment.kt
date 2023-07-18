@@ -74,12 +74,12 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.getChatRooms()
+        viewModel.addChatRoomsValueEventListener()
 
         initRecyclerView()
         observeChatRooms()
-
-        viewModel.getChatRooms()
-        viewModel.addChatRoomsValueEventListener()
+        observeChatRoomsError()
     }
 
     override fun onResume() {
@@ -148,6 +148,14 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
     private fun observeChatRooms() {
         viewModel.chatRooms.observe(viewLifecycleOwner, EventObserver{ chatRooms ->
             adapter.submitList(chatRooms)
+        })
+    }
+
+    private fun observeChatRoomsError() {
+        viewModel.chatRoomsError.observe(viewLifecycleOwner, EventObserver { chatRoomsError ->
+            if (chatRoomsError) {
+                showToast(R.string.error_message_chat_room)
+            }
         })
     }
 

@@ -7,6 +7,8 @@ import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.model.UserType
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.remote.network.onError
+import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -27,14 +29,11 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
     val category: LiveData<Category>
         get() = _category
 
-    private val _itemRefreshCompleted = MutableLiveData<Event<Boolean>>()
-    val itemRefreshCompleted: LiveData<Event<Boolean>> get() = _itemRefreshCompleted
+    private val _isLoading = MutableLiveData<Event<Boolean>>()
+    val isLoading: LiveData<Event<Boolean>> get() = _isLoading
 
-    private val _itemRefreshSuccess = MutableLiveData<Event<Boolean>>()
-    val itemRefreshSuccess: LiveData<Event<Boolean>> get() = _itemRefreshSuccess
-
-    private val _itemRefreshResponse = MutableLiveData<Event<Boolean>>()
-    val itemRefreshResponse: LiveData<Event<Boolean>> get() = _itemRefreshResponse
+    private val _isError = MutableLiveData<Event<Boolean>>()
+    val isError: LiveData<Event<Boolean>> get() = _isError
 
     val searchText = MutableLiveData<String>()
 
@@ -46,9 +45,17 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
 
     private fun loadAllProducts() {
         viewModelScope.launch {
-            val products = productRepository.getAvailableProducts()
-            productList.value = products
-            setupProductList()
+            _isLoading.value = Event(true)
+            val result = productRepository.getProduct()
+            result.onSuccess { productMap ->
+                val updatedProducts = filterAndMapProducts(productMap)
+                productList.value = updatedProducts
+                _isLoading.value = Event(false)
+                setupProductList()
+            }.onError { code, message ->
+                _isLoading.value = Event(false)
+                _isError.value = Event(true)
+            }
         }
     }
 
@@ -128,20 +135,31 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
 
     fun refreshData() {
         viewModelScope.launch {
-            _itemRefreshCompleted.value = Event(false)
-            val products = productRepository.getAvailableProducts()
-            _itemRefreshResponse.value = Event(true)
-            productList.value = products
-            applyFilters()
+            _isLoading.value = Event(true)
+            val result = productRepository.getProduct()
+            result.onSuccess { productMap ->
+                val updatedProducts = filterAndMapProducts(productMap)
+                productList.value = updatedProducts
+                _isLoading.value = Event(false)
+                applyFilters()
+            }.onError { code, message ->
+                _isLoading.value = Event(true)
+                _isError.value = Event(true)
+            }
         }
     }
 
-    fun handleUpdateResponse(response: Boolean) {
-        if (response) {
-            _itemRefreshSuccess.value = Event(true)
-        } else {
-            _itemRefreshSuccess.value = Event(true)
-        }
-        _itemRefreshCompleted.value = Event(true)
+    private suspend fun filterAndMapProducts(productMap: Map<String, ProductPostItem>): List<Pair<String, ProductPostItem>> {
+        return productMap.filter { (_, product) -> product.soldOut.not() }
+            .mapNotNull { (key, product) ->
+                val updatedImageLocations = product.imageLocations?.mapNotNull { imageLocation ->
+                    imageLocation?.let { productRepository.getDownloadUrl(it) }
+                }
+                if (updatedImageLocations != null) {
+                    key to product.copy(imageLocations = updatedImageLocations)
+                } else {
+                    null
+                }
+            }
     }
 }

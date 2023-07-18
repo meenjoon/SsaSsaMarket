@@ -1,6 +1,5 @@
 package com.mbj.ssassamarket.ui.chat.detail
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +8,9 @@ import com.google.firebase.database.ChildEventListener
 import com.mbj.ssassamarket.data.model.ChatItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.ChatRepository
+import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.remote.network.onError
+import com.mbj.ssassamarket.data.source.remote.network.onSuccess
 import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
 import com.mbj.ssassamarket.util.Event
 import com.mbj.ssassamarket.util.location.LocationFormat.calculateDistance
@@ -18,7 +20,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ChatDetailViewModel @Inject constructor(private val chatRepository: ChatRepository) : ViewModel() {
+class ChatDetailViewModel @Inject constructor(
+    private val chatRepository: ChatRepository,
+    private val userInfoRepository: UserInfoRepository
+) : ViewModel() {
 
     private val _chatRoomId = MutableLiveData<Event<String>>()
     val chatRoomId: LiveData<Event<String>> = _chatRoomId
@@ -46,6 +51,21 @@ class ChatDetailViewModel @Inject constructor(private val chatRepository: ChatRe
     private val _location = MutableLiveData<Event<String>>()
     val location: LiveData<Event<String>>
         get() = _location
+
+    private val _myDataId = MutableLiveData<Event<String?>>()
+    val myDataId: LiveData<Event<String?>> get() = _myDataId
+
+    private val _myDataIdError = MutableLiveData<Event<Boolean>>()
+    val myDataIdError: LiveData<Event<Boolean>> get() = _myDataIdError
+
+    private val _myUserDataError = MutableLiveData<Event<Boolean>>()
+    val myUserDataError: LiveData<Event<Boolean>> get() = _myUserDataError
+
+    private val _otherUserDataError = MutableLiveData<Event<Boolean>>()
+    val otherUserDataError: LiveData<Event<Boolean>> get() = _otherUserDataError
+
+    private val _sendMessageError = MutableLiveData<Event<Boolean>>()
+    val sendMessageError: LiveData<Event<Boolean>> get() = _sendMessageError
 
     private var latLngState: String? = null
     private var otherUserItemState: User? = null
@@ -76,30 +96,46 @@ class ChatDetailViewModel @Inject constructor(private val chatRepository: ChatRe
 
     fun getMyUserItem() {
         viewModelScope.launch {
-            chatRepository.getMyUserItem() { user ->
+            val result = chatRepository.getMyUserItem()
+            result.onSuccess { user ->
                 _myUserItem.value = Event(user)
+            }.onError { code, message ->
+                _myUserDataError.value = Event(true)
             }
         }
     }
 
     fun getOtherUserItem(userId: String) {
         viewModelScope.launch {
-            chatRepository.getOtherUserItem(userId) { user ->
-                _otherUserItem.value = Event(user)
+            val result = chatRepository.getOtherUserItem(userId)
+            result.onSuccess { otherUser ->
+                _otherUserItem.value = Event(otherUser)
+            }.onError { code, message ->
+                _otherUserDataError.value = Event(true)
             }
         }
     }
 
-    fun sendMessage(message: String) {
-        val myUserName = myUserItem.value?.peekContent()?.userName?: ""
-        val myUserLocation = location.value?.peekContent()?: ""
-        val myLatLng = latLngString.value?.peekContent()?: ""
+    fun sendMessage(message: String, myDataId: String) {
+        val myUserName = myUserItem.value?.peekContent()?.userName ?: ""
+        val myUserLocation = location.value?.peekContent() ?: ""
+        val myLatLng = latLngString.value?.peekContent() ?: ""
         viewModelScope.launch {
             if (otherUserId != null) {
-                chatRepository.sendMessage(
+                val result = chatRepository.sendMessage(
                     chatRoomId.value?.peekContent()!!,
-                    otherUserId!!, message, myUserName, myUserLocation, getCurrentTime(), myLatLng
+                    otherUserId!!,
+                    message,
+                    myUserName,
+                    myUserLocation,
+                    getCurrentTime(),
+                    myLatLng,
+                    myDataId
                 )
+                result.onSuccess {
+                }.onError { code, message ->
+                    _sendMessageError.value = Event(true)
+                }
             }
         }
     }
@@ -118,14 +154,39 @@ class ChatDetailViewModel @Inject constructor(private val chatRepository: ChatRe
             val otherLongitude = otherCoordinates?.get(1)?.toDouble()
 
             // 거리 계산 및 관련 로직 수행
-            if(myLatitude != null && myLongitude != null && otherLatitude != null && otherLongitude != null) {
-                val distance = calculateDistance(myLatitude,myLongitude,otherLatitude,otherLongitude)
+            if (myLatitude != null && myLongitude != null && otherLatitude != null && otherLongitude != null) {
+                val distance =
+                    calculateDistance(myLatitude, myLongitude, otherLatitude, otherLongitude)
                 val distanceFormat = formatDistance(distance)
                 _distanceDiff.value = Event(distanceFormat)
             }
         }
     }
 
+    fun getMyDataId() {
+        viewModelScope.launch {
+            val result = userInfoRepository.getUser()
+            result.onSuccess { users ->
+                val myDataId = findMyDataId(users)
+                _myDataId.value = Event(myDataId)
+            }.onError { code, message ->
+                _myDataIdError.value = Event(true)
+            }
+        }
+    }
+
+
+    private suspend fun findMyDataId(users: Map<String, Map<String, User>>): String? {
+        val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
+        for ((userNode, userDataMap) in users) {
+            for ((key, foundUser) in userDataMap) {
+                if (foundUser.userId == uId) {
+                    return key
+                }
+            }
+        }
+        return null
+    }
 
     fun addChatDetailEventListener() {
         chatDetailEventListener = chatRoomId.value?.peekContent()?.let {

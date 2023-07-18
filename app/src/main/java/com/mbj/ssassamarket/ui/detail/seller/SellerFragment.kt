@@ -23,7 +23,6 @@ import com.mbj.ssassamarket.util.Constants
 import com.mbj.ssassamarket.util.Constants.CONTENT
 import com.mbj.ssassamarket.util.Constants.PRICE
 import com.mbj.ssassamarket.util.Constants.TITLE
-import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
 import com.mbj.ssassamarket.util.EventObserver
 import com.mbj.ssassamarket.util.ProgressDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,6 +41,7 @@ class SellerFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.viewModel = viewModel
         initViewModel()
         observeData()
         setupViewPager()
@@ -51,61 +51,14 @@ class SellerFragment : BaseFragment() {
 
     private fun initViewModel() {
         viewModel.initializeProduct( args.postId, args.product)
+        viewModel.getProductNickname()
     }
 
     private fun observeData() {
-        viewModel.editMode.observe(viewLifecycleOwner) { editMode ->
-            setEditMode(editMode.peekContent())
-        }
-
-        viewModel.getProductNickname()
-
-        viewModel.nickname.observe(viewLifecycleOwner, EventObserver { nickname ->
-            binding.detailReceiver.setDetailNicknameText(nickname)
-            viewModel.handleNicknameResponse(nickname)
-        })
-
-        viewModel.productNicknameCompleted.observe(viewLifecycleOwner, EventObserver { productNicknameCompleted ->
-            if (!productNicknameCompleted) {
-                showLoadingDialog()
-            } else {
-                dismissLoadingDialog()
-            }
-        })
-
-        viewModel.productNicknameSuccess.observe(viewLifecycleOwner, EventObserver { productNicknameSuccess ->
-                if (!productNicknameSuccess) {
-                    showToast(R.string.nickname_response_failure)
-                }
-            })
-
-        viewModel.product.observe(viewLifecycleOwner, EventObserver {
-            binding.detailSubmitTv.setTextColorRes(if (viewModel.isProductModified()) R.color.orange_700 else R.color.grey_300)
-            setDetailTitleTextColor(viewModel.isTitleMatch())
-            setDetailPriceTextColor(viewModel.isPriceMatch())
-            setDetailContentTextColor(viewModel.isContentMatch())
-        })
-
-        viewModel.productUpdatedResponse.observe(viewLifecycleOwner, EventObserver { response ->
-            viewModel.handleUpdateResponse(response)
-        })
-
-        viewModel.productUpdatedSuccess.observe(viewLifecycleOwner, EventObserver { success ->
-            if (success) {
-                findNavController().navigateUp()
-                showToast(R.string.product_update_success)
-            } else {
-                showToast(R.string.product_update_failed)
-            }
-        })
-
-        viewModel.productUpdateCompleted.observe(viewLifecycleOwner, EventObserver{ compleated ->
-            if(compleated) {
-                dismissLoadingDialog()
-            } else {
-                showLoadingDialog()
-            }
-        })
+        observeEditMode()
+        observeNicknameResponse()
+        observeProductData()
+        observeProductUpdate()
     }
 
     private fun setupViewPager() {
@@ -196,7 +149,6 @@ class SellerFragment : BaseFragment() {
         } else {
             getString(R.string.confirmation_dialog_message_cancel)
         }
-
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.confirmation_dialog_title)
             .setMessage(dialogMessage)
@@ -258,5 +210,55 @@ class SellerFragment : BaseFragment() {
         val colorResourceId = if (isMatch) R.color.grey_100 else R.color.black
         val textColor = ContextCompat.getColor(requireContext(), colorResourceId)
         binding.detailReceiver.setDetailContentTextColor(textColor)
+    }
+
+    private fun observeEditMode() {
+        viewModel.editMode.observe(viewLifecycleOwner) { editMode ->
+            setEditMode(editMode.peekContent())
+        }
+    }
+
+    private fun observeNicknameResponse() {
+        viewModel.nickname.observe(viewLifecycleOwner, EventObserver { nickname ->
+            binding.detailReceiver.setDetailNicknameText(nickname)
+        })
+
+        viewModel.nicknameError.observe(viewLifecycleOwner, EventObserver { nicknameError ->
+            if (nicknameError) {
+                showToast(R.string.error_message_nickname)
+            }
+        })
+    }
+
+    private fun observeProductData() {
+        viewModel.product.observe(viewLifecycleOwner, EventObserver {
+            binding.detailSubmitTv.setTextColorRes(if (viewModel.isProductModified()) R.color.orange_700 else R.color.grey_300)
+            setDetailTitleTextColor(viewModel.isTitleMatch())
+            setDetailPriceTextColor(viewModel.isPriceMatch())
+            setDetailContentTextColor(viewModel.isContentMatch())
+        })
+    }
+
+    private fun observeProductUpdate() {
+        viewModel.productUpdateCompleted.observe(viewLifecycleOwner, EventObserver { productUpdateCompleted ->
+            if (productUpdateCompleted) {
+                findNavController().navigateUp()
+                showToast(R.string.product_update_success)
+            }
+        })
+
+        viewModel.productUpdateError.observe(viewLifecycleOwner, EventObserver { productUpdateError ->
+            if(productUpdateError) {
+                showToast(R.string.error_message_product_update)
+            }
+        })
+
+        viewModel.productUpdateLoading.observe(viewLifecycleOwner, EventObserver { productUpdateLoading ->
+            if (productUpdateLoading) {
+                showLoadingDialog()
+            } else {
+                dismissLoadingDialog()
+            }
+        })
     }
 }

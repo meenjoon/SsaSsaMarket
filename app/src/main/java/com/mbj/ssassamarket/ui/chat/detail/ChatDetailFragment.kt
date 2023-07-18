@@ -50,12 +50,17 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
     private fun setupViewModel() {
         setChatRoomId()
         addChatDetailEventListener()
+        getMyDataId()
         getMyUserItem()
         getOtherUserItem()
         observeChatItemList()
         observeOtherUserItem()
         observeLatLngString()
         observeDistanceDiff()
+        observeMyDataIdError()
+        observeMyUserDataError()
+        observeOtherUserDataError()
+        observeSendMessageError()
     }
 
     private fun setChatRoomId() {
@@ -67,6 +72,10 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
         lifecycleScope.launch {
             viewModel.addChatDetailEventListener()
         }
+    }
+
+    private fun getMyDataId() {
+        viewModel.getMyDataId()
     }
 
     private fun getMyUserItem() {
@@ -98,12 +107,11 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
 
         binding.chatDetailSendIv.setOnClickListener {
             val message = binding.chatDetailTiev.text.toString()
-
             if (message.isEmpty()) {
                 showToast(R.string.empty_message_error)
                 return@setOnClickListener
             }
-            viewModel.sendMessage(message)
+            viewModel.sendMessage(message, viewModel.myDataId.value?.peekContent()!!)
             binding.chatDetailTiev.text?.clear()
         }
     }
@@ -156,6 +164,38 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
     private fun observeDistanceDiff() {
         viewModel.distanceDiff.observe(viewLifecycleOwner, EventObserver { distanceDiff ->
             binding.chatDetailLocationDiffTv.text = distanceDiff
+        })
+    }
+
+    private fun observeMyDataIdError() {
+        viewModel.myDataIdError.observe(viewLifecycleOwner, EventObserver { myDataIdError ->
+            if (myDataIdError) {
+                showToast(R.string.error_message_retry)
+            }
+        })
+    }
+
+    private fun observeMyUserDataError() {
+        viewModel.myUserDataError.observe(viewLifecycleOwner, EventObserver { myUserDataError ->
+            if (myUserDataError) {
+                showToast(R.string.error_message_user_data)
+            }
+        })
+    }
+
+    private fun observeOtherUserDataError() {
+        viewModel.otherUserDataError.observe(viewLifecycleOwner, EventObserver { otherUserDataError ->
+            if (otherUserDataError) {
+                showToast(R.string.error_message_user_data)
+            }
+        })
+    }
+
+    private fun observeSendMessageError() {
+        viewModel.sendMessageError.observe(viewLifecycleOwner, EventObserver { sendMessageError ->
+            if (sendMessageError) {
+                showToast(R.string.error_message_send_message)
+            }
         })
     }
 

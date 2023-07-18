@@ -5,6 +5,9 @@
 
     <data>
 
+        <variable
+            name="viewModel"
+            type="com.mbj.ssassamarket.ui.inventory.InventoryViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -37,11 +40,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
+            android:text="@string/text_greeting_suffix"
             android:textColor="@color/black"
             android:textSize="22sp"
             app:layout_constraintBottom_toBottomOf="@id/inventory_nickname_tv"
-            app:layout_constraintStart_toEndOf="@id/inventory_nickname_tv"
-            android:text="@string/text_greeting_suffix" />
+            app:layout_constraintStart_toEndOf="@id/inventory_nickname_tv" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/inventory_outer_rv"
@@ -55,6 +58,15 @@
             app:layout_constraintStart_toStartOf="@id/guideline_vertical_5"
             app:layout_constraintTop_toTopOf="@id/guideline_horizontal_15"
             tools:listitem="@layout/recyclerview_item_inventory_product_list" />
+
+        <com.mbj.ssassamarket.util.ProgressIndicatorView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.isLoading().peekContent()}" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline_vertical_5"

@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.ui.inventory
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.mbj.ssassamarket.R
@@ -23,17 +24,47 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val adapter = InventoryOuterAdapter(this)
+        binding.viewModel = viewModel
         binding.inventoryOuterRv.adapter = adapter
         viewModel.getNickname()
         viewModel.initProductPostItemList()
 
-        viewModel.inventoryDataList.observe(viewLifecycleOwner, EventObserver{ inventoryDataList ->
+        observeInventoryDataList(adapter)
+        observeNickname()
+        observeNicknameError()
+        observeProductError()
+    }
+
+    private fun observeInventoryDataList(adapter: InventoryOuterAdapter) {
+        viewModel.inventoryDataList.observe(viewLifecycleOwner, EventObserver { inventoryDataList ->
             adapter.submitList(inventoryDataList)
         })
+    }
 
-        viewModel.nickname.observe(viewLifecycleOwner, EventObserver{ nickname ->
+    private fun observeNickname() {
+        viewModel.nickname.observe(viewLifecycleOwner, EventObserver { nickname ->
             binding.inventoryNicknameTv.text = nickname
         })
+    }
+
+    private fun observeNicknameError() {
+        viewModel.nicknameError.observe(viewLifecycleOwner, EventObserver { nicknameError ->
+            if (nicknameError) {
+                showToast(R.string.error_message_retry)
+            }
+        })
+    }
+
+    private fun observeProductError() {
+        viewModel.productError.observe(viewLifecycleOwner, EventObserver { productError ->
+            if (productError) {
+                showToast(R.string.error_message_retry)
+            }
+        })
+    }
+
+    private fun showToast(messageResId: Int) {
+        Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
     }
 
     override fun onProductClick(productPostItem: Pair<String, ProductPostItem>) {

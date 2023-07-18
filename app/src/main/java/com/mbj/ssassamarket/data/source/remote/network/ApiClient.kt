@@ -1,7 +1,6 @@
-package com.mbj.ssassamarket.data.source.remote
+package com.mbj.ssassamarket.data.source.remote.network
 
 import com.mbj.ssassamarket.data.model.*
-import retrofit2.Response
 import retrofit2.http.*
 
 interface ApiClient {
@@ -11,56 +10,57 @@ interface ApiClient {
         @Path("uId") uId: String,
         @Body user: User,
         @Query("auth") auth: String
-    ): Response<Map<String, String>>
+    ): ApiResponse<Map<String, String>>
 
     @GET("user.json")
     suspend fun getUser(
         @Query("auth") auth: String
-    ): Response<Map<String, Map<String, User>>>
+    ): ApiResponse<Map<String, Map<String, User>>>
 
     @POST("posts/.json")
     suspend fun addProductPost(
         @Body product: ProductPostItem,
         @Query("auth") auth: String
-    ): Response<Map<String, String>>
+    ): ApiResponse<Map<String, String>>
 
     @PATCH("user/{userId}/{dataId}.json")
     suspend fun updateMyLatLng(
         @Path("userId") userId: String,
         @Path("dataId") dataId: String,
-        @Body user: User
-    ) : Response<Unit>
+        @Body request: PatchUserLatLng,
+        @Query("auth") auth: String
+    ): ApiResponse<Unit>
 
     @GET("posts.json")
     suspend fun getProduct(
         @Query("auth") auth: String
-    ): Response<Map<String, ProductPostItem>>
+    ): ApiResponse<Map<String, ProductPostItem>>
 
     @PATCH("posts/{postId}.json")
     suspend fun updateProduct(
         @Path("postId") postId: String,
         @Body request: PatchProductRequest,
         @Query("auth") auth: String
-    ): Response<Unit>
+    ): ApiResponse<Unit>
 
     @PATCH("posts/{postId}.json")
     suspend fun buyProduct(
         @Path("postId") postId: String,
         @Body request: PatchBuyRequest,
         @Query("auth") auth: String
-    ): Response<Unit>
+    ): ApiResponse<Unit>
 
     @PATCH("posts/{postId}.json")
     suspend fun updateProductFavorite(
         @Path("postId") productId: String,
         @Body requestBody: FavoriteCountRequest,
         @Query("auth") auth: String
-    ): Response<Unit>
+    ): ApiResponse<Unit>
 
     @GET("posts/{postId}.json")
     suspend fun getProductDetail(
         @Path("postId") postId: String,
         @Query("auth") auth: String
-    ): Response<ProductPostItem>
+    ): ApiResponse<ProductPostItem>
 }
 

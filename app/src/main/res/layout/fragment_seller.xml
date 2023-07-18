@@ -4,6 +4,9 @@
 
     <data>
 
+        <variable
+            name="viewModel"
+            type="com.mbj.ssassamarket.ui.detail.seller.SellerViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -109,6 +112,7 @@
                     android:id="@+id/detail_receiver"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    app:detailNicknameText="@{viewModel.nickname.peekContent()}"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -128,6 +132,12 @@
             android:text="@string/seller_edit"
             android:textColor="@color/white"
             android:textSize="20sp" />
+
+        <com.mbj.ssassamarket.util.ProgressIndicatorView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:visible="@{viewModel.nicknameLoading.peekContent()}" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

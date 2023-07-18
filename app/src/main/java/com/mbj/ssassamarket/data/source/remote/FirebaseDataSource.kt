@@ -12,6 +12,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.data.model.*
+import com.mbj.ssassamarket.data.source.remote.network.*
 import com.mbj.ssassamarket.util.Constants.CHATS
 import com.mbj.ssassamarket.util.Constants.CHAT_ROOMS
 import com.mbj.ssassamarket.util.Constants.CHAT_ROOM_ID
@@ -27,7 +28,6 @@ import com.mbj.ssassamarket.util.Constants.USER_NAME
 import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
-import retrofit2.Response
 import java.util.*
 import javax.inject.Inject
 
@@ -40,68 +40,17 @@ class FirebaseDataSource @Inject constructor(
     private val chatRef = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference.child(CHATS)
     private val database = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference
 
-    override suspend fun currentUserExists(): Boolean {
+    override suspend fun getUser(): ApiResponse<Map<String, Map<String, User>>> {
         val (user, idToken) = getUserAndIdToken()
-        if (idToken != null) {
-            try {
-                val response = apiClient.getUser(idToken)
-                if (response.isSuccessful) {
-                    val users = response.body()
-                    if (users != null) {
-                        return users.containsKey(user?.uid)
-                    }
-                } else {
-                    Log.d("currentUserExists Error", "${Exception(response.code().toString())}")
-                }
-            } catch (e: Exception) {
-                Log.d("currentUserExists Error", e.toString())
-            }
-        }
-        return false
+        val googleIdToken = idToken ?: ""
+        return apiClient.getUser(googleIdToken)
     }
 
-    override suspend fun addUser(nickname: String): Boolean {
+    override suspend fun addUser(nickname: String): ApiResponse<Map<String, String>> {
         val (user, idToken) = getUserAndIdToken()
+        val googleIdToken = idToken ?: ""
         val userItem = User(user?.uid, nickname, null)
-        if (idToken != null) {
-            try {
-                val response = apiClient.addUser(user?.uid ?: "", userItem, idToken)
-                if (response.isSuccessful) {
-                    Log.d("postUser Success", "${response.body()}")
-                    return true
-                } else {
-                    Log.e("FirebaseDataSource", "postUser Error: ${response.code()}")
-                }
-            } catch (e: Exception) {
-                Log.e("FirebaseDataSource", "postUser Error: $e")
-            }
-        }
-        return false
-    }
-
-    override suspend fun checkDuplicateUserName(nickname: String): Boolean {
-        val (user, idToken) = getUserAndIdToken()
-        if (idToken != null) {
-            try {
-                val response = apiClient.getUser(idToken)
-                if (response.isSuccessful) {
-                    val users = response.body()
-                    if (users != null) {
-                        return users.values.flatMap { it.values }.any { userInfo ->
-                            userInfo.userName == nickname
-                        }
-                    }
-                } else {
-                    Log.e(
-                        "checkDuplicateUserName Error",
-                        "${Exception(response.code().toString())}"
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e("checkDuplicateUserName Error", e.toString())
-            }
-        }
-        return false
+        return apiClient.addUser(user?.uid ?: "", userItem, googleIdToken)
     }
 
     override suspend fun addProductPost(
@@ -116,352 +65,228 @@ class FirebaseDataSource @Inject constructor(
         location: String,
         latLng: String,
         favoriteList: List<String?>
-    ): Boolean = coroutineScope {
+    ): ApiResponse<Map<String, String>> {
         val (user, idToken) = getUserAndIdToken()
-
-        if (idToken != null && user != null) {
-            val userUid = user.uid
-            val productPostItem = ProductPostItem(
-                userUid,
-                content,
-                getCurrentTime(),
-                uploadImages(imageLocations),
-                price,
-                title,
-                category,
-                soldOut,
-                favoriteCount,
-                shoppingList,
-                location,
-                latLng,
-                favoriteList
-            )
-
-            val response = addPostItem(productPostItem, idToken)
-            try {
-                if (response.isSuccessful) {
-                    Log.d(TAG, "글이 성공적으로 작성되었습니다.")
-                    val updateResult = updateMyLatLng(latLng)
-                    if (updateResult) {
-                        return@coroutineScope true
-                    } else {
-                        Log.e(TAG, "위치 정보 업데이트에 실패하였습니다.")
-                    }
-                } else {
-                    val statusCode = response.code()
-                    Log.e(TAG, "글 작성에 실패하였습니다. (Status Code: $statusCode)")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "글 작성을 추가 하던 중 예외가 발생하였습니다.", e)
-            }
-        } else {
-            Log.d(TAG, "GoogleIdToken, User가 존재하지 않습니다.")
-        }
-
-        return@coroutineScope false
+        val uId = user?.uid ?: ""
+        val googleIdToken = idToken ?: ""
+        val productPostItem = ProductPostItem(
+            uId,
+            content,
+            getCurrentTime(),
+            uploadImages(imageLocations),
+            price,
+            title,
+            category,
+            soldOut,
+            favoriteCount,
+            shoppingList,
+            location,
+            latLng,
+            favoriteList
+        )
+        return apiClient.addProductPost(productPostItem, googleIdToken)
     }
 
-    override suspend fun getMyDataId(): String? {
+
+    override suspend fun updateMyLatLng(
+        dataId: String,
+        latLng: PatchUserLatLng
+    ): ApiResponse<Unit> {
         val (user, idToken) = getUserAndIdToken()
-        if (idToken != null && user?.uid != null) {
-            try {
-                val response = apiClient.getUser(idToken)
-                if (response.isSuccessful) {
-                    val users = response.body()
-                    if (users != null) {
-                        for ((userNode, userDataMap) in users) {
-                            for ((key, foundUser) in userDataMap) {
-                                if (foundUser.userId == user.uid) {
-                                    return key
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    Log.e(
-                        TAG,
-                        "getUserNode Error: API call failed with response code: ${response.code()}"
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "getUserNode Error: $e")
-            }
-        }
-        return null
+        val googleIdToken = idToken ?: ""
+        val userId = user?.uid ?: ""
+        return apiClient.updateMyLatLng(userId, dataId, latLng, googleIdToken)
     }
 
-    override suspend fun updateMyLatLng(latLng: String): Boolean {
-        try {
-            val (user, idToken) = getUserAndIdToken()
-
-            if (user?.uid != null && idToken != null) {
-                val dataId = getMyDataId()
-                val existingUserResponse = apiClient.getUser(idToken)
-                val userMap = existingUserResponse.body()
-
-                userMap?.let { users ->
-                    val foundUser = users.values.flatMap { it.values }.find { it.userId == user.uid }
-                    foundUser?.let {
-                        val updatedUser = User(userId = it.userId, userName = it.userName, latLng = latLng)
-                        try {
-                            if (dataId != null) {
-                                val response = apiClient.updateMyLatLng(user.uid, dataId, updatedUser)
-                                if (response.isSuccessful) {
-                                    Log.d(TAG, "위치 정보 업데이트 성공")
-                                    return true
-                                } else {
-                                    Log.e(TAG, "위치 정보 업데이트 실패 (Status Code: ${response.code()})")
-                                }
-                            } else {
-                                Log.e(TAG, "데이터 ID가 없습니다.")
-                            }
-                        } catch (e: Exception) {
-                            Log.e(TAG, "위치 정보 업데이트 오류", e)
-                        }
-                    }
-                }
-            } else {
-                Log.d(TAG, "GoogleIdToken, User가 존재하지 않습니다.")
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "예외 발생", e)
-        }
-
-        return false
+    override suspend fun getProduct(): ApiResponse<Map<String, ProductPostItem>> {
+        val (user, idToken) = getUserAndIdToken()
+        val googleIdToken = idToken ?: ""
+        return apiClient.getProduct(googleIdToken)
     }
 
-    override suspend fun getProduct(): List<Pair<String, ProductPostItem>> {
+    override suspend fun getProductDetail(postId: String): ApiResponse<ProductPostItem> {
         val (user, idToken) = getUserAndIdToken()
-        return try {
-            if (idToken != null) {
-                val response = apiClient.getProduct(idToken)
-                if (response.isSuccessful) {
-                    val productMap: Map<String, ProductPostItem>? = response.body()
-                    val productList = productMap?.entries?.map { entry ->
-                        val key = entry.key
-                        val product = entry.value
-                        val updatedImageLocations = product.imageLocations?.mapNotNull { imageLocation ->
-                            if (imageLocation != null) {
-                                getDownloadUrl(imageLocation)
-                            } else {
-                                null
-                            }
-                        }
-                        key to product.copy(imageLocations = updatedImageLocations)
-                    } ?: emptyList()
-
-                    productList
-                } else {
-                    val statusCode = response.code()
-                    Log.e(TAG, "Failed to get product. Status Code: $statusCode")
-                    emptyList()
-                }
-            } else {
-                emptyList()
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Exception while getting product", e)
-            emptyList()
-        }
-    }
-
-    override suspend fun getProductDetail(postId: String): ProductPostItem? {
-        val (user, idToken) = getUserAndIdToken()
-        return try {
-            if (idToken != null) {
-                val response = apiClient.getProductDetail(postId, idToken)
-                if (response.isSuccessful) {
-                    val product = response.body()
-                    product
-                } else {
-                    val statusCode = response.code()
-                    Log.e(TAG, "Failed to get product detail. Status Code: $statusCode")
-                    throw Exception("Failed to get product detail. Status Code: $statusCode")
-                }
-            } else {
-                throw Exception("Missing GoogleIdToken")
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Exception while getting product detail", e)
-            throw Exception("Failed to get product detail", e)
-        }
+        val googleIdToken = idToken ?: ""
+        return apiClient.getProductDetail(postId, googleIdToken)
     }
 
     override suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
         val user = FirebaseAuth.getInstance().currentUser
-        var idToken: String? = null
-
-        try {
-            idToken = user?.getIdToken(true)?.await()?.token
-        } catch (e: Exception) {
-            Log.e("idToken Error", e.toString())
-        }
+        val idToken = user?.getIdToken(true)?.await()?.token
         return Pair(user, idToken)
     }
 
-    override suspend fun getUserNameByUserId(uId: String): String? {
+    override suspend fun getUserNameByUserId(): ApiResponse<Map<String, Map<String, User>>> {
         val (user, idToken) = getUserAndIdToken()
-        if (idToken != null) {
-            try {
-                val response = apiClient.getUser(idToken)
-                if (response.isSuccessful) {
-                    val users = response.body()
-                    if (users != null) {
-                        val matchingUser = users.values.flatMap { it.values }.find { userInfo ->
-                            userInfo.userId == uId
-                        }
-                        return matchingUser?.userName
-                    }
-                } else {
-                    val statusCode = response.code()
-                    Log.e(TAG, "getUserNameByUserId Error, Status Code: $statusCode")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "getUserNameByUserId Error", e)
-            }
-        }
-        return null
+        val googleIdToken = idToken ?: ""
+        return apiClient.getUser(googleIdToken)
     }
 
-    override suspend fun updateProduct(postId: String, request: PatchProductRequest): Boolean {
+    override suspend fun updateProduct(
+        postId: String,
+        request: PatchProductRequest
+    ): ApiResponse<Unit> {
         val (user, idToken) = getUserAndIdToken()
-        if (idToken != null) {
-            try {
-                val response = apiClient.updateProduct(postId, request, idToken)
-                if (response.isSuccessful) {
-                    Log.d(TAG, "상품 업데이트 성공")
-                    return true
-                } else {
-                    Log.e(TAG, "상품 업데이트 실패 (Status Code: ${response.code()})")
-                    return false
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "상품 업데이트 오류", e)
-            }
-        }
-        return false
+        val googleIdToken = idToken ?: ""
+        return apiClient.updateProduct(postId, request, googleIdToken)
     }
 
-    override suspend fun updateProductFavorite(postId: String, request: FavoriteCountRequest): Boolean {
+    override suspend fun updateProductFavorite(
+        postId: String,
+        request: FavoriteCountRequest
+    ): ApiResponse<Unit> {
         val (user, idToken) = getUserAndIdToken()
-        if (idToken != null) {
-            try {
-                val response = apiClient.updateProductFavorite(postId, request, idToken)
-                if (response.isSuccessful) {
-                    Log.d(TAG, "좋아요 업데이트 성공")
-                    return true
-                } else {
-                    Log.e(TAG, "좋아요 업데이트 (Status Code: ${response.code()})")
-                    return false
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "좋아요 업데이트", e)
-            }
-        }
-        return false
+        val googleIdToken = idToken ?: ""
+        return apiClient.updateProductFavorite(postId, request, googleIdToken)
     }
 
-    override suspend fun buyProduct(postId: String, request: PatchBuyRequest) {
+    override suspend fun buyProduct(postId: String, request: PatchBuyRequest): ApiResponse<Unit> {
         val (user, idToken) = getUserAndIdToken()
-        if (idToken != null) {
-            try {
-                val response = apiClient.buyProduct(postId, request, idToken)
-                if (response.isSuccessful) {
-                    Log.d(TAG, "구매 시 업데이트 실패")
-                } else {
-                    Log.e(TAG, "구매 시 업데이트 실패 (Status Code: ${response.code()})")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "구매 시 업데이트 오류", e)
-            }
-        }
+        val googleIdToken = idToken ?: ""
+        return apiClient.buyProduct(postId, request, googleIdToken)
     }
 
-    override suspend fun enterChatRoom(ohterUserId: String, otherUserName: String, otherLocation: String): String {
-        val userId = getUserAndIdToken().first?.uid?: ""
+    override suspend fun enterChatRoom(
+        ohterUserId: String,
+        otherUserName: String,
+        otherLocation: String
+    ): ApiResponse<String> {
+        val userId = getUserAndIdToken().first?.uid ?: ""
 
         val chatRoomDB = chatRoomsRef.child(userId).child(ohterUserId)
         val dataSnapshot = chatRoomDB.get().await()
 
         return if (dataSnapshot.value != null) {
             val chatRoom = dataSnapshot.getValue(ChatRoomItem::class.java)
-            chatRoom?.chatRoomId ?: ""
+            val chatRoomId = chatRoom?.chatRoomId ?: ""
+            ApiResultSuccess(chatRoomId)
         } else {
-            val chatRoomId = UUID.randomUUID().toString()
-            val newChatRoom = ChatRoomItem(
-                chatRoomId = chatRoomId,
-                otherUserId = ohterUserId,
-                otherUserName = otherUserName,
-                otherLocation = otherLocation,
-            )
-            chatRoomDB.setValue(newChatRoom).await()
-            chatRoomId
+            try {
+                val chatRoomId = UUID.randomUUID().toString()
+                val newChatRoom = ChatRoomItem(
+                    chatRoomId = chatRoomId,
+                    otherUserId = ohterUserId,
+                    otherUserName = otherUserName,
+                    otherLocation = otherLocation,
+                )
+                chatRoomDB.setValue(newChatRoom).await()
+                ApiResultSuccess(chatRoomId)
+            } catch (e: Exception) {
+                ApiResultError(code = 400, message = e.message ?: "Failed to create chat room")
+            }
         }
     }
 
-    override suspend fun getMyUserItem(callback: (User) -> Unit) {
-        val userId = getUserAndIdToken().first?.uid?: ""
+    override suspend fun getMyUserItem(): ApiResponse<User> {
+        val userId = getUserAndIdToken().first?.uid ?: ""
 
-        database.child(USER).child(userId).get().addOnSuccessListener { dataSnapshot ->
+        return try {
+            val dataSnapshot = database.child(USER).child(userId).get().await()
+
             for (childSnapshot in dataSnapshot.children) {
                 val myUserId = childSnapshot.child(USER_ID).getValue(String::class.java)
                 val myUserName = childSnapshot.child(USER_NAME).getValue(String::class.java)
                 val myLatLng = childSnapshot.child(LAT_LNG).getValue(String::class.java)
 
                 val myUserItem = User(myUserId, myUserName, myLatLng)
-                callback(myUserItem)
+                return ApiResultSuccess(myUserItem)
             }
+            ApiResultError(code = 400, message = "My User data not found")
+        } catch (e: Exception) {
+            ApiResultError(code = 500, message = e.message ?: "Failed to get my user")
         }
     }
 
-    override suspend fun getOtherUserItem(userId: String, callback: (User) -> Unit) {
-        database.child(USER).child(userId).get().addOnSuccessListener { dataSnapshot ->
-            for (childSnapshot in dataSnapshot.children) {
+    override suspend fun getOtherUserItem(userId: String): ApiResponse<User> {
+        return try {
+            val dataSnapshot = database.child(USER).child(userId).get().await()
+            val user = dataSnapshot.children.mapNotNull { childSnapshot ->
                 val otherUserId = childSnapshot.child(USER_ID).getValue(String::class.java)
                 val otherUserName = childSnapshot.child(USER_NAME).getValue(String::class.java)
                 val otherLatLng = childSnapshot.child(LAT_LNG).getValue(String::class.java)
 
-                val otherUserItem = User(otherUserId, otherUserName, otherLatLng)
-                callback(otherUserItem)
+                if (otherUserId != null && otherUserName != null && otherLatLng != null) {
+                    User(otherUserId, otherUserName, otherLatLng)
+                } else {
+                    null
+                }
+            }.firstOrNull()
+
+            if (user != null) {
+                ApiResultSuccess(user)
+            } else {
+                ApiResultError(code = 400, message = "Other User data not found")
             }
+        } catch (e: Exception) {
+            ApiResultError(code = 500, message = e.message ?: "Failed to get other user")
         }
     }
 
-    override suspend fun sendMessage(chatRoomId: String, otherUserId: String, message: String, myUserName: String, myLocation: String, lastSentTime: String, myLatLng: String) {
-        val userId = getUserAndIdToken().first?.uid?: ""
+    override suspend fun sendMessage(
+        chatRoomId: String,
+        otherUserId: String,
+        message: String,
+        myUserName: String,
+        myLocation: String,
+        lastSentTime: String,
+        myLatLng: String,
+        dataId: String
+    ): ApiResponse<Unit> {
+        return try {
+            val userId = getUserAndIdToken().first?.uid ?: ""
 
-        val newChatItem = ChatItem(
-            message = message,
-            userId = userId,
-            lastSentTime = lastSentTime
-        )
+            val newChatItem = ChatItem(
+                message = message,
+                userId = userId,
+                lastSentTime = lastSentTime
+            )
 
-        newChatItem.chatId = database.child(CHATS).child(chatRoomId).push().key
-        database.child(CHATS).child(chatRoomId).child(newChatItem.chatId ?: "").setValue(newChatItem)
+            newChatItem.chatId = database.child(CHATS).child(chatRoomId).push().key
+            database.child(CHATS).child(chatRoomId).child(newChatItem.chatId ?: "")
+                .setValue(newChatItem)
 
-        val dataId = getMyDataId()
-        val uId = getUserAndIdToken().first?.uid?: ""
+            val uId = getUserAndIdToken().first?.uid ?: ""
 
-        val updates: MutableMap<String, Any> = hashMapOf(
-            "${USER}/${uId}/${dataId}/${LAT_LNG}" to myLatLng,
-            "${CHAT_ROOMS}/${userId}/$otherUserId/${LAST_MESSAGE}" to message,
-            "${CHAT_ROOMS}/${userId}/$otherUserId/${LAST_SENT_TIME}" to lastSentTime,
-            "${CHAT_ROOMS}/$otherUserId/${userId}/${LAST_MESSAGE}" to message,
-            "${CHAT_ROOMS}/$otherUserId/${userId}/${LAST_SENT_TIME}" to lastSentTime,
-            "${CHAT_ROOMS}/$otherUserId/${userId}/${CHAT_ROOM_ID}" to chatRoomId,
-            "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_USER_ID}" to userId,
-            "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_USER_NAME}" to myUserName,
-            "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_LOCATION}" to myLocation,
-        )
-        database.updateChildren(updates)
+            val updates: MutableMap<String, Any> = hashMapOf(
+                "${USER}/${uId}/${dataId}/${LAT_LNG}" to myLatLng,
+                "${CHAT_ROOMS}/${userId}/$otherUserId/${LAST_MESSAGE}" to message,
+                "${CHAT_ROOMS}/${userId}/$otherUserId/${LAST_SENT_TIME}" to lastSentTime,
+                "${CHAT_ROOMS}/$otherUserId/${userId}/${LAST_MESSAGE}" to message,
+                "${CHAT_ROOMS}/$otherUserId/${userId}/${LAST_SENT_TIME}" to lastSentTime,
+                "${CHAT_ROOMS}/$otherUserId/${userId}/${CHAT_ROOM_ID}" to chatRoomId,
+                "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_USER_ID}" to userId,
+                "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_USER_NAME}" to myUserName,
+                "${CHAT_ROOMS}/$otherUserId/${userId}/${OTHER_LOCATION}" to myLocation,
+            )
+            database.updateChildren(updates)
+
+            ApiResultSuccess(Unit)
+        } catch (e: Exception) {
+            ApiResultError(code = 400, message = e.message ?: "Failed to send message")
+        }
     }
 
-    override suspend fun getChatRooms(callback: (List<ChatRoomItem>) -> Unit) {
-        val userId = getUserAndIdToken().first?.uid?: ""
-        val chatRoomsDB = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference.child(CHAT_ROOMS).child(userId)
+    override suspend fun getChatRooms(): ApiResponse<List<ChatRoomItem>> {
+        val userId = getUserAndIdToken().first?.uid ?: ""
+        val chatRoomsDB = Firebase.database(BuildConfig.FIREBASE_BASE_URL)
+            .reference.child(CHAT_ROOMS)
+            .child(userId)
 
-        val chatRoomsValueEventListener = addChatRoomsValueEventListener(callback)
-        chatRoomsDB.addValueEventListener(chatRoomsValueEventListener)
+        return try {
+            val chatRoomsSnapshot = chatRoomsDB.get().await()
+            val chatRoomItemList = mutableListOf<ChatRoomItem>()
+
+            for (childSnapshot in chatRoomsSnapshot.children) {
+                val chatRoomItem = childSnapshot.getValue(ChatRoomItem::class.java)
+                if (chatRoomItem != null) {
+                    chatRoomItemList.add(chatRoomItem)
+                }
+            }
+
+            ApiResultSuccess(chatRoomItemList)
+        } catch (e: Exception) {
+            ApiResultError(code = 400, message = e.message ?: "Failed to get chat rooms")
+        }
     }
 
     override fun addChatDetailEventListener(
@@ -493,7 +318,10 @@ class FirebaseDataSource @Inject constructor(
         return chatDetailEventListener
     }
 
-    override fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String) {
+    override fun removeChatDetailEventListener(
+        chatDetailEventListener: ChildEventListener?,
+        chatRoomId: String
+    ) {
         chatDetailEventListener?.let {
             chatRef.child(chatRoomId).removeEventListener(it)
         }
@@ -520,24 +348,17 @@ class FirebaseDataSource @Inject constructor(
     }
 
     override suspend fun removeChatRoomsValueEventListener(valueEventListener: ValueEventListener?) {
-        val userId = getUserAndIdToken().first?.uid?: ""
+        val userId = getUserAndIdToken().first?.uid ?: ""
         valueEventListener?.let {
             chatRoomsRef.child(userId).removeEventListener(it)
         }
     }
 
-    suspend fun getDownloadUrl(imageLocation: String): String {
+    override suspend fun getDownloadUrl(imageLocation: String): String {
         return storage.getReference(imageLocation)
             .downloadUrl
             .await()
             .toString()
-    }
-
-    private suspend fun addPostItem(
-        ProductPostItem: ProductPostItem,
-        idToken: String
-    ): Response<Map<String, String>> {
-        return apiClient.addProductPost(ProductPostItem, idToken)
     }
 
     private suspend fun uploadImages(imageContentList: List<ImageContent>): List<String> =
