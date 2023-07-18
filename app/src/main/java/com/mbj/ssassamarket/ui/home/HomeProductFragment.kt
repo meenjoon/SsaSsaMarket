@@ -35,20 +35,7 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
         binding.viewModel = viewModel
         setupViews()
         setAdapter()
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.searchText.collectLatest { searchText ->
-                        viewModel.updateSearchText()
-                    }
-                }
-                launch {
-                    viewModel.items.collectLatest { productList ->
-                        adapter.submitList(productList)
-                    }
-                }
-            }
-        }
+        observeSearchAndItems()
     }
 
     private fun setupViews() {
@@ -89,6 +76,23 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
             adapter = HomeAdapter(this)
             binding.homeProductRv.adapter = adapter
             viewModel.updateCategory(category)
+        }
+    }
+
+    private fun observeSearchAndItems() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.searchText.collectLatest { searchText ->
+                        viewModel.updateSearchText()
+                    }
+                }
+                launch {
+                    viewModel.items.collectLatest { productList ->
+                        adapter.submitList(productList)
+                    }
+                }
+            }
         }
     }
 
