@@ -43,8 +43,7 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
     private val _isProductInfoUnchanged = MutableStateFlow(false)
     val isProductInfoUnchanged: StateFlow<Boolean> = _isProductInfoUnchanged
 
-    private val _originalProduct = MutableStateFlow<ProductPostItem?>(null)
-    val originalProduct: StateFlow<ProductPostItem?> = _originalProduct
+    private var originalProduct: ProductPostItem? = null
 
     private var postId: String? = null
 
@@ -54,8 +53,8 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
         }
         if (_product.value == null) {
             _product.value = productPostItem
-            if (_originalProduct.value == null) {
-                _originalProduct.value = productPostItem
+            if (originalProduct == null) {
+                originalProduct = productPostItem
             }
         }
     }
@@ -90,7 +89,7 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
             if (currentEditMode == EditMode.EDIT) EditMode.READ_ONLY else EditMode.EDIT
         if (newEditMode == EditMode.READ_ONLY) {
             _product.value = null
-            _product.value = originalProduct.value
+            _product.value = originalProduct
         }
         setEditMode(newEditMode)
     }
@@ -141,6 +140,6 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
         price: String,
         content: String
     ): Boolean {
-        return title != product?.title || price.toInt() != product?.price || content != product?.content
+        return title != product?.title || price.toInt() != product.price || content != product.content
     }
 }
