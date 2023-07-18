@@ -37,7 +37,7 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
         viewModelScope.launch {
             _isLoading.value = true
             productRepository.getProduct(
-                onComplete = { _isLoading.value = false },
+                onComplete = { },
                 onError = { _productError.value = true }
             ).collectLatest { productMap ->
                 if (productMap is ApiResultSuccess) {
@@ -66,6 +66,7 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
                 inventoryDataList.add(InventoryData.ProductItem(favoriteProductList))
             }
             _inventoryDataList.value = inventoryDataList
+            _isLoading.value = false
         }
     }
 
@@ -84,6 +85,7 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
                 inventoryDataList.add(InventoryData.ProductItem(registeredProductList))
             }
             _inventoryDataList.value = inventoryDataList
+            _isLoading.value = false
         }
     }
 
@@ -102,6 +104,7 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
                 inventoryDataList.add(InventoryData.ProductItem(purchasedProductList))
             }
             _inventoryDataList.value = inventoryDataList
+            _isLoading.value = false
         }
     }
 
@@ -109,7 +112,7 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
         viewModelScope.launch {
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             userInfoRepository.getUser(
-                onComplete = { _isLoading.value = false },
+                onComplete = { },
                 onError = { _nicknameError.value = true }
             ).collectLatest { response ->
                 if (response is ApiResultSuccess) {
