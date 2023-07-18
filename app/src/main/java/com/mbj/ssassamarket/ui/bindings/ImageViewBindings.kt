@@ -1,5 +1,6 @@
 package com.mbj.ssassamarket.ui.bindings
 
+import android.net.Uri
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import coil.load
@@ -37,5 +38,14 @@ fun ImageView.loadImage(imageUrl: String) {
     this.load(imageUrl) {
         transformations(RoundedCornersTransformation(15f))
         error(R.drawable.null_icon)
+    }
+}
+
+@BindingAdapter("imageUriWithRoundedCorners")
+fun ImageView.loadImageWithRoundedCorners(uri: Uri?) {
+    uri?.let {
+        this.load(it) {
+            transformations(RoundedCornersTransformation(15f))
+        }
     }
 }
