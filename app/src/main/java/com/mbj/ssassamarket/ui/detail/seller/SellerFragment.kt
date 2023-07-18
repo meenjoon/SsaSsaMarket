@@ -36,31 +36,7 @@ class SellerFragment : BaseFragment() {
         initViewModel()
         setupViewPager()
         setupClickListeners()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.productUpdateCompleted.collectLatest { productUpdateCompleted ->
-                        if (productUpdateCompleted) {
-                            findNavController().navigateUp()
-                            showToast(R.string.product_update_success)
-                        }
-                    }
-                }
-                launch {
-                    viewModel.product.collectLatest { product ->
-                        updateBannerAdapter()
-                    }
-                }
-                launch {
-                    viewModel.isProductInfoUnchanged.collectLatest { isProductInfoUnchanged ->
-                        if (isProductInfoUnchanged) {
-                            showToast(R.string.request_edit_product)
-                        }
-                    }
-                }
-            }
-        }
+        observeProductUpdates()
     }
 
     private fun initViewModel() {
@@ -131,5 +107,32 @@ class SellerFragment : BaseFragment() {
                 dialog.dismiss()
             }
             .show()
+    }
+
+    private fun observeProductUpdates() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.productUpdateCompleted.collectLatest { productUpdateCompleted ->
+                        if (productUpdateCompleted) {
+                            findNavController().navigateUp()
+                            showToast(R.string.product_update_success)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.product.collectLatest { product ->
+                        updateBannerAdapter()
+                    }
+                }
+                launch {
+                    viewModel.isProductInfoUnchanged.collectLatest { isProductInfoUnchanged ->
+                        if (isProductInfoUnchanged) {
+                            showToast(R.string.request_edit_product)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
