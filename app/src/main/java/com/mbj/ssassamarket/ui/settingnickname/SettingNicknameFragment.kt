@@ -30,14 +30,13 @@ class SettingNicknameFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
+        viewModel.validateNickname()
+        observeSettingNicknameStatus()
+    }
 
+    fun observeSettingNicknameStatus() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.nickname.collectLatest { nickname ->
-                        viewModel.validateNickname()
-                    }
-                }
                 launch {
                     viewModel.isCompleted.collectLatest { isCompleted ->
                         if (isCompleted) {

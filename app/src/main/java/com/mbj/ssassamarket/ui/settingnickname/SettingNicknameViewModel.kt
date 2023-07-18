@@ -12,11 +12,14 @@ import com.mbj.ssassamarket.util.Constants.NICKNAME_VALID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingNicknameViewModel @Inject constructor(private val repository: UserInfoRepository) : ViewModel() {
+class SettingNicknameViewModel @Inject constructor(private val repository: UserInfoRepository) :
+    ViewModel() {
 
     val nickname = MutableStateFlow("")
 
@@ -39,7 +42,7 @@ class SettingNicknameViewModel @Inject constructor(private val repository: UserI
         viewModelScope.launch {
             if (nickname.value.isNullOrEmpty()) {
                 _responseToastMessage.value = (NICKNAME_REQUEST)
-            } else if (!validateNickname()) {
+            } else if (!nickname.value.matches(Constants.NICKNAME_PATTERN.toRegex())) {
                 _responseToastMessage.value = (NICKNAME_ERROR)
             } else if (isNicknameDuplicate()) {
                 _responseToastMessage.value = (NICKNAME_DUPLICATE)
@@ -48,31 +51,30 @@ class SettingNicknameViewModel @Inject constructor(private val repository: UserI
                 repository.addUser(
                     onComplete = { _isLoading.value = false },
                     onError = { _isError.value = true },
-                    nickname.value).collect { response ->
-                        if (response is ApiResultSuccess) {
-                            _isCompleted.value = true
-                        }
+                    nickname.value
+                ).collect { response ->
+                    if (response is ApiResultSuccess) {
+                        _isCompleted.value = true
+                    }
                 }
             }
         }
     }
 
-    fun validateNickname(): Boolean {
-        val value: String = nickname.value ?: ""
-
-        return when {
-            value.isEmpty() -> {
-                _nicknameErrorMessage.value = (NICKNAME_REQUEST)
-                false
-            }
-            !value.matches(Constants.NICKNAME_PATTERN.toRegex()) -> {
-                _nicknameErrorMessage.value = (NICKNAME_ERROR)
-                false
-            }
-            else -> {
-                _nicknameErrorMessage.value = (NICKNAME_VALID)
-                true
-            }
+    fun validateNickname() {
+        viewModelScope.launch {
+            nickname.debounce(300)
+                .collectLatest { debouncedNickname ->
+                    if (debouncedNickname.isEmpty()) {
+                        _nicknameErrorMessage.value = NICKNAME_REQUEST
+                    } else if (!debouncedNickname.matches(Constants.NICKNAME_PATTERN.toRegex())) {
+                        _nicknameErrorMessage.value = NICKNAME_ERROR
+                    } else if (isNicknameDuplicate()) {
+                        _nicknameErrorMessage.value = NICKNAME_DUPLICATE
+                    } else {
+                        _nicknameErrorMessage.value = NICKNAME_VALID
+                    }
+                }
         }
     }
 

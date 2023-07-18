@@ -56,12 +56,13 @@
             style="@style/ButtonStyle"
             android:layout_width="70dp"
             android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:enabled="@{viewModel.nicknameErrorMessage != @string/setting_nickname_valid}"
             android:onClick="@{() -> viewModel.addUser()}"
             android:text="@string/setting_nickname_register"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/setting_nickname_til"
-            app:layout_constraintTop_toTopOf="@id/guideline_horizontal_65"
             app:nicknameValidColor="@{viewModel.nicknameErrorMessage}" />
 
         <TextView
@@ -96,13 +97,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.50" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline_horizontal_65"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.65" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
