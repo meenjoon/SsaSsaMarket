@@ -9,6 +9,8 @@ data class ProductEntity(
     @PrimaryKey
     @ColumnInfo(name = "product_id")
     val id: String,
+    @ColumnInfo(name = "user_id")
+    val uid: String,
     @ColumnInfo(name = "product_content")
     val content: String,
     @ColumnInfo(name = "product_created_date")

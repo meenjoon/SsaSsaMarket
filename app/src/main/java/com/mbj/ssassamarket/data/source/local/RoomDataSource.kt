@@ -2,11 +2,12 @@ package com.mbj.ssassamarket.data.source.local
 
 import com.mbj.ssassamarket.data.source.local.entities.ProductEntity
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class RoomDataSource(private val appDatabase: AppDatabase) : MarketDatabaseDataSource {
+class RoomDataSource @Inject constructor(private val appDatabase: AppDatabase) : MarketDatabaseDataSource {
 
     override suspend fun insertProducts(products: List<ProductEntity>) {
-        appDatabase.productDao().insertProducts(products)
+        return appDatabase.productDao().insertProducts(products)
     }
 
     override fun getAllProducts(): Flow<List<ProductEntity>> {

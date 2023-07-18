@@ -1,12 +1,17 @@
 package com.mbj.ssassamarket.data.source
 
 import com.mbj.ssassamarket.data.model.*
+import com.mbj.ssassamarket.data.source.local.MarketDatabaseDataSource
+import com.mbj.ssassamarket.data.source.local.entities.ProductEntity
 import com.mbj.ssassamarket.data.source.remote.MarketNetworkDataSource
 import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class ProductRepository @Inject constructor(private val marketNetworkDataSource: MarketNetworkDataSource) {
+class ProductRepository @Inject constructor(
+    private val marketNetworkDataSource: MarketNetworkDataSource,
+    private val marketDatabaseDataSource: MarketDatabaseDataSource
+) {
 
     fun addProductPost(
         onComplete: () -> Unit,
@@ -84,5 +89,13 @@ class ProductRepository @Inject constructor(private val marketNetworkDataSource:
         request: FavoriteCountRequest
     ): Flow<ApiResponse<Unit>> {
         return marketNetworkDataSource.updateProductFavorite(onComplete, onError, postId, request)
+    }
+
+    suspend fun insertProducts(products: List<ProductEntity>) {
+        marketDatabaseDataSource.insertProducts(products)
+    }
+
+    fun getAllProducts(): Flow<List<ProductEntity>> {
+        return marketDatabaseDataSource.getAllProducts()
     }
 }
