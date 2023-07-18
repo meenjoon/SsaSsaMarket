@@ -10,10 +10,7 @@ import com.mbj.ssassamarket.util.Constants.NICKNAME_ERROR
 import com.mbj.ssassamarket.util.Constants.NICKNAME_REQUEST
 import com.mbj.ssassamarket.util.Constants.NICKNAME_VALID
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -38,26 +35,43 @@ class SettingNicknameViewModel @Inject constructor(private val repository: UserI
     private val _responseToastMessage = MutableStateFlow("")
     val responseToastMessage: StateFlow<String> = _responseToastMessage
 
-    fun addUser() {
+    private val _addUserClicks = MutableSharedFlow<Unit>()
+
+    init {
         viewModelScope.launch {
-            if (nickname.value.isNullOrEmpty()) {
-                _responseToastMessage.value = (NICKNAME_REQUEST)
-            } else if (!nickname.value.matches(Constants.NICKNAME_PATTERN.toRegex())) {
-                _responseToastMessage.value = (NICKNAME_ERROR)
-            } else if (isNicknameDuplicate()) {
-                _responseToastMessage.value = (NICKNAME_DUPLICATE)
-            } else {
-                _isLoading.value = (true)
-                repository.addUser(
-                    onComplete = { _isLoading.value = false },
-                    onError = { _isError.value = true },
-                    nickname.value
-                ).collect { response ->
-                    if (response is ApiResultSuccess) {
-                        _isCompleted.value = true
+            _addUserClicks
+                .conflate()
+                .collectLatest {
+                    if (_isLoading.value) {
+                        return@collectLatest
+                    }
+
+                    if (nickname.value.isNullOrEmpty()) {
+                        _responseToastMessage.value = NICKNAME_REQUEST
+                    } else if (!nickname.value.matches(Constants.NICKNAME_PATTERN.toRegex())) {
+                        _responseToastMessage.value = NICKNAME_ERROR
+                    } else if (isNicknameDuplicate()) {
+                        _responseToastMessage.value = NICKNAME_DUPLICATE
+                    } else {
+                        _isLoading.value = true
+                        repository.addUser(
+                            onComplete = { _isLoading.value = false },
+                            onError = { _isError.value = true },
+                            nickname.value
+                        ).collect { response ->
+                            if (response is ApiResultSuccess) {
+                                _isCompleted.value = true
+                            }
+                        }
                     }
                 }
-            }
+        }
+    }
+
+
+    fun addUser() {
+        viewModelScope.launch {
+            _addUserClicks.emit(Unit)
         }
     }
 
