@@ -38,8 +38,11 @@ class WritingViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _isCompleted = MutableStateFlow(false)
+    private val _isCompleted = MutableStateFlow(true)
     val isCompleted: StateFlow<Boolean> = _isCompleted
+
+    private val _isSuccess= MutableStateFlow(false)
+    val isSuccess: StateFlow<Boolean> = _isSuccess
 
     private val _isPostError = MutableStateFlow(false)
     val isPostError: StateFlow<Boolean> = _isPostError
@@ -121,10 +124,14 @@ class WritingViewModel @Inject constructor(
         when (requiredPropertyCount) {
             0 -> {
                 viewModelScope.launch {
-                    _isLoading.value = (true)
+//                    _isLoading.value = (true)
+                    _isCompleted.value = false
                     postItemRepository.addProductPost(
                         onComplete = { },
-                        onError = { _isPostError.value = true },
+                        onError = {
+                            _isPostError.value = true
+                            _isCompleted.value = true
+                        },
                         title = title.value,
                         category = category.value,
                         price = price.value.toInt(),
@@ -215,11 +222,15 @@ class WritingViewModel @Inject constructor(
             val request = PatchUserLatLng(latLngString)
             userInfoRepository.updateMyLatLng(
                 onComplete = { _isLoading.value = false },
-                onError = { _updateMyLatLngError.value = true },
+                onError = {
+                    _updateMyLatLngError.value = true
+                    _isCompleted.value = true
+                },
                 dataId,
                 request
             ).collectLatest {
                 _isCompleted.value = true
+                _isSuccess.value = true
             }
         }
     }

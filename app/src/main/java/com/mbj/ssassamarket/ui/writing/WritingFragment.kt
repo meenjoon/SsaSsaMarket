@@ -33,8 +33,10 @@ import com.mbj.ssassamarket.databinding.FragmentWritingBinding
 import com.mbj.ssassamarket.ui.BaseFragment
 import com.mbj.ssassamarket.ui.common.GalleryClickListener
 import com.mbj.ssassamarket.ui.common.ImageRemoveListener
+import com.mbj.ssassamarket.util.Constants.PROGRESS_DIALOG
 import com.mbj.ssassamarket.util.LocateFormat
 import com.mbj.ssassamarket.util.LocationManager
+import com.mbj.ssassamarket.util.ProgressDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -57,6 +59,7 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
 
     private var isLocationPermissionChecked = false
     private var isSystemSettingsExited = false
+    private var progressDialog: ProgressDialogFragment? = null
 
     private val viewModel: WritingViewModel by viewModels()
 
@@ -84,6 +87,15 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
                 launch {
                     viewModel.isCompleted.collectLatest { isCompleted ->
                         if (isCompleted) {
+                            hideLoadingDialog()
+                        } else {
+                            showLoadingDialog()
+                        }
+                    }
+                }
+                launch {
+                    viewModel.isSuccess.collectLatest { isSuccess ->
+                        if (isSuccess) {
                             findNavController().navigateUp()
                         }
                     }
@@ -401,6 +413,16 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
                 }
             }
         }
+    }
+
+    private fun showLoadingDialog() {
+        progressDialog = ProgressDialogFragment()
+        progressDialog?.show(childFragmentManager, PROGRESS_DIALOG)
+    }
+
+    private fun hideLoadingDialog() {
+        progressDialog?.dismiss()
+        progressDialog = null
     }
 
     override fun onGalleryClick() {
