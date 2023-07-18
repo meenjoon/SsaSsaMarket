@@ -11,9 +11,7 @@ import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -48,9 +46,21 @@ class BuyerViewModel @Inject constructor(
     private val _buyError = MutableStateFlow(false)
     val buyError: StateFlow<Boolean> = _buyError
 
+    private val _favoriteClicks = MutableSharedFlow<Unit>()
+
     private var otherUserId: String? = null
     private var postId: String? = null
     private var productPostItem: ProductPostItem? = null
+
+    init {
+        viewModelScope.launch {
+            _favoriteClicks
+                .conflate()
+                .collectLatest {
+                    toggleProductFavorite()
+                }
+        }
+    }
 
     fun setOtherUserId(id: String) {
         otherUserId = id
