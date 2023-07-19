@@ -473,6 +473,21 @@ class FirebaseDataSource @Inject constructor(
         onComplete()
     }.flowOn(defaultDispatcher)
 
+    override fun logout(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<Unit>> = flow {
+        try {
+            val firebaseAuth = FirebaseAuth.getInstance()
+            firebaseAuth.signOut()
+            emit(ApiResultSuccess(Unit))
+        } catch (e: Exception) {
+            onError(e.message ?: "Unknown error")
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(Dispatchers.IO)
+
     override fun addChatDetailEventListener(
         chatRoomId: String,
         onChatItemAdded: (ChatItem) -> Unit
