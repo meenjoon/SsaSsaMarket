@@ -42,8 +42,7 @@ class FirebaseDataSource @Inject constructor(
     private val storage: FirebaseStorage
 ) : MarketNetworkDataSource {
 
-    private val chatRoomsRef =
-        Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference.child(CHAT_ROOMS)
+    private val chatRoomsRef = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference.child(CHAT_ROOMS)
     private val chatRef = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference.child(CHATS)
     private val database = Firebase.database(BuildConfig.FIREBASE_BASE_URL).reference
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
@@ -52,15 +51,20 @@ class FirebaseDataSource @Inject constructor(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
     ): Flow<ApiResponse<Map<String, Map<String, User>>>> = flow {
-        val (user, idToken) = getUserAndIdToken()
-        val googleIdToken = idToken ?: ""
-        val response = apiClient.getUser(googleIdToken)
-        response.onSuccess {
-            emit(response)
-        }.onError { code, message ->
-            onError("code: $code, message: $message")
-        }.onException {
-            onError(it.message)
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.getUser(googleIdToken)
+
+            response.onSuccess {
+                emit(response)
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException {
+                onError(it.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
         }
     }.onCompletion {
         onComplete()
@@ -70,20 +74,25 @@ class FirebaseDataSource @Inject constructor(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit,
         nickname: String
-    ): Flow<ApiResponse<Map<String, String>>> = flow {
-        val (user, idToken) = getUserAndIdToken()
-        val googleIdToken = idToken ?: ""
-        val userItem = User(user?.uid, nickname, null)
-        val response = apiClient.addUser(user?.uid ?: "", userItem, googleIdToken)
+    ): Flow<ApiResponse<Map<String, String>>> = flow<ApiResponse<Map<String, String>>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val userItem = User(user?.uid, nickname, null)
+            val response = apiClient.addUser(user?.uid ?: "", userItem, googleIdToken)
 
-        response.onSuccess { data ->
-            emit(response)
-            onComplete()
-        }.onError { code, message ->
-            onError("code: $code, message: $message")
-        }.onException { throwable ->
-            onError(throwable.message)
+            response.onSuccess { data ->
+                emit(response)
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
         }
+    }.onCompletion {
+        onComplete()
     }.flowOn(defaultDispatcher)
 
     override fun addProductPost(
@@ -101,69 +110,29 @@ class FirebaseDataSource @Inject constructor(
         latLng: String,
         favoriteList: List<String?>
     ): Flow<ApiResponse<Map<String, String>>> = flow {
-        val (user, idToken) = getUserAndIdToken()
-        val uId = user?.uid ?: ""
-        val googleIdToken = idToken ?: ""
-        val productPostItem = ProductPostItem(
-            uId,
-            content,
-            getCurrentTime(),
-            uploadImages(imageLocations),
-            price,
-            title,
-            category,
-            soldOut,
-            favoriteCount,
-            shoppingList,
-            location,
-            latLng,
-            favoriteList
-        )
-        val response = apiClient.addProductPost(productPostItem, googleIdToken)
-
-        response.onSuccess { data ->
-            emit(response)
-            onComplete()
-        }.onError { code, message ->
-            onError("code: $code, message: $message")
-        }.onException { throwable ->
-            onError(throwable.message)
-        }
-    }.flowOn(defaultDispatcher)
-
-    override fun updateMyLatLng(
-        onComplete: () -> Unit,
-        onError: (message: String?) -> Unit,
-        dataId: String,
-        latLng: PatchUserLatLng
-    ): Flow<ApiResponse<Unit>> = flow {
-        val (user, idToken) = getUserAndIdToken()
-        val googleIdToken = idToken ?: ""
-        val userId = user?.uid ?: ""
-        val response = apiClient.updateMyLatLng(userId, dataId, latLng, googleIdToken)
-
-        response.onSuccess {
-            emit(response)
-            onComplete()
-        }.onError { code, message ->
-            onError("code: $code, message: $message")
-        }.onException { throwable ->
-            onError(throwable.message)
-        }
-    }.flowOn(defaultDispatcher)
-
-    override fun getProduct(
-        onComplete: () -> Unit,
-        onError: (message: String?) -> Unit
-    ): Flow<ApiResponse<Map<String, ProductPostItem>>> = flow {
         try {
             val (user, idToken) = getUserAndIdToken()
+            val uId = user?.uid ?: ""
             val googleIdToken = idToken ?: ""
-            val response = apiClient.getProduct(googleIdToken)
+            val productPostItem = ProductPostItem(
+                uId,
+                content,
+                getCurrentTime(),
+                uploadImages(imageLocations),
+                price,
+                title,
+                category,
+                soldOut,
+                favoriteCount,
+                shoppingList,
+                location,
+                latLng,
+                favoriteList
+            )
+            val response = apiClient.addProductPost(productPostItem, googleIdToken)
 
-            response.onSuccess {
+            response.onSuccess { data ->
                 emit(response)
-                onComplete()
             }.onError { code, message ->
                 onError("code: $code, message: $message")
             }.onException { throwable ->
@@ -172,6 +141,57 @@ class FirebaseDataSource @Inject constructor(
         } catch (e: Exception) {
             onError(e.message)
         }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
+
+    override fun updateMyLatLng(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        dataId: String,
+        latLng: PatchUserLatLng
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val userId = user?.uid ?: ""
+            val response = apiClient.updateMyLatLng(userId, dataId, latLng, googleIdToken)
+
+            response.onSuccess {
+                emit(response)
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
+
+    override fun getProduct(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<Map<String, ProductPostItem>>> = flow<ApiResponse<Map<String, ProductPostItem>>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.getProduct(googleIdToken)
+
+            response.onSuccess {
+                emit(response)
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
+        }
+    }.onCompletion {
+        onComplete()
     }.flowOn(defaultDispatcher)
 
     override fun updateProduct(
@@ -179,19 +199,24 @@ class FirebaseDataSource @Inject constructor(
         onError: (message: String?) -> Unit,
         postId: String,
         request: PatchProductRequest
-    ): Flow<ApiResponse<Unit>> = flow {
-        val (user, idToken) = getUserAndIdToken()
-        val googleIdToken = idToken ?: ""
-        val response = apiClient.updateProduct(postId, request, googleIdToken)
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.updateProduct(postId, request, googleIdToken)
 
-        response.onSuccess {
-            emit(response)
-            onComplete()
-        }.onError { code, message ->
-            onError("code: $code, message: $message")
-        }.onException { throwable ->
-            onError(throwable.message)
+            response.onSuccess {
+                emit(response)
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
         }
+    }.onCompletion {
+        onComplete()
     }.flowOn(defaultDispatcher)
 
     override fun buyProduct(
@@ -199,19 +224,24 @@ class FirebaseDataSource @Inject constructor(
         onError: (message: String?) -> Unit,
         postId: String,
         request: PatchBuyRequest,
-    ): Flow<ApiResponse<Unit>> = flow {
-        val (user, idToken) = getUserAndIdToken()
-        val googleIdToken = idToken ?: ""
-        val response = apiClient.buyProduct(postId, request, googleIdToken)
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.buyProduct(postId, request, googleIdToken)
 
-        response.onSuccess {
-            emit(response)
-            onComplete()
-        }.onError { code, message ->
-            onError("code: $code, message: $message")
-        }.onException { throwable ->
-            onError(throwable.message)
+            response.onSuccess {
+                emit(response)
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
         }
+    }.onCompletion {
+        onComplete()
     }.flowOn(defaultDispatcher)
 
     override fun enterChatRoom(
@@ -220,19 +250,22 @@ class FirebaseDataSource @Inject constructor(
         ohterUserId: String,
         otherUserName: String,
         otherLocation: String
-    ): Flow<ApiResponse<String>> = flow {
-        val userId = getUserAndIdToken().first?.uid ?: ""
+    ): Flow<ApiResponse<String>> = flow<ApiResponse<String>> {
+        try {
+            val userId = getUserAndIdToken().first?.uid ?: ""
+            if (userId.isEmpty()) {
+                onError("Failed to get the user ID.")
+                return@flow
+            }
 
-        val chatRoomDB = chatRoomsRef.child(userId).child(ohterUserId)
-        val dataSnapshot = chatRoomDB.get().await()
+            val chatRoomDB = chatRoomsRef.child(userId).child(ohterUserId)
+            val dataSnapshot = chatRoomDB.get().await()
 
-        if (dataSnapshot.value != null) {
-            val chatRoom = dataSnapshot.getValue(ChatRoomItem::class.java)
-            val chatRoomId = chatRoom?.chatRoomId ?: ""
-            emit(ApiResultSuccess(chatRoomId))
-            onComplete()
-        } else {
-            try {
+            if (dataSnapshot.value != null) {
+                val chatRoom = dataSnapshot.getValue(ChatRoomItem::class.java)
+                val chatRoomId = chatRoom?.chatRoomId ?: ""
+                emit(ApiResultSuccess(chatRoomId))
+            } else {
                 val chatRoomId = UUID.randomUUID().toString()
                 val newChatRoom = ChatRoomItem(
                     chatRoomId = chatRoomId,
@@ -242,30 +275,36 @@ class FirebaseDataSource @Inject constructor(
                 )
                 chatRoomDB.setValue(newChatRoom).await()
                 emit(ApiResultSuccess(chatRoomId))
-                onComplete()
-            } catch (e: Exception) {
-                onError(e.message)
             }
+        } catch (e: Exception) {
+            onError(e.message)
         }
+    }.onCompletion {
+        onComplete()
     }.flowOn(defaultDispatcher)
 
     override fun getProductDetail(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit,
         postId: String
-    ): Flow<ApiResponse<ProductPostItem>> = flow {
-        val (user, idToken) = getUserAndIdToken()
-        val googleIdToken = idToken ?: ""
-        val response = apiClient.getProductDetail(postId, googleIdToken)
+    ): Flow<ApiResponse<ProductPostItem>> = flow<ApiResponse<ProductPostItem>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.getProductDetail(postId, googleIdToken)
 
-        response.onSuccess { productItem ->
-            emit(ApiResultSuccess(productItem))
-            onComplete()
-        }.onError { code, message ->
-            onError("code: $code, message: $message")
-        }.onException { throwable ->
-            onError(throwable.message)
+            response.onSuccess { productItem ->
+                emit(ApiResultSuccess(productItem))
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
         }
+    }.onCompletion {
+        onComplete()
     }.flowOn(defaultDispatcher)
 
     override fun updateProductFavorite(
@@ -273,30 +312,34 @@ class FirebaseDataSource @Inject constructor(
         onError: (message: String?) -> Unit,
         postId: String,
         request: FavoriteCountRequest
-    ): Flow<ApiResponse<Unit>> = flow {
-        val (user, idToken) = getUserAndIdToken()
-        val googleIdToken = idToken ?: ""
-        val response = apiClient.updateProductFavorite(postId, request, googleIdToken)
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.updateProductFavorite(postId, request, googleIdToken)
 
-        response.onSuccess {
-            emit(ApiResultSuccess(Unit))
-            onComplete()
-        }.onError { code, message ->
-            onError("code: $code, message: $message")
-        }.onException { throwable ->
-            onError(throwable.message)
+            response.onSuccess {
+                emit(ApiResultSuccess(Unit))
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
         }
+    }.onCompletion {
+        onComplete()
     }.flowOn(defaultDispatcher)
 
     override fun getMyUserItem(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
-    ): Flow<ApiResponse<User>> = flow {
-        val userId = getUserAndIdToken().first?.uid ?: ""
-
+    ): Flow<ApiResponse<User>> = flow<ApiResponse<User>> {
         try {
-            val dataSnapshot = database.child(USER).child(userId).get().await()
+            val userId = getUserAndIdToken().first?.uid ?: ""
 
+            val dataSnapshot = database.child(USER).child(userId).get().await()
             for (childSnapshot in dataSnapshot.children) {
                 val myUserId = childSnapshot.child(USER_ID).getValue(String::class.java)
                 val myUserName = childSnapshot.child(USER_NAME).getValue(String::class.java)
@@ -304,7 +347,6 @@ class FirebaseDataSource @Inject constructor(
 
                 val myUserItem = User(myUserId, myUserName, myLatLng)
                 emit(ApiResultSuccess(myUserItem))
-                onComplete()
                 return@flow
             }
             emit(ApiResultError(code = 400, message = "My User data not found"))
@@ -312,13 +354,15 @@ class FirebaseDataSource @Inject constructor(
             onError(e.message)
             emit(ApiResultError(code = 500, message = e.message ?: "Failed to get my user"))
         }
+    }.onCompletion {
+        onComplete()
     }.flowOn(defaultDispatcher)
 
     override fun getOtherUserItem(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit,
         userId: String
-    ): Flow<ApiResponse<User>> = flow {
+    ): Flow<ApiResponse<User>> = flow<ApiResponse<User>> {
         try {
             val dataSnapshot = database.child(USER).child(userId).get().await()
             val user = dataSnapshot.children.mapNotNull { childSnapshot ->
@@ -335,7 +379,6 @@ class FirebaseDataSource @Inject constructor(
 
             if (user != null) {
                 emit(ApiResultSuccess(user))
-                onComplete()
             } else {
                 onError("Other User data not found")
                 emit(ApiResultError(code = 400, message = "Other User data not found"))
@@ -344,6 +387,8 @@ class FirebaseDataSource @Inject constructor(
             onError(e.message)
             emit(ApiResultError(code = 500, message = e.message ?: "Failed to get other user"))
         }
+    }.onCompletion {
+        onComplete()
     }.flowOn(defaultDispatcher)
 
     override fun sendMessage(
@@ -357,7 +402,7 @@ class FirebaseDataSource @Inject constructor(
         lastSentTime: String,
         myLatLng: String,
         dataId: String,
-    ): Flow<ApiResponse<Unit>> = flow {
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
         try {
             val userId = getUserAndIdToken().first?.uid ?: ""
 
@@ -366,7 +411,6 @@ class FirebaseDataSource @Inject constructor(
                 userId = userId,
                 lastSentTime = lastSentTime
             )
-
             newChatItem.chatId = database.child(CHATS).child(chatRoomId).push().key
             database.child(CHATS).child(chatRoomId).child(newChatItem.chatId ?: "")
                 .setValue(newChatItem)
@@ -387,23 +431,24 @@ class FirebaseDataSource @Inject constructor(
             database.updateChildren(updates)
 
             emit(ApiResultSuccess(Unit))
-            onComplete()
         } catch (e: Exception) {
             onError(e.message)
             emit(ApiResultError(code = 400, message = e.message ?: "Failed to send message"))
         }
+    }.onCompletion {
+        onComplete()
     }.flowOn(defaultDispatcher)
 
     override fun getChatRooms(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
-    ): Flow<ApiResponse<List<ChatRoomItem>>> = flow {
-        val userId = getUserAndIdToken().first?.uid ?: ""
-        val chatRoomsDB = Firebase.database(BuildConfig.FIREBASE_BASE_URL)
-            .reference.child(CHAT_ROOMS)
-            .child(userId)
-
+    ): Flow<ApiResponse<List<ChatRoomItem>>> = flow<ApiResponse<List<ChatRoomItem>>> {
         try {
+            val userId = getUserAndIdToken().first?.uid ?: ""
+            val chatRoomsDB = Firebase.database(BuildConfig.FIREBASE_BASE_URL)
+                .reference.child(CHAT_ROOMS)
+                .child(userId)
+
             val chatRoomsSnapshot = chatRoomsDB.get().await()
             val chatRoomItemList = mutableListOf<ChatRoomItem>()
 
@@ -414,12 +459,18 @@ class FirebaseDataSource @Inject constructor(
                 }
             }
             emit(ApiResultSuccess<List<ChatRoomItem>>(chatRoomItemList))
-            onComplete()
         } catch (e: Exception) {
-            val errorResponse = ApiResultError<List<ChatRoomItem>>(code = 400, message = e.message ?: "Failed to get chat rooms")
-            emit(ApiResultError<List<ChatRoomItem>>(code = 400, message = e.message ?: "Failed to get chat rooms"))
+            val errorResponse = ApiResultError<List<ChatRoomItem>>(
+                code = 400,
+                message = e.message ?: "Failed to get chat rooms"
+            )
+            emit(
+                ApiResultError<List<ChatRoomItem>>(code = 400, message = e.message ?: "Failed to get chat rooms")
+            )
             onError(errorResponse.message)
         }
+    }.onCompletion {
+        onComplete()
     }.flowOn(defaultDispatcher)
 
     override fun addChatDetailEventListener(
@@ -495,9 +546,14 @@ class FirebaseDataSource @Inject constructor(
     }
 
     override suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
-        val user = FirebaseAuth.getInstance().currentUser
-        val idToken = user?.getIdToken(true)?.await()?.token
-        return Pair(user, idToken)
+        try {
+            val user = FirebaseAuth.getInstance().currentUser
+            val idToken = user?.getIdToken(true)?.await()?.token
+            return Pair(user, idToken)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting user and ID token: ${e.message}")
+            return Pair(null, null) // 또는 원하는 값으로 반환하거나, 예외를 다시 던질 수도 있습니다.
+        }
     }
 
     private suspend fun uploadImages(imageContentList: List<ImageContent>): List<String> =
