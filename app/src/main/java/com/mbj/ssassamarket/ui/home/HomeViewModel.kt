@@ -7,6 +7,8 @@ import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.model.UserType
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
+import com.mbj.ssassamarket.data.source.local.entities.ProductEntity
+import com.mbj.ssassamarket.data.source.local.entities.toProductPostItem
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +18,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val productRepository: ProductRepository, private val userInfoRepository: UserInfoRepository) : ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val productRepository: ProductRepository,
+    private val userInfoRepository: UserInfoRepository
+) : ViewModel() {
 
     private val _items = MutableStateFlow<List<Pair<String, ProductPostItem>>>(emptyList())
     val items: StateFlow<List<Pair<String, ProductPostItem>>> = _items
@@ -43,15 +48,39 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
 
     private fun loadAllProducts() {
         viewModelScope.launch {
+            _isError.value = false
             productRepository.getProduct(
                 onComplete = { _isLoading.value = false },
-                onError = { _isError.value = true }
+                onError =
+                {
+                    _isError.value = true
+                    _isLoading.value = false
+                    updateProductsFromRoomDatabase()
+                }
             ).collectLatest { productMap ->
                 if (productMap is ApiResultSuccess) {
                     val updatedProducts = filterAndMapProducts(productMap.data)
+                    val productEntities = convertToProductEntities(updatedProducts)
+                    productRepository.insertProducts(productEntities)
                     productList.value = updatedProducts
                     setupProductList()
                 }
+            }
+        }
+    }
+
+    private fun List<ProductEntity>.toTransformedList(): List<Pair<String, ProductPostItem>> {
+        return this.flatMap { product ->
+            listOf(Pair(product.id, product.toProductPostItem()))
+        }
+    }
+
+    fun updateProductsFromRoomDatabase() {
+        viewModelScope.launch {
+            productRepository.getAllProducts().collectLatest { newProductList ->
+                val updatedProductList = newProductList.toTransformedList()
+                productList.value = updatedProductList
+                setupProductList()
             }
         }
     }
@@ -133,12 +162,20 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
     fun refreshData() {
         viewModelScope.launch {
             _isLoading.value = true
+            _isError.value = false
             productRepository.getProduct(
                 onComplete = { _isLoading.value = false },
-                onError = { _isError.value = true }
+                onError =
+                {
+                    _isError.value = true
+                    _isLoading.value = false
+                    updateProductsFromRoomDatabase()
+                }
             ).collectLatest { productMap ->
                 if (productMap is ApiResultSuccess) {
                     val updatedProducts = filterAndMapProducts(productMap.data)
+                    val productEntities = convertToProductEntities(updatedProducts)
+                    productRepository.insertProducts(productEntities)
                     productList.value = updatedProducts
                     applyFilters()
                 }
@@ -158,5 +195,28 @@ class HomeViewModel @Inject constructor(private val productRepository: ProductRe
                     null
                 }
             }
+    }
+
+    private fun convertToProductEntities(productMap: List<Pair<String, ProductPostItem>>): List<ProductEntity> {
+        return productMap.map { pair ->
+            val postId = pair.first
+            val productPostItem = pair.second
+            ProductEntity(
+                id = postId,
+                uid = productPostItem.id,
+                content = productPostItem.content,
+                createdDate = productPostItem.createdDate,
+                imageLocations = productPostItem.imageLocations,
+                price = productPostItem.price,
+                title = productPostItem.title,
+                category = productPostItem.category,
+                soldOut = productPostItem.soldOut,
+                favoriteCount = productPostItem.favoriteCount,
+                shoppingList = productPostItem.shoppingList ?: emptyList(),
+                location = productPostItem.location,
+                latLng = productPostItem.latLng,
+                favoriteList = productPostItem.favoriteList ?: emptyList()
+            )
+        }
     }
 }

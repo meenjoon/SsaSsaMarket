@@ -5,8 +5,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseUser
 import com.mbj.ssassamarket.R
@@ -29,7 +29,7 @@ class SplashFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
         viewModel.checkCurrentUserExists()
-        observeAccountExistence()
+        checkNetworkThenNavigate()
     }
 
     private fun navigateBasedOnUserState(
@@ -50,16 +50,30 @@ class SplashFragment : BaseFragment() {
         findNavController().navigate(action)
     }
 
-    private fun observeAccountExistence() {
+    fun checkNetworkThenNavigate() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isAccountExistsOnServer.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED).collectLatest { isAccountExistsOnServer ->
-                delay(2000)
-                if (isAccountExistsOnServer != null) {
-                    navigateBasedOnUserState(
-                        viewModel.autoLoginState,
-                        isAccountExistsOnServer,
-                        viewModel.currentUser
-                    )
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.isError.collectLatest { isError ->
+                        if (isError) {
+                            delay(2000)
+                            showToast(R.string.error_network)
+                            val action = SplashFragmentDirections.actionSplashFragmentToLogInFragment()
+                            findNavController().navigate(action)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.isAccountExistsOnServer.collectLatest { isAccountExistsOnServer ->
+                        delay(2000)
+                        if (isAccountExistsOnServer != null) {
+                            navigateBasedOnUserState(
+                                viewModel.autoLoginState,
+                                isAccountExistsOnServer,
+                                viewModel.currentUser
+                            )
+                        }
+                    }
                 }
             }
         }
