@@ -27,6 +27,7 @@ android {
         buildConfigField("String", "GOOGLE_CLIENT_ID", properties.getProperty("google_client_id"))
         buildConfigField("String", "FIREBASE_BASE_URL", properties.getProperty("firebase_base_url"))
         buildConfigField("String", "KAKAO_MAP_NATIVE_KEY", properties.getProperty("kakao_map_native_key"))
+        buildConfigField("String", "GOOGLE_FEEDBACK_FORM_URL", properties.getProperty("google_feedback_form_url"))
 
         manifestPlaceholders["KAKAO_MAP_NATIVE_KEY"] = KAKAO_MAP_NATIVE_KEY
 

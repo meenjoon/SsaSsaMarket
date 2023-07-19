@@ -1,5 +1,7 @@
 package com.mbj.ssassamarket.ui.setting
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
@@ -8,6 +10,7 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentSettingBinding
 import com.mbj.ssassamarket.ui.BaseFragment
@@ -30,6 +33,9 @@ class SettingFragment : BaseFragment() {
         binding.settingLogoutTv.setOnClickListener {
             showLogoutConfirmationDialog()
         }
+        binding.settingFeedbackTv.setOnClickListener {
+            openGoogleFeedbackForm()
+        }
     }
 
     private fun observeLogoutSuccess() {
@@ -40,6 +46,12 @@ class SettingFragment : BaseFragment() {
                 }
             }
         }
+    }
+
+    private fun openGoogleFeedbackForm() {
+        val googleFormLink = BuildConfig.GOOGLE_FEEDBACK_FORM_URL
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleFormLink))
+        startActivity(intent)
     }
 
     private fun navigateToLoginFragment() {
