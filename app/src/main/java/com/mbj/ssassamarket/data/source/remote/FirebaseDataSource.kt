@@ -156,17 +156,21 @@ class FirebaseDataSource @Inject constructor(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
     ): Flow<ApiResponse<Map<String, ProductPostItem>>> = flow {
-        val (user, idToken) = getUserAndIdToken()
-        val googleIdToken = idToken ?: ""
-        val response = apiClient.getProduct(googleIdToken)
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.getProduct(googleIdToken)
 
-        response.onSuccess {
-            emit(response)
-            onComplete()
-        }.onError { code, message ->
-            onError("code: $code, message: $message")
-        }.onException { throwable ->
-            onError(throwable.message)
+            response.onSuccess {
+                emit(response)
+                onComplete()
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
         }
     }.flowOn(defaultDispatcher)
 

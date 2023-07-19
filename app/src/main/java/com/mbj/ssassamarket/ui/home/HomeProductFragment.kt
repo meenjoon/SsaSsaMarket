@@ -3,6 +3,7 @@ package com.mbj.ssassamarket.ui.home
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -92,8 +93,19 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
                         adapter.submitList(productList)
                     }
                 }
+                launch {
+                    viewModel.isError.collectLatest { isError ->
+                        if (isError) {
+                            showToast(R.string.error_message_product_get)
+                        }
+                    }
+                }
             }
         }
+    }
+
+    private fun showToast(messageResId: Int) {
+        Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
     }
 
     override fun onProductClick(productPostItem: Pair<String, ProductPostItem>) {

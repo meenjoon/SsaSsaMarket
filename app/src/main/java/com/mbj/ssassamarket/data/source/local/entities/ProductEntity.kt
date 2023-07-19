@@ -3,6 +3,7 @@ package com.mbj.ssassamarket.data.source.local.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.mbj.ssassamarket.data.model.ProductPostItem
 
 @Entity(tableName = "products")
 data class ProductEntity(
@@ -36,3 +37,21 @@ data class ProductEntity(
     @ColumnInfo(name = "product_favorite_list")
     val favoriteList: List<String?>?
 )
+
+fun ProductEntity.toProductPostItem(): ProductPostItem {
+    return ProductPostItem(
+        id = this.uid,
+        content = this.content,
+        createdDate = this.createdDate,
+        imageLocations = this.imageLocations,
+        price = this.price,
+        title = this.title,
+        category = this.category,
+        soldOut = this.soldOut,
+        favoriteCount = this.favoriteCount,
+        shoppingList = this.shoppingList,
+        location = this.location,
+        latLng = this.latLng,
+        favoriteList = this.favoriteList
+    )
+}
