@@ -80,4 +80,5 @@
     <string name="request_writing_image">상품 사진을 등록해주세요.</string>
     <string name="request_writing_all">글의 내용들을 작성해주세요.</string>
     <string name="request_edit_product">변경된 내용이 없습니다.</string>
+    <string name="error_network">네트워크 상태를 확인해주세요.</string>
 </resources>
