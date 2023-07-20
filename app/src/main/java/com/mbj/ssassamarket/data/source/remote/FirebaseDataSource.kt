@@ -249,7 +249,8 @@ class FirebaseDataSource @Inject constructor(
         onError: (message: String?) -> Unit,
         otherUserId: String,
         otherUserName: String,
-        otherLocation: String
+        otherLocation: String,
+        createdChatRoom: String,
     ): Flow<ApiResponse<String>> = flow<ApiResponse<String>> {
         try {
             val userId = getUserAndIdToken().first?.uid ?: ""
@@ -272,6 +273,7 @@ class FirebaseDataSource @Inject constructor(
                     otherUserId = otherUserId,
                     otherUserName = otherUserName,
                     otherLocation = otherLocation,
+                    lastSentTime = createdChatRoom,
                 )
                 chatRoomDB.setValue(newChatRoom).await()
                 emit(ApiResultSuccess(chatRoomId))

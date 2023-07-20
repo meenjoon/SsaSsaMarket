@@ -67,7 +67,8 @@ interface MarketNetworkDataSource {
         onError: (message: String?) -> Unit,
         otherUserId: String,
         otherUserName: String,
-        otherLocation: String
+        otherLocation: String,
+        createdChatRoom: String,
     ): Flow<ApiResponse<String>>
 
     fun getProductDetail(
