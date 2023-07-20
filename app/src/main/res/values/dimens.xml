@@ -4,6 +4,6 @@
     <dimen name="material_divider_height">0.7dp</dimen>
     <dimen name="writing_form">40dp</dimen>
     <dimen name="detail_product_top_margin">10dp</dimen>
-    <dimen name="viewpager_item_width">270dp</dimen>
+    <dimen name="viewpager_item_width">280dp</dimen>
     <dimen name="viewpager_item_margin">16dp</dimen>
 </resources>
