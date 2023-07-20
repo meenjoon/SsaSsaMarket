@@ -65,7 +65,7 @@ interface MarketNetworkDataSource {
     fun enterChatRoom(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit,
-        ohterUserId: String,
+        otherUserId: String,
         otherUserName: String,
         otherLocation: String
     ): Flow<ApiResponse<String>>

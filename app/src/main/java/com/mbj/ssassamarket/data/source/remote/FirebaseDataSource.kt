@@ -247,7 +247,7 @@ class FirebaseDataSource @Inject constructor(
     override fun enterChatRoom(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit,
-        ohterUserId: String,
+        otherUserId: String,
         otherUserName: String,
         otherLocation: String
     ): Flow<ApiResponse<String>> = flow<ApiResponse<String>> {
@@ -258,7 +258,7 @@ class FirebaseDataSource @Inject constructor(
                 return@flow
             }
 
-            val chatRoomDB = chatRoomsRef.child(userId).child(ohterUserId)
+            val chatRoomDB = chatRoomsRef.child(userId).child(otherUserId)
             val dataSnapshot = chatRoomDB.get().await()
 
             if (dataSnapshot.value != null) {
@@ -269,7 +269,7 @@ class FirebaseDataSource @Inject constructor(
                 val chatRoomId = UUID.randomUUID().toString()
                 val newChatRoom = ChatRoomItem(
                     chatRoomId = chatRoomId,
-                    otherUserId = ohterUserId,
+                    otherUserId = otherUserId,
                     otherUserName = otherUserName,
                     otherLocation = otherLocation,
                 )
