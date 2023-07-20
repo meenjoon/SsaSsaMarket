@@ -1,15 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
+        <variable
+            name="viewModel"
+            type="com.mbj.ssassamarket.ui.setting.SettingViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.setting.SettingFragment">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/setting_abl"
+            style="@style/AppBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/app_bar_layout_height"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setting"
+                    android:textSize="35sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <TextView
+            android:id="@+id/setting_logout_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/logout"
+            android:textColor="@color/black"
+            android:textSize="23sp"
+            app:layout_constraintBottom_toTopOf="@id/setting_logout_md"
+            app:layout_constraintStart_toStartOf="@id/guideline_horizontal_3"
+            app:layout_constraintTop_toBottomOf="@id/setting_abl" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/setting_logout_md"
+            android:layout_width="0dp"
+            android:layout_height="0.7dp"
+            android:layout_marginTop="70dp"
+            app:dividerColor="@color/grey_100"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/setting_abl" />
+
+        <TextView
+            android:id="@+id/setting_feedback_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/customer_feedback"
+            android:textColor="@color/black"
+            android:textSize="23sp"
+            app:layout_constraintBottom_toTopOf="@id/setting_feedback_md"
+            app:layout_constraintStart_toStartOf="@id/guideline_horizontal_3"
+            app:layout_constraintTop_toBottomOf="@id/setting_logout_md" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/setting_feedback_md"
+            android:layout_width="0dp"
+            android:layout_height="0.7dp"
+            android:layout_marginTop="70dp"
+            app:dividerColor="@color/grey_100"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/setting_logout_md" />
+
+
+        <com.mbj.ssassamarket.util.ProgressIndicatorView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.isLoading()}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.isLogoutError}" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_horizontal_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.03" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

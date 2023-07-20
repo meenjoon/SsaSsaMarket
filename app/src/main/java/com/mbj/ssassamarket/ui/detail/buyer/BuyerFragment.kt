@@ -7,12 +7,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -38,16 +39,7 @@ class BuyerFragment : BaseFragment() {
     private lateinit var locationManager: LocationManager
     private lateinit var bannerAdapter: BannerAdapter
 
-    private val requestLocationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
-            val coarseLocationGranted =
-                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
-
-            if (!(fineLocationGranted || coarseLocationGranted)) {
-                showPermissionPermanentlyDeniedDialog()
-            }
-        }
+    private lateinit var requestLocationPermissionLauncher: ActivityResultLauncher<Array<String>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,22 +49,24 @@ class BuyerFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
+        setupLocationPermissionLauncher()
         setupViewModel()
         setupViews()
+        observeChatRoomIdAndNavigateToChatDetail()
+    }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.chatRoomId.collectLatest { chatRoomId ->
-                        viewModel.resetChatRoomSuccess()
-                        if (chatRoomId.isNotEmpty()) {
-                            viewModel.getOtherUserId()
-                                ?.let { navigateToChatDetailFragment(chatRoomId, it) }
-                        }
-                    }
+    private fun setupLocationPermissionLauncher() {
+        requestLocationPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                val fineLocationGranted =
+                    permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+                val coarseLocationGranted =
+                    permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+
+                if (!(fineLocationGranted || coarseLocationGranted)) {
+                    showPermissionPermanentlyDeniedDialog()
                 }
             }
-        }
     }
 
     private fun setupViewModel() {
@@ -147,6 +141,22 @@ class BuyerFragment : BaseFragment() {
             .show()
     }
 
+    private fun showBuyConfirmationDialog() {
+        val builder = MaterialAlertDialogBuilder(requireContext())
+        builder.setMessage(getString(R.string.request_buy))
+
+        builder.setPositiveButton(getString(R.string.buy_confirmed)) { dialog, _ ->
+            dialog.dismiss()
+            viewModel.onBuyButtonClicked()
+        }
+        builder.setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
     private fun openAppSettings() {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         val uri: Uri = Uri.fromParts("package", requireContext().packageName, null)
@@ -164,9 +174,23 @@ class BuyerFragment : BaseFragment() {
 
     private fun onBuyerBuyButtonClicked() {
         if (locationManager.isAnyLocationPermissionGranted()) {
-            viewModel.onBuyButtonClicked()
+            showBuyConfirmationDialog()
         } else {
             requestLocationPermission()
+        }
+    }
+
+    private fun observeChatRoomIdAndNavigateToChatDetail() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.chatRoomId.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collectLatest { chatRoomId ->
+                    viewModel.resetChatRoomSuccess()
+                    if (chatRoomId.isNotEmpty()) {
+                        viewModel.getOtherUserId()?.let { otherUserId ->
+                            navigateToChatDetailFragment(chatRoomId, otherUserId)
+                        }
+                    }
+                }
         }
     }
 
