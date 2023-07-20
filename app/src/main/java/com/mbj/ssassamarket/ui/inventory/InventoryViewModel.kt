@@ -37,7 +37,7 @@ class InventoryViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             productRepository.getProduct(
-                onComplete = { },
+                onComplete = {_isLoading.value = false },
                 onError = {
                     _isLoading.value = false
                     _productError.value = true
@@ -45,6 +45,7 @@ class InventoryViewModel @Inject constructor(
             ).collectLatest { productMap ->
                 if (productMap is ApiResultSuccess) {
                     val updateProduct = updateProductsWithImageUrls(productMap.data)
+                    _isLoading.value = false
                     _productPostItemList.value = updateProduct
                 }
             }
@@ -93,7 +94,6 @@ class InventoryViewModel @Inject constructor(
             inventoryDataList.add(InventoryData.ProductType(InventoryType.SHOPPING_PRODUCT))
             inventoryDataList.add(InventoryData.ProductItem(myPurchasedProducts))
         }
-        _isLoading.value = false
         return inventoryDataList
     }
 
