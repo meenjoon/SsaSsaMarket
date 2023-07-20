@@ -25,6 +25,8 @@ fun ImageView.loadFirstImage(imageLocations: List<String?>?) {
     if (firstImageLocation != null) {
         val roundedCorners = RoundedCornersTransformation(15f)
         this.load(firstImageLocation.toString()) {
+            crossfade(true)
+            crossfade(1000)
             transformations(roundedCorners)
             error(R.drawable.null_icon)
         }
