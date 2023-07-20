@@ -90,7 +90,7 @@
             android:layout_marginTop="3dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="@{chatRoomItem.lastMessage}"
+            android:text="@{chatRoomItem.lastMessage != null ? chatRoomItem.lastMessage : @string/chat_room_created}"
             android:textColor="@color/black"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

@@ -1,7 +1,5 @@
 package com.mbj.ssassamarket.ui.chat.list
 
-import android.graphics.Color
-import android.graphics.PorterDuff
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -11,8 +9,6 @@ import com.mbj.ssassamarket.data.model.ChatRoomItem
 import com.mbj.ssassamarket.databinding.RecyclerviewItemChatRoomBinding
 import com.mbj.ssassamarket.ui.common.ChatListClickListener
 import com.mbj.ssassamarket.util.Colors
-import com.mbj.ssassamarket.util.DateFormat.getFormattedElapsedTime
-import com.mbj.ssassamarket.util.TextFormat.getInitialLetter
 import javax.inject.Inject
 
 class ChatListAdapter@Inject constructor(
