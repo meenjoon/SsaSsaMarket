@@ -37,7 +37,18 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
 
     private fun observeInventoryDataList(adapter: InventoryOuterAdapter) {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.inventoryDataList.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED).collectLatest { inventoryDataList ->
+            viewModel.productPostItemList.flowWithLifecycle(
+                viewLifecycleOwner.lifecycle,
+                Lifecycle.State.STARTED
+            ).collectLatest { productPostItemList ->
+                val myFavoriteProducts = viewModel.getMyFavoriteProduct(productPostItemList)
+                val myRegisteredProducts = viewModel.getMyRegisteredProduct(productPostItemList)
+                val myPurchasedProducts = viewModel.getMyPurchasedProduct(productPostItemList)
+                val inventoryDataList = viewModel.createInventoryDataList(
+                    myFavoriteProducts,
+                    myRegisteredProducts,
+                    myPurchasedProducts
+                )
                 adapter.submitList(inventoryDataList)
             }
         }
@@ -47,11 +58,19 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
         viewModel.navigateBasedOnUserType(productPostItem.second.id) { userType ->
             when (userType) {
                 UserType.SELLER -> {
-                    val action = InventoryFragmentDirections.actionNavigationInventoryToSellerFragment(productPostItem.first, productPostItem.second)
+                    val action =
+                        InventoryFragmentDirections.actionNavigationInventoryToSellerFragment(
+                            productPostItem.first,
+                            productPostItem.second
+                        )
                     findNavController().navigate(action)
                 }
                 UserType.BUYER -> {
-                    val action = InventoryFragmentDirections.actionNavigationInventoryToBuyerFragment(productPostItem.first, productPostItem.second)
+                    val action =
+                        InventoryFragmentDirections.actionNavigationInventoryToBuyerFragment(
+                            productPostItem.first,
+                            productPostItem.second
+                        )
                     findNavController().navigate(action)
                 }
             }

@@ -52,6 +52,7 @@ class InventoryOuterAdapter(private val productClickListener: ProductClickListen
     }
 
     fun submitList(list: List<InventoryData>) {
+        inventoryDataList.clear()
         inventoryDataList.addAll(list)
         notifyDataSetChanged()
     }

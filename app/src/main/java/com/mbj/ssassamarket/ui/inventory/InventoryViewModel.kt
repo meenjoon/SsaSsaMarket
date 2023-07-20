@@ -7,17 +7,15 @@ import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class InventoryViewModel @Inject constructor(private val productRepository: ProductRepository, private val userInfoRepository: UserInfoRepository) : ViewModel() {
-
-    private val _inventoryDataList = MutableStateFlow<List<InventoryData>>(emptyList())
-    val inventoryDataList: StateFlow<List<InventoryData>> = _inventoryDataList
+class InventoryViewModel @Inject constructor(
+    private val productRepository: ProductRepository,
+    private val userInfoRepository: UserInfoRepository
+) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -31,81 +29,72 @@ class InventoryViewModel @Inject constructor(private val productRepository: Prod
     private val _productError = MutableStateFlow(false)
     val productError: StateFlow<Boolean> = _productError
 
-    private var productPostItemList: List<Pair<String, ProductPostItem>>? = null
+    private val _productPostItemList =
+        MutableStateFlow<List<Pair<String, ProductPostItem>>>(emptyList())
+    val productPostItemList: StateFlow<List<Pair<String, ProductPostItem>>> = _productPostItemList
 
     fun initProductPostItemList() {
         viewModelScope.launch {
             _isLoading.value = true
             productRepository.getProduct(
                 onComplete = { },
-                onError = { _productError.value = true }
+                onError = {
+                    _isLoading.value = false
+                    _productError.value = true
+                }
             ).collectLatest { productMap ->
                 if (productMap is ApiResultSuccess) {
                     val updateProduct = updateProductsWithImageUrls(productMap.data)
-                    productPostItemList = updateProduct
+                    _productPostItemList.value = updateProduct
                 }
             }
-            getMyFavoriteProduct()
-            getMyRegisteredProduct()
-            getMyPurchasedProduct()
         }
     }
 
-    private fun getMyFavoriteProduct() {
-        viewModelScope.launch {
-            val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
-            val inventoryDataList = mutableListOf<InventoryData>()
-            val favoriteProductList = productPostItemList?.filter { (_, product) ->
-                product.favoriteList?.contains(uId) == true
-            }?.map { (key, product) ->
-                key to product
-            }?.sortedByDescending { it.second.createdDate } ?: emptyList()
-
-            if (favoriteProductList.isNotEmpty()) {
-                inventoryDataList.add(InventoryData.ProductType(InventoryType.FAVORITE))
-                inventoryDataList.add(InventoryData.ProductItem(favoriteProductList))
-            }
-            _inventoryDataList.value = inventoryDataList
-            _isLoading.value = false
-        }
+    suspend fun getMyFavoriteProduct(productPostItems: List<Pair<String, ProductPostItem>>): List<Pair<String, ProductPostItem>> {
+        val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
+        return productPostItems.filter { (_, product) ->
+            product.favoriteList?.contains(uId) == true
+        }.sortedByDescending { it.second.createdDate }
     }
 
-    private fun getMyRegisteredProduct() {
-        viewModelScope.launch {
-            val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
-            val inventoryDataList = mutableListOf<InventoryData>()
-            val registeredProductList = productPostItemList?.filter { (_, product) ->
-                product.id == uId
-            }?.map { (key, product) ->
-                key to product
-            }?.sortedByDescending { it.second.createdDate } ?: emptyList()
-
-            if (registeredProductList.isNotEmpty()) {
-                inventoryDataList.add(InventoryData.ProductType(InventoryType.REGISTER_PRODUCT))
-                inventoryDataList.add(InventoryData.ProductItem(registeredProductList))
-            }
-            _inventoryDataList.value = inventoryDataList
-            _isLoading.value = false
-        }
+    suspend fun getMyRegisteredProduct(productPostItems: List<Pair<String, ProductPostItem>>): List<Pair<String, ProductPostItem>> {
+        val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
+        return productPostItems.filter { (_, product) ->
+            product.id == uId
+        }.sortedByDescending { it.second.createdDate }
     }
 
-    private fun getMyPurchasedProduct() {
-        viewModelScope.launch {
-            val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
-            val inventoryDataList = mutableListOf<InventoryData>()
-            val purchasedProductList = productPostItemList?.filter { (_, product) ->
-                product.shoppingList?.contains(uId) == true
-            }?.map { (key, product) ->
-                key to product
-            }?.sortedByDescending { it.second.createdDate } ?: emptyList()
+    suspend fun getMyPurchasedProduct(productPostItems: List<Pair<String, ProductPostItem>>): List<Pair<String, ProductPostItem>> {
+        val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
+        return productPostItems.filter { (_, product) ->
+            product.shoppingList?.contains(uId) == true
+        }.sortedByDescending { it.second.createdDate }
+    }
 
-            if (purchasedProductList.isNotEmpty()) {
-                inventoryDataList.add(InventoryData.ProductType(InventoryType.SHOPPING_PRODUCT))
-                inventoryDataList.add(InventoryData.ProductItem(purchasedProductList))
-            }
-            _inventoryDataList.value = inventoryDataList
-            _isLoading.value = false
+    fun createInventoryDataList(
+        myFavoriteProducts: List<Pair<String, ProductPostItem>>,
+        myRegisteredProducts: List<Pair<String, ProductPostItem>>,
+        myPurchasedProducts: List<Pair<String, ProductPostItem>>
+    ): List<InventoryData> {
+        val inventoryDataList = mutableListOf<InventoryData>()
+
+        if (myFavoriteProducts.isNotEmpty()) {
+            inventoryDataList.add(InventoryData.ProductType(InventoryType.FAVORITE))
+            inventoryDataList.add(InventoryData.ProductItem(myFavoriteProducts))
         }
+
+        if (myRegisteredProducts.isNotEmpty()) {
+            inventoryDataList.add(InventoryData.ProductType(InventoryType.REGISTER_PRODUCT))
+            inventoryDataList.add(InventoryData.ProductItem(myRegisteredProducts))
+        }
+
+        if (myPurchasedProducts.isNotEmpty()) {
+            inventoryDataList.add(InventoryData.ProductType(InventoryType.SHOPPING_PRODUCT))
+            inventoryDataList.add(InventoryData.ProductItem(myPurchasedProducts))
+        }
+        _isLoading.value = false
+        return inventoryDataList
     }
 
     fun getMyNickname() {
