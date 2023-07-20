@@ -10,6 +10,7 @@ import com.mbj.ssassamarket.data.source.ChatRepository
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
+import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -113,7 +114,8 @@ class BuyerViewModel @Inject constructor(
                     onError = { _enterChatRoomError.value = true },
                     otherUserId!!,
                     nickname.value,
-                    productPostItem?.location!!
+                    productPostItem?.location!!,
+                    getCurrentTime(),
                 ).collectLatest { chatRoomId ->
                     if (chatRoomId is ApiResultSuccess) {
                         _chatRoomId.value = chatRoomId.data
@@ -143,7 +145,8 @@ class BuyerViewModel @Inject constructor(
                                 onError = { _enterChatRoomError.value = true },
                                 otherUserId!!,
                                 nickname.value,
-                                productPostItem?.location!!
+                                productPostItem?.location!!,
+                                getCurrentTime(),
                             ).collectLatest { chatRoomId ->
                                 if (chatRoomId is ApiResultSuccess) {
                                     _chatRoomId.value = chatRoomId.data

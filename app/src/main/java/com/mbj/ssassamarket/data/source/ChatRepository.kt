@@ -15,11 +15,12 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
     fun enterChatRoom(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit,
-        ohterUserId: String,
+        otherUserId: String,
         otherUserName: String,
-        otherLocation: String
+        otherLocation: String,
+        createdChatRoom: String,
     ): Flow<ApiResponse<String>> {
-        return marketNetworkDataSource.enterChatRoom(onComplete, onError, ohterUserId, otherUserName, otherLocation)
+        return marketNetworkDataSource.enterChatRoom(onComplete, onError, otherUserId, otherUserName, otherLocation, createdChatRoom)
     }
 
     fun getMyUserItem(
