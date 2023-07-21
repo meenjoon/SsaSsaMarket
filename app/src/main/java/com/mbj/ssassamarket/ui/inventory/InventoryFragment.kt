@@ -30,7 +30,6 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
         binding.viewModel = viewModel
         binding.inventoryOuterRv.adapter = adapter
         viewModel.getMyNickname()
-        viewModel.initProductPostItemList()
 
         observeInventoryDataList(adapter)
     }

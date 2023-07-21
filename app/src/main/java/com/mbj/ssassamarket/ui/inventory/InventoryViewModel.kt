@@ -29,25 +29,27 @@ class InventoryViewModel @Inject constructor(
     private val _productError = MutableStateFlow(false)
     val productError: StateFlow<Boolean> = _productError
 
-    private val _productPostItemList =
-        MutableStateFlow<List<Pair<String, ProductPostItem>>>(emptyList())
-    val productPostItemList: StateFlow<List<Pair<String, ProductPostItem>>> = _productPostItemList
+    val productPostItemList: StateFlow<List<Pair<String, ProductPostItem>>> = initProductPostItemList().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(500),
+            initialValue = emptyList()
+        )
 
-    fun initProductPostItemList() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            productRepository.getProduct(
-                onComplete = {_isLoading.value = false },
-                onError = {
-                    _isLoading.value = false
-                    _productError.value = true
-                }
-            ).collectLatest { productMap ->
-                if (productMap is ApiResultSuccess) {
-                    val updateProduct = updateProductsWithImageUrls(productMap.data)
-                    _isLoading.value = false
-                    _productPostItemList.value = updateProduct
-                }
+    fun initProductPostItemList(): Flow<List<Pair<String, ProductPostItem>>> {
+        _isLoading.value = true
+
+        return productRepository.getProduct(
+            onComplete = { },
+            onError = {
+                _isLoading.value = false
+                _productError.value = true
+            }
+        ).mapNotNull { productMap ->
+            if (productMap is ApiResultSuccess) {
+                val updatedProducts = updateProductsWithImageUrls(productMap.data)
+                updatedProducts
+            } else {
+                null
             }
         }
     }
@@ -94,6 +96,7 @@ class InventoryViewModel @Inject constructor(
             inventoryDataList.add(InventoryData.ProductType(InventoryType.SHOPPING_PRODUCT))
             inventoryDataList.add(InventoryData.ProductItem(myPurchasedProducts))
         }
+        _isLoading.value = false
         return inventoryDataList
     }
 
