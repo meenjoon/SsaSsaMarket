@@ -63,7 +63,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
 
     private val viewModel: WritingViewModel by viewModels()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initializeGalleryLauncher()
@@ -77,7 +76,6 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
-        viewModel.getMyDataId()
         setupCategorySpinner()
         setupAdapters()
         setupRecyclerView()
