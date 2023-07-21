@@ -41,7 +41,6 @@ class SellerFragment : BaseFragment() {
 
     private fun initViewModel() {
         viewModel.initializeProduct(args.postId, args.product)
-        viewModel.getProductNickname()
     }
 
     private fun setupViewPager() {
