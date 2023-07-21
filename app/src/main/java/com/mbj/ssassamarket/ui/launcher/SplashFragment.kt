@@ -28,7 +28,6 @@ class SplashFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
-        viewModel.checkCurrentUserExists()
         checkNetworkThenNavigate()
     }
 
@@ -50,7 +49,7 @@ class SplashFragment : BaseFragment() {
         findNavController().navigate(action)
     }
 
-    fun checkNetworkThenNavigate() {
+    private fun checkNetworkThenNavigate() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {

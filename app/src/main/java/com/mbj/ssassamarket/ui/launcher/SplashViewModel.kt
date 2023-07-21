@@ -8,8 +8,7 @@ import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.UserPreferenceRepository
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,8 +18,11 @@ class SplashViewModel @Inject constructor(
     private val userPreferenceRepository: UserPreferenceRepository
 ) : ViewModel() {
 
-    private val _isAccountExistsOnServer = MutableStateFlow<Boolean?>(null)
-    val isAccountExistsOnServer: StateFlow<Boolean?> = _isAccountExistsOnServer
+    val isAccountExistsOnServer: StateFlow<Boolean?> = checkCurrentUserExists().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
 
     private val _isError = MutableStateFlow(false)
     val isError: StateFlow<Boolean> = _isError
@@ -34,18 +36,15 @@ class SplashViewModel @Inject constructor(
         }
     }
 
-    fun checkCurrentUserExists() {
-        viewModelScope.launch {
-            repository.getUser(
-                onComplete = {},
-                onError = { _isError.value = (true) }
-            ).collect { response ->
-                if (response is ApiResultSuccess) {
-                    val userMap = response.data
-                    val isExists = isAccountExistsOnServer(userMap)
-                    _isAccountExistsOnServer.value = isExists
-                }
-            }
+    private fun checkCurrentUserExists(): Flow<Boolean> = repository.getUser(
+        onComplete = {},
+        onError = { _isError.value = true }
+    ).mapNotNull { response ->
+        if (response is ApiResultSuccess) {
+            val userMap = response.data
+            isAccountExistsOnServer(userMap)
+        } else {
+            null
         }
     }
 
