@@ -42,15 +42,12 @@ class HomeViewModel @Inject constructor(
 
     private val productList = MutableStateFlow<List<Pair<String, ProductPostItem>>>(emptyList())
 
-    init {
-        loadAllProducts()
-    }
-
-    private fun loadAllProducts() {
+    fun loadAllProducts() {
+        _isLoading.value = true
+        _isError.value = false
         viewModelScope.launch {
-            _isError.value = false
             productRepository.getProduct(
-                onComplete = { _isLoading.value = false },
+                onComplete = { },
                 onError =
                 {
                     _isError.value = true
@@ -63,6 +60,7 @@ class HomeViewModel @Inject constructor(
                     val productEntities = convertToProductEntities(updatedProducts)
                     productRepository.insertProducts(productEntities)
                     productList.value = updatedProducts
+                    _isLoading.value = false
                     setupProductList()
                 }
             }
@@ -75,7 +73,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun updateProductsFromRoomDatabase() {
+    private fun updateProductsFromRoomDatabase() {
         viewModelScope.launch {
             productRepository.getAllProducts().collectLatest { newProductList ->
                 val updatedProductList = newProductList.toTransformedList()

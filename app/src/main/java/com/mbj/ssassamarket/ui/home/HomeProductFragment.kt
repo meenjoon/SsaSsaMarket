@@ -40,6 +40,7 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
     }
 
     private fun setupViews() {
+        viewModel.loadAllProducts()
         setupSwipeRefreshLayout()
         setupSpinner()
     }
