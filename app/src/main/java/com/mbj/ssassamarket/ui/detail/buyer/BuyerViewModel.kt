@@ -26,8 +26,11 @@ class BuyerViewModel @Inject constructor(
     private val _chatRoomId = MutableStateFlow("")
     val chatRoomId: StateFlow<String> = _chatRoomId
 
-    private val _nickname = MutableStateFlow("")
-    val nickname: StateFlow<String> = _nickname
+    val nickname: StateFlow<String> = getProductNickname().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ""
+    )
 
     private val _nicknameError = MutableStateFlow(false)
     val nicknameError: StateFlow<Boolean> = _nicknameError
@@ -80,24 +83,20 @@ class BuyerViewModel @Inject constructor(
         return productPostItem
     }
 
-    fun getProductNickname() {
-        viewModelScope.launch {
+    private fun getProductNickname(): Flow<String> = userInfoRepository.getUser(
+        onComplete = { _isLoading.value = false },
+        onError = { _nicknameError.value = true }
+    ).mapNotNull { response ->
+        if (response is ApiResultSuccess) {
+            val users = response.data
             val productUid = productPostItem?.id
-
             if (productUid != null) {
-                userInfoRepository.getUser(
-                    onComplete = { _isLoading.value = false },
-                    onError = { _nicknameError.value = true }
-                ).collect { response ->
-                    if (response is ApiResultSuccess) {
-                        val users = response.data
-                        val nickname = findNicknameByUserId(users, productUid)
-                        if (nickname != null) {
-                            _nickname.value = nickname
-                        }
-                    }
-                }
+                findNicknameByUserId(users, productUid)
+            } else {
+                null
             }
+        } else {
+            null
         }
     }
 
