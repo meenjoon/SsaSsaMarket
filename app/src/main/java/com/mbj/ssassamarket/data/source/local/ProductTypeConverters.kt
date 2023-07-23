@@ -8,19 +8,17 @@ import com.squareup.moshi.Types
 
 class ProductTypeConverters {
 
-    private val moshi = Moshi.Builder().build()
+    private val moshi: Moshi = Moshi.Builder().build()
+    private val type = Types.newParameterizedType(List::class.java, String::class.java)
+    private val jsonAdapter: JsonAdapter<List<String>> = moshi.adapter(type)
 
     @TypeConverter
     fun fromStringList(list: List<String>?): String {
-        val type = Types.newParameterizedType(List::class.java, String::class.java)
-        val jsonAdapter: JsonAdapter<List<String>> = moshi.adapter(type)
         return jsonAdapter.toJson(list)
     }
 
     @TypeConverter
     fun toStringList(value: String): List<String>? {
-        val type = Types.newParameterizedType(List::class.java, String::class.java)
-        val jsonAdapter: JsonAdapter<List<String>> = moshi.adapter(type)
         return try {
             jsonAdapter.fromJson(value)
         } catch (e: JsonDataException) {
