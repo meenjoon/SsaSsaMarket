@@ -3,6 +3,7 @@ package com.mbj.ssassamarket.ui.chat.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.ChildEventListener
+import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.ChatItem
 import com.mbj.ssassamarket.data.model.User
 import com.mbj.ssassamarket.data.source.ChatRepository
@@ -12,9 +13,7 @@ import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
 import com.mbj.ssassamarket.util.location.LocationFormat.calculateDistance
 import com.mbj.ssassamarket.util.location.LocationFormat.formatDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -53,6 +52,9 @@ class ChatDetailViewModel @Inject constructor(
 
     private val _sendMessageError = MutableStateFlow(false)
     val sendMessageError: StateFlow<Boolean> = _sendMessageError
+
+    private val _sendMessageToastId = MutableSharedFlow<Int>()
+    val sendMessageToastId: SharedFlow<Int> = _sendMessageToastId.asSharedFlow()
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -140,6 +142,8 @@ class ChatDetailViewModel @Inject constructor(
                     myDataId
                 ).collectLatest {
                 }
+            } else if (myUserLocation.isNullOrEmpty()) {
+                _sendMessageToastId.emit(R.string.error_location_issue)
             }
         }
     }
@@ -158,7 +162,7 @@ class ChatDetailViewModel @Inject constructor(
             val otherLongitude = otherCoordinates?.get(1)?.toDouble()
 
             // 거리 계산 및 관련 로직 수행
-            if (myLatitude != null && myLongitude != null && otherLatitude != null && otherLongitude != null) {
+            if (otherLatitude != null && otherLongitude != null) {
                 val distance = calculateDistance(myLatitude, myLongitude, otherLatitude, otherLongitude)
                 val distanceFormat = formatDistance(distance)
                 _distanceDiff.value = distanceFormat
