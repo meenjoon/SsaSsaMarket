@@ -53,8 +53,11 @@ class WritingViewModel @Inject constructor(
     private val _requiredProperty = MutableStateFlow(false)
     val requiredProperty: StateFlow<Boolean> = _requiredProperty
 
-    private val _myDataId = MutableStateFlow("")
-    val myDataId: StateFlow<String> = _myDataId
+    private val myDataId: StateFlow<String> = getMyDataId().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ""
+    )
 
     private val _myDataIdError = MutableStateFlow(false)
     val myDataIdError: StateFlow<Boolean> = _myDataIdError
@@ -65,6 +68,10 @@ class WritingViewModel @Inject constructor(
     private var latLngString: String? = null
 
     init {
+        viewModelScope.launch {
+            myDataId.collectLatest {
+            }
+        }
         combine(
             title,
             price,
@@ -114,17 +121,17 @@ class WritingViewModel @Inject constructor(
     }
 
     fun setLocation(location: String) {
+        _isLoading.value = false
         _location.value = location
     }
 
     fun registerProductWithValidation() {
         val requiredPropertyCount = listOf(title.value, price.value, content.value)
-            .count { it.isNullOrEmpty() } + if (category.value == CATEGORY_REQUEST) 1 else 0 +
-                if (selectedImageList.value.isNullOrEmpty()) 1 else 0
+            .count { it.isEmpty() } + if (category.value == CATEGORY_REQUEST) 1 else 0 +
+                if (selectedImageList.value.isEmpty()) 1 else 0
         when (requiredPropertyCount) {
             0 -> {
                 viewModelScope.launch {
-//                    _isLoading.value = (true)
                     _isCompleted.value = false
                     postItemRepository.addProductPost(
                         onComplete = { },
@@ -151,15 +158,15 @@ class WritingViewModel @Inject constructor(
                 }
             }
             1 -> {
-                if (title.value.isNullOrEmpty())
+                if (title.value.isEmpty())
                     _toastMessage.value = "request_writing_title"
-                else if (price.value.isNullOrEmpty())
+                else if (price.value.isEmpty())
                     _toastMessage.value = "request_writing_price"
-                else if (content.value.isNullOrEmpty())
+                else if (content.value.isEmpty())
                     _toastMessage.value = "request_writing_content"
                 else if (category.value == CATEGORY_REQUEST)
                     _toastMessage.value = "request_writing_request"
-                else if (selectedImageList.value.isNullOrEmpty()) {
+                else if (selectedImageList.value.isEmpty()) {
                     _toastMessage.value = "request_writing_image"
                 }
             }
@@ -177,9 +184,9 @@ class WritingViewModel @Inject constructor(
         selectedImageListValue: List<ImageContent>
     ): Boolean {
         val categoryRequest = categoryValue != CATEGORY_REQUEST
-        return !titleValue.isNullOrEmpty() &&
-                !priceValue.isNullOrEmpty() &&
-                !contentValue.isNullOrEmpty() &&
+        return !titleValue.isEmpty() &&
+                !priceValue.isEmpty() &&
+                !contentValue.isEmpty() &&
                 categoryRequest &&
                 selectedImageListValue.isNotEmpty()
     }
@@ -188,20 +195,16 @@ class WritingViewModel @Inject constructor(
         return price.isNullOrEmpty()
     }
 
-    fun getMyDataId() {
-        viewModelScope.launch {
-            userInfoRepository.getUser(
-                onComplete = { _isLoading.value = false },
-                onError = { _myDataIdError.value = true }
-            ).collect { response ->
-                if (response is ApiResultSuccess) {
-                    val users = response.data
-                    val myDataId = findMyDataId(users)
-                    if (myDataId != null) {
-                        _myDataId.value = myDataId
-                    }
-                }
-            }
+    private fun getMyDataId(): Flow<String> = userInfoRepository.getUser(
+        onComplete = { _isLoading.value = false },
+        onError = { _myDataIdError.value = true }
+    ).mapNotNull { response ->
+        if (response is ApiResultSuccess) {
+            val users = response.data
+            val myDataId = findMyDataId(users)
+            myDataId
+        } else {
+            null
         }
     }
 

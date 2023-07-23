@@ -72,7 +72,6 @@ class BuyerFragment : BaseFragment() {
     private fun setupViewModel() {
         viewModel.setOtherUserId(args.product.id)
         viewModel.initializeProduct(args.postId, args.product)
-        viewModel.getProductNickname()
         viewModel.checkProductInFavorites()
     }
 

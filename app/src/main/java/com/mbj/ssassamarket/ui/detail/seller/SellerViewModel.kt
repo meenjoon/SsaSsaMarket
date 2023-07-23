@@ -10,9 +10,7 @@ import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,8 +23,11 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
     private val _editMode = MutableStateFlow(EditMode.READ_ONLY)
     val editMode: StateFlow<EditMode> = _editMode
 
-    private val _nickname = MutableStateFlow<String?>(null)
-    val nickname: StateFlow<String?> = _nickname
+    val nickname: StateFlow<String> = getProductNickname().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ""
+    )
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -63,23 +64,16 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
         _editMode.value = editMode
     }
 
-    fun getProductNickname() {
-        viewModelScope.launch {
-            val productUid = product.value?.id
-            if (productUid != null) {
-                userInfoRepository.getUser(
-                    onComplete = { _isLoading.value = false },
-                    onError = { _nicknameError.value = true }
-                ).collect { response ->
-                    if (response is ApiResultSuccess) {
-                        val users = response.data
-                        val nickname = findNicknameByUserId(users, productUid)
-                        _nickname.value = nickname
-                    }
-                }
-            } else {
-                _nicknameError.value = true
-            }
+    private fun getProductNickname(): Flow<String> = userInfoRepository.getUser(
+        onComplete = { _isLoading.value = false },
+        onError = { _nicknameError.value = true }
+    ).mapNotNull { response ->
+        val productUid = product.value?.id
+        if (productUid != null && response is ApiResultSuccess) {
+            val users = response.data
+            findNicknameByUserId(users, productUid)
+        } else {
+            null
         }
     }
 
