@@ -105,11 +105,8 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
                     }
                 }
                 launch {
-                    viewModel.toastMessage.collectLatest { toastMessage ->
-                        val messageId = resources.getIdentifier(toastMessage, "string", requireContext().packageName)
-                        if (messageId != 0) {
-                            showToast(messageId)
-                        }
+                    viewModel.toastMessageId.collectLatest { toastMessageId ->
+                        showToast(toastMessageId)
                     }
                 }
             }
