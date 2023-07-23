@@ -29,15 +29,14 @@ class InventoryViewModel @Inject constructor(
     private val _productError = MutableStateFlow(false)
     val productError: StateFlow<Boolean> = _productError
 
-    val productPostItemList: StateFlow<List<Pair<String, ProductPostItem>>> = initProductPostItemList().stateIn(
+    val productPostItemList: StateFlow<List<Pair<String, ProductPostItem>>> =
+        initProductPostItemList().stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(500),
             initialValue = emptyList()
         )
 
-    fun initProductPostItemList(): Flow<List<Pair<String, ProductPostItem>>> {
-        _isLoading.value = true
-
+    private fun initProductPostItemList(): Flow<List<Pair<String, ProductPostItem>>> {
         return productRepository.getProduct(
             onComplete = { },
             onError = {
@@ -54,28 +53,28 @@ class InventoryViewModel @Inject constructor(
         }
     }
 
-    suspend fun getMyFavoriteProduct(productPostItems: List<Pair<String, ProductPostItem>>): List<Pair<String, ProductPostItem>> {
+    private suspend fun getMyFavoriteProduct(productPostItems: List<Pair<String, ProductPostItem>>): List<Pair<String, ProductPostItem>> {
         val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
         return productPostItems.filter { (_, product) ->
             product.favoriteList?.contains(uId) == true
         }.sortedByDescending { it.second.createdDate }
     }
 
-    suspend fun getMyRegisteredProduct(productPostItems: List<Pair<String, ProductPostItem>>): List<Pair<String, ProductPostItem>> {
+    private suspend fun getMyRegisteredProduct(productPostItems: List<Pair<String, ProductPostItem>>): List<Pair<String, ProductPostItem>> {
         val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
         return productPostItems.filter { (_, product) ->
             product.id == uId
         }.sortedByDescending { it.second.createdDate }
     }
 
-    suspend fun getMyPurchasedProduct(productPostItems: List<Pair<String, ProductPostItem>>): List<Pair<String, ProductPostItem>> {
+    private suspend fun getMyPurchasedProduct(productPostItems: List<Pair<String, ProductPostItem>>): List<Pair<String, ProductPostItem>> {
         val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
         return productPostItems.filter { (_, product) ->
             product.shoppingList?.contains(uId) == true
         }.sortedByDescending { it.second.createdDate }
     }
 
-    fun createInventoryDataList(
+    private fun createInventoryDataList(
         myFavoriteProducts: List<Pair<String, ProductPostItem>>,
         myRegisteredProducts: List<Pair<String, ProductPostItem>>,
         myPurchasedProducts: List<Pair<String, ProductPostItem>>
@@ -96,7 +95,22 @@ class InventoryViewModel @Inject constructor(
             inventoryDataList.add(InventoryData.ProductType(InventoryType.SHOPPING_PRODUCT))
             inventoryDataList.add(InventoryData.ProductItem(myPurchasedProducts))
         }
+        return inventoryDataList
+    }
+
+    suspend fun updateInventoryDataList(productPostItemList: List<Pair<String, ProductPostItem>>): List<InventoryData> {
+        _isLoading.value = true
+
+        val myFavoriteProducts = getMyFavoriteProduct(productPostItemList)
+        val myRegisteredProducts = getMyRegisteredProduct(productPostItemList)
+        val myPurchasedProducts = getMyPurchasedProduct(productPostItemList)
+        val inventoryDataList = createInventoryDataList(
+            myFavoriteProducts,
+            myRegisteredProducts,
+            myPurchasedProducts
+        )
         _isLoading.value = false
+
         return inventoryDataList
     }
 

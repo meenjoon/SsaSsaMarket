@@ -30,7 +30,6 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
         binding.viewModel = viewModel
         binding.inventoryOuterRv.adapter = adapter
         viewModel.getMyNickname()
-
         observeInventoryDataList(adapter)
     }
 
@@ -40,15 +39,10 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
                 viewLifecycleOwner.lifecycle,
                 Lifecycle.State.STARTED
             ).collectLatest { productPostItemList ->
-                val myFavoriteProducts = viewModel.getMyFavoriteProduct(productPostItemList)
-                val myRegisteredProducts = viewModel.getMyRegisteredProduct(productPostItemList)
-                val myPurchasedProducts = viewModel.getMyPurchasedProduct(productPostItemList)
-                val inventoryDataList = viewModel.createInventoryDataList(
-                    myFavoriteProducts,
-                    myRegisteredProducts,
-                    myPurchasedProducts
-                )
-                adapter.submitList(inventoryDataList)
+                if (productPostItemList.isNotEmpty()) {
+                    val updateInventoryDataList = viewModel.updateInventoryDataList(productPostItemList)
+                    adapter.submitList(updateInventoryDataList)
+                }
             }
         }
     }
