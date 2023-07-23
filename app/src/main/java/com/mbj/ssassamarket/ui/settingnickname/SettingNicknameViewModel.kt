@@ -42,6 +42,7 @@ class SettingNicknameViewModel @Inject constructor(private val repository: UserI
         viewModelScope.launch {
             _addUserClicks
                 .conflate()
+                .debounce(300)
                 .collectLatest {
                     if (_isLoading.value) {
                         return@collectLatest
