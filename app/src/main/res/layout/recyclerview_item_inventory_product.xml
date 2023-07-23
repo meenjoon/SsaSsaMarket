@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:ellipsize="end"
-            android:maxLines="2"
+            android:maxLines="1"
             android:text="@{productPostItem.title}"
             android:textColor="@color/black"
             android:textSize="18sp"
@@ -65,6 +65,27 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/inventory_inner_product_title_tv"
             tools:text="1분 전" />
+
+        <ImageView
+            android:id="@+id/inventory_inner_product_favorite_iv"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginEnd="2dp"
+            app:layout_constraintEnd_toStartOf="@id/inventory_inner_product_favorite_count_tv"
+            app:layout_constraintTop_toBottomOf="@id/inventory_inner_product_time_tv"
+            app:srcCompat="@drawable/heart_empty_icon" />
+
+        <TextView
+            android:id="@+id/inventory_inner_product_favorite_count_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:text="@{Integer.toString(productPostItem.favoriteCount)}"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="@id/inventory_inner_product_favorite_iv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/inventory_inner_product_favorite_iv"
+            tools:text="3" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

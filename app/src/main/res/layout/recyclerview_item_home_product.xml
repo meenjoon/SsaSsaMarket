@@ -28,8 +28,8 @@
 
         <ImageView
             android:id="@+id/home_product_iv"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
             app:imageFirstUrl="@{productPostItem.imageLocations}"
             app:layout_constraintStart_toStartOf="@id/guideline_vertical_2"
             app:layout_constraintTop_toTopOf="parent"
@@ -93,6 +93,27 @@
             app:layout_constraintTop_toBottomOf="@id/home_product_price_tv"
             tools:text="대전 유성구" />
 
+        <TextView
+            android:id="@+id/home_product_favorite_count_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="@id/home_product_favorite_iv"
+            app:layout_constraintEnd_toEndOf="@id/guideline_vertical_96"
+            app:layout_constraintTop_toTopOf="@id/home_product_favorite_iv"
+            android:text="@{Integer.toString(productPostItem.favoriteCount)}"
+            tools:text="3" />
+
+        <ImageView
+            android:id="@+id/home_product_favorite_iv"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginEnd="2dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/home_product_favorite_count_tv"
+            app:layout_constraintTop_toBottomOf="@id/home_product_location"
+            app:srcCompat="@drawable/heart_empty_icon" />
+
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline_vertical_2"
             android:layout_width="wrap_content"
@@ -100,6 +121,12 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.02" />
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_vertical_96"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.96" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
