@@ -13,6 +13,7 @@ val properties = Properties()
 properties.load(rootProject.file("local.properties").inputStream())
 
 val KAKAO_MAP_NATIVE_KEY = properties.getProperty("kakao_map_native_key")
+val DEFAULT_NOTIFICATION_CHANNEL_ID = properties.getProperty("default_notification_channel_id")
 
 android {
     compileSdkVersion(33)
@@ -28,8 +29,11 @@ android {
         buildConfigField("String", "FIREBASE_BASE_URL", properties.getProperty("firebase_base_url"))
         buildConfigField("String", "KAKAO_MAP_NATIVE_KEY", properties.getProperty("kakao_map_native_key"))
         buildConfigField("String", "GOOGLE_FEEDBACK_FORM_URL", properties.getProperty("google_feedback_form_url"))
+        buildConfigField("String", "CHAT_NOTIFICATION_CHANNEL_ID", properties.getProperty("chat_notification_channel_id"))
+        buildConfigField("String", "SELL_NOTIFICATION_CHANNEL_ID", properties.getProperty("sell_notification_channel_id"))
 
         manifestPlaceholders["KAKAO_MAP_NATIVE_KEY"] = KAKAO_MAP_NATIVE_KEY
+        manifestPlaceholders["DEFAULT_NOTIFICATION_CHANNEL_ID"] = DEFAULT_NOTIFICATION_CHANNEL_ID
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -77,8 +81,8 @@ dependencies {
 
     //Firebase Bom 관련
     implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
-    implementation("com.google.firebase:firebase-analytics-ktx") //analytics 관련
-    implementation("com.google.firebase:firebase-auth-ktx:22.0.0") //auth 관련
+    implementation("com.google.firebase:firebase-analytics-ktx") // analytics 관련
+    implementation("com.google.firebase:firebase-auth-ktx:22.0.0") // auth 관련
     implementation("com.google.firebase:firebase-storage-ktx:20.2.1") // storage 관련
     implementation ("com.google.firebase:firebase-database-ktx") // Realtime Database 관련
 
