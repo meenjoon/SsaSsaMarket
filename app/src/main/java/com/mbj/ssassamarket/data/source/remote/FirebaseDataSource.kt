@@ -17,6 +17,7 @@ import com.mbj.ssassamarket.data.source.remote.network.*
 import com.mbj.ssassamarket.util.Constants.CHATS
 import com.mbj.ssassamarket.util.Constants.CHAT_ROOMS
 import com.mbj.ssassamarket.util.Constants.CHAT_ROOM_ID
+import com.mbj.ssassamarket.util.Constants.FCM_TOKEN
 import com.mbj.ssassamarket.util.Constants.LAST_MESSAGE
 import com.mbj.ssassamarket.util.Constants.LAST_SENT_TIME
 import com.mbj.ssassamarket.util.Constants.LAT_LNG
@@ -373,9 +374,10 @@ class FirebaseDataSource @Inject constructor(
                 val otherUserId = childSnapshot.child(USER_ID).getValue(String::class.java)
                 val otherUserName = childSnapshot.child(USER_NAME).getValue(String::class.java)
                 val otherLatLng = childSnapshot.child(LAT_LNG).getValue(String::class.java)
+                val otherFcmToken = childSnapshot.child(FCM_TOKEN).getValue(String::class.java)
 
                 if (otherUserId != null && otherUserName != null && otherLatLng != null) {
-                    User(otherUserId, otherUserName, otherLatLng)
+                    User(otherUserId, otherUserName, otherLatLng, otherFcmToken)
                 } else {
                     null
                 }
