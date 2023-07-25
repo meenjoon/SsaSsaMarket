@@ -1,5 +1,6 @@
 package com.mbj.ssassamarket.ui.detail.buyer
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mbj.ssassamarket.data.model.FavoriteCountRequest
@@ -49,6 +50,12 @@ class BuyerViewModel @Inject constructor(
 
     private val _buyError = MutableStateFlow(false)
     val buyError: StateFlow<Boolean> = _buyError
+
+    private val _otherUserDataError = MutableStateFlow(false)
+    val otherUserDataError: StateFlow<Boolean> = _otherUserDataError
+
+    private val _otherUserItem = MutableStateFlow<User?>(null)
+    val otherUserItem: StateFlow<User?> = _otherUserItem
 
     private val _favoriteClicks = MutableSharedFlow<Unit>()
 
@@ -118,6 +125,7 @@ class BuyerViewModel @Inject constructor(
                 ).collectLatest { chatRoomId ->
                     if (chatRoomId is ApiResultSuccess) {
                         _chatRoomId.value = chatRoomId.data
+
                     }
                 }
             }
@@ -230,5 +238,19 @@ class BuyerViewModel @Inject constructor(
             userInfo.userId == userId
         }
         return matchingUser?.userName
+    }
+
+    fun getOtherUserItem(userId: String) {
+        viewModelScope.launch {
+            chatRepository.getOtherUserItem(
+                onComplete = { _isLoading.value = false },
+                onError = { _otherUserDataError.value = true },
+                userId
+            ).collectLatest { otherUser ->
+                if (otherUser is ApiResultSuccess) {
+                    _otherUserItem.value = otherUser.data
+                }
+            }
+        }
     }
 }
