@@ -11,7 +11,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.Category
-import com.mbj.ssassamarket.data.model.FilterType
+import com.mbj.ssassamarket.data.model.ProductFilterType
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.model.UserType
 import com.mbj.ssassamarket.databinding.FragmentHomeProductBinding
@@ -61,9 +61,9 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
                 id: Long
             ) {
                 val filter = when (position) {
-                    0 -> FilterType.LATEST
-                    1 -> FilterType.PRICE
-                    else -> FilterType.FAVORITE
+                    0 -> ProductFilterType.LATEST
+                    1 -> ProductFilterType.PRICE
+                    else -> ProductFilterType.FAVORITE
                 }
                 viewModel.updateFilterType(filter)
             }
