@@ -31,6 +31,8 @@ android {
         buildConfigField("String", "GOOGLE_FEEDBACK_FORM_URL", properties.getProperty("google_feedback_form_url"))
         buildConfigField("String", "CHAT_NOTIFICATION_CHANNEL_ID", properties.getProperty("chat_notification_channel_id"))
         buildConfigField("String", "SELL_NOTIFICATION_CHANNEL_ID", properties.getProperty("sell_notification_channel_id"))
+        buildConfigField("String", "FCM_BASE_URL", properties.getProperty("fcm_base_url"))
+        buildConfigField("String", "FCM_SERVER_KEY", properties.getProperty("fcm_server_key"))
 
         manifestPlaceholders["KAKAO_MAP_NATIVE_KEY"] = KAKAO_MAP_NATIVE_KEY
         manifestPlaceholders["DEFAULT_NOTIFICATION_CHANNEL_ID"] = DEFAULT_NOTIFICATION_CHANNEL_ID
