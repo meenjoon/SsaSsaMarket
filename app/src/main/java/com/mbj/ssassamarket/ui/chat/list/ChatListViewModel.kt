@@ -26,6 +26,24 @@ class ChatListViewModel @Inject constructor(private val chatRepository: ChatRepo
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private var chatRoomsValueEventListener: ValueEventListener? = null
+    private var isLocationPermissionChecked = false
+    private var isSystemSettingsExited = false
+
+    fun isLocationPermissionChecked(): Boolean {
+        return isLocationPermissionChecked
+    }
+
+    fun setLocationPermissionChecked(checked: Boolean) {
+        isLocationPermissionChecked = checked
+    }
+
+    fun isSystemSettingsExited(): Boolean {
+        return isSystemSettingsExited
+    }
+
+    fun setSystemSettingsExited(exited: Boolean) {
+        isSystemSettingsExited = exited
+    }
 
     fun getChatRooms() {
         viewModelScope.launch {

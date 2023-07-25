@@ -67,6 +67,8 @@ class WritingViewModel @Inject constructor(
     val updateMyLatLngError: StateFlow<Boolean> = _updateMyLatLngError
 
     private var latLngString: String? = null
+    private var isLocationPermissionChecked = false
+    private var isSystemSettingsExited = false
 
     init {
         viewModelScope.launch {
@@ -111,6 +113,22 @@ class WritingViewModel @Inject constructor(
         _selectedImageList.value = _selectedImageList.value
             .toMutableList()
             .apply { remove(imageContent) }
+    }
+
+    fun isLocationPermissionChecked(): Boolean {
+        return isLocationPermissionChecked
+    }
+
+    fun setLocationPermissionChecked(checked: Boolean) {
+        isLocationPermissionChecked = checked
+    }
+
+    fun isSystemSettingsExited(): Boolean {
+        return isSystemSettingsExited
+    }
+
+    fun setSystemSettingsExited(exited: Boolean) {
+        isSystemSettingsExited = exited
     }
 
     fun setCategoryLabel(category: String) {
