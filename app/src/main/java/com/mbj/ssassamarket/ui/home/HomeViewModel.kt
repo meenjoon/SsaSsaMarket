@@ -26,8 +26,8 @@ class HomeViewModel @Inject constructor(
     private val _items = MutableStateFlow<List<Pair<String, ProductPostItem>>>(emptyList())
     val items: StateFlow<List<Pair<String, ProductPostItem>>> = _items
 
-    private val _Product_filterType = MutableStateFlow<ProductFilterType>(ProductFilterType.LATEST)
-    val productFilterType: StateFlow<ProductFilterType> = _Product_filterType
+    private val _productFilterType = MutableStateFlow<ProductFilterType>(ProductFilterType.LATEST)
+    val productFilterType: StateFlow<ProductFilterType> = _productFilterType
 
     private val _category = MutableStateFlow<Category?>(null)
     val category: StateFlow<Category?> = _category
@@ -107,7 +107,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun updateFilterType(productFilterType: ProductFilterType) {
-        _Product_filterType.value = productFilterType
+        _productFilterType.value = productFilterType
         applyFilters()
     }
 
