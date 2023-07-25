@@ -90,7 +90,7 @@ class HomeViewModel @Inject constructor(
         productList.collectLatest { products ->
             val filteredProducts = products.filter { (_, product) ->
                 product.category == currentCategory?.label &&
-                        (searchText.value.isNullOrBlank() || product.title.contains(
+                        (searchText.value.isBlank() || product.title.contains(
                             searchText.value,
                             ignoreCase = true
                         ))
@@ -132,7 +132,7 @@ class HomeViewModel @Inject constructor(
 
         val filteredProducts = productList.value.filter { (_, product) ->
             product.category == currentCategory.label &&
-                    (currentSearchText.isNullOrBlank() || product.title.contains(
+                    (currentSearchText.isBlank() || product.title.contains(
                         currentSearchText,
                         ignoreCase = true
                     ))
