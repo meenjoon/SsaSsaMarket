@@ -35,7 +35,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
             if (message.data["type"] == NotificationType.CHAT.label) {
                 val body = message.notification?.body
                 val chatNotificationBuilder = NotificationCompat.Builder(applicationContext, BuildConfig.CHAT_NOTIFICATION_CHANNEL_ID)
-                    .setSmallIcon(R.drawable.chat_other_bacground)
+                    .setSmallIcon(R.drawable.chat_icon)
                     .setContentTitle(getString(R.string.chat_channel_name))
                     .setContentText(body)
 
