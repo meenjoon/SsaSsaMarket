@@ -3,10 +3,11 @@ package com.mbj.ssassamarket.ui.chat.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.ChildEventListener
+import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
-import com.mbj.ssassamarket.data.model.ChatItem
-import com.mbj.ssassamarket.data.model.User
+import com.mbj.ssassamarket.data.model.*
 import com.mbj.ssassamarket.data.source.ChatRepository
+import com.mbj.ssassamarket.data.source.NotificationRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import com.mbj.ssassamarket.util.DateFormat.getCurrentTime
@@ -20,7 +21,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ChatDetailViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
-    private val userInfoRepository: UserInfoRepository
+    private val userInfoRepository: UserInfoRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     private val _myUserItem = MutableStateFlow<User?>(null)
@@ -130,7 +132,7 @@ class ChatDetailViewModel @Inject constructor(
         viewModelScope.launch {
             if (otherUserId != null && chatRoomId != null && myUserLocation != null) {
                 chatRepository.sendMessage(
-                    onComplete = { _isLoading.value = false },
+                    onComplete = {  },
                     onError = { _sendMessageError.value = true },
                     chatRoomId!!,
                     otherUserId!!,
@@ -140,7 +142,20 @@ class ChatDetailViewModel @Inject constructor(
                     getCurrentTime(),
                     myLatLng,
                     myDataId
-                ).collectLatest {
+                ).collectLatest { response ->
+                    if (response is ApiResultSuccess) {
+                        if (otherUserItem.value?.fcmToken != null) {
+                            val notification = Notification(NotificationType.SELL.label,"판매 알림", "${myUserName}: $message")
+                            val notificationRequest = FcmRequest(otherUserItem.value!!.fcmToken!!, "high", notification)
+                            notificationRepository.sendNotification(
+                                onComplete = { _isLoading.value = false },
+                                onError = { _sendMessageError.value = true },
+                                "key=${BuildConfig.FCM_SERVER_KEY}",
+                                notificationRequest
+                            ).collectLatest {
+                            }
+                        }
+                    }
                 }
             } else if (myUserLocation.isNullOrEmpty()) {
                 _sendMessageToastId.emit(R.string.error_location_issue)
