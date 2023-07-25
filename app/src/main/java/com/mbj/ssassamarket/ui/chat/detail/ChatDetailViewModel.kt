@@ -145,7 +145,7 @@ class ChatDetailViewModel @Inject constructor(
                 ).collectLatest { response ->
                     if (response is ApiResultSuccess) {
                         if (otherUserItem.value?.fcmToken != null) {
-                            val notification = Notification(NotificationType.SELL.label,"판매 알림", "${myUserName}: $message")
+                            val notification = Notification(NotificationType.CHAT.label,"채팅 알림", "${myUserName}: $message")
                             val notificationRequest = FcmRequest(otherUserItem.value!!.fcmToken!!, "high", notification)
                             notificationRepository.sendNotification(
                                 onComplete = { _isLoading.value = false },
