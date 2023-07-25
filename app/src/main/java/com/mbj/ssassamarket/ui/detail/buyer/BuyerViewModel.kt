@@ -3,11 +3,10 @@ package com.mbj.ssassamarket.ui.detail.buyer
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mbj.ssassamarket.data.model.FavoriteCountRequest
-import com.mbj.ssassamarket.data.model.PatchBuyRequest
-import com.mbj.ssassamarket.data.model.ProductPostItem
-import com.mbj.ssassamarket.data.model.User
+import com.mbj.ssassamarket.BuildConfig
+import com.mbj.ssassamarket.data.model.*
 import com.mbj.ssassamarket.data.source.ChatRepository
+import com.mbj.ssassamarket.data.source.NotificationRepository
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
@@ -21,7 +20,8 @@ import javax.inject.Inject
 class BuyerViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val userInfoRepository: UserInfoRepository,
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     private val _chatRoomId = MutableStateFlow("")
@@ -54,8 +54,14 @@ class BuyerViewModel @Inject constructor(
     private val _otherUserDataError = MutableStateFlow(false)
     val otherUserDataError: StateFlow<Boolean> = _otherUserDataError
 
+    private val _myUserDataError = MutableStateFlow(false)
+    val myUserDataError: StateFlow<Boolean> = _myUserDataError
+
     private val _otherUserItem = MutableStateFlow<User?>(null)
     val otherUserItem: StateFlow<User?> = _otherUserItem
+
+    private val _myUserItem = MutableStateFlow<User?>(null)
+    val myUserItem: StateFlow<User?> = _myUserItem
 
     private val _favoriteClicks = MutableSharedFlow<Unit>()
 
@@ -249,6 +255,19 @@ class BuyerViewModel @Inject constructor(
             ).collectLatest { otherUser ->
                 if (otherUser is ApiResultSuccess) {
                     _otherUserItem.value = otherUser.data
+                }
+            }
+        }
+    }
+
+    fun getMyUserItem() {
+        viewModelScope.launch {
+            chatRepository.getMyUserItem(
+                onComplete = { _isLoading.value = false },
+                onError = { _myUserDataError.value = true }
+            ).collectLatest { myUser ->
+                if (myUser is ApiResultSuccess) {
+                    _myUserItem.value = myUser.data
                 }
             }
         }
