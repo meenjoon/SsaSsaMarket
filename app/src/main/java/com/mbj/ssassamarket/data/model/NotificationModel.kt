@@ -3,8 +3,7 @@ package com.mbj.ssassamarket.data.model
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class Notification(
-    val type: String,
+data class NotificationData(
     val title: String,
     val body: String
 )
@@ -13,5 +12,6 @@ data class Notification(
 data class FcmRequest(
     val to: String,
     val priority: String,
-    val data: Notification
+    val notification: NotificationData,
+    val data: Map<String, String>
 )

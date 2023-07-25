@@ -33,17 +33,19 @@ class FirebaseMessagingService : FirebaseMessagingService() {
             notificationManager.createNotificationChannel(sellChannel)
 
             if (message.data["type"] == NotificationType.CHAT.label) {
+                val body = message.notification?.body
                 val chatNotificationBuilder = NotificationCompat.Builder(applicationContext, BuildConfig.CHAT_NOTIFICATION_CHANNEL_ID)
-                    .setSmallIcon(R.drawable.chat_icon)
-                    .setContentTitle(getString(R.string.app_name))
-                    .setContentText(message.data["body"])
+                    .setSmallIcon(R.drawable.chat_other_bacground)
+                    .setContentTitle(getString(R.string.chat_channel_name))
+                    .setContentText(body)
 
                 notificationManager.notify(0, chatNotificationBuilder.build())
             } else if (message.data["type"] == NotificationType.SELL.label) {
+                val body = message.notification?.body
                 val buyNotificationBuilder = NotificationCompat.Builder(applicationContext, BuildConfig.SELL_NOTIFICATION_CHANNEL_ID)
                     .setSmallIcon(R.drawable.sell_icon)
-                    .setContentTitle(getString(R.string.app_name))
-                    .setContentText(message.data["body"])
+                    .setContentTitle(getString(R.string.sell_channel_name))
+                    .setContentText(body)
 
                 notificationManager.notify(0, buyNotificationBuilder.build())
             }

@@ -144,17 +144,7 @@ class ChatDetailViewModel @Inject constructor(
                     myDataId
                 ).collectLatest { response ->
                     if (response is ApiResultSuccess) {
-                        if (otherUserItem.value?.fcmToken != null) {
-                            val notification = Notification(NotificationType.CHAT.label,"채팅 알림", "${myUserName}: $message")
-                            val notificationRequest = FcmRequest(otherUserItem.value!!.fcmToken!!, "high", notification)
-                            notificationRepository.sendNotification(
-                                onComplete = { _isLoading.value = false },
-                                onError = { _sendMessageError.value = true },
-                                "key=${BuildConfig.FCM_SERVER_KEY}",
-                                notificationRequest
-                            ).collectLatest {
-                            }
-                        }
+                        sendChatNotification(myUserName, message)
                     }
                 }
             } else if (myUserLocation.isNullOrEmpty()) {
@@ -202,7 +192,6 @@ class ChatDetailViewModel @Inject constructor(
         }
     }
 
-
     private suspend fun findMyDataId(users: Map<String, Map<String, User>>): String? {
         val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
         for ((userNode, userDataMap) in users) {
@@ -213,6 +202,21 @@ class ChatDetailViewModel @Inject constructor(
             }
         }
         return null
+    }
+
+    private suspend fun sendChatNotification(myUserName: String, message: String) {
+        if (otherUserItem.value?.fcmToken != null) {
+            val notification = NotificationData("채팅 알림", "${myUserName}: $message")
+            val channelType = mutableMapOf<String, String>("type" to NotificationType.CHAT.label)
+            val notificationRequest = FcmRequest(otherUserItem.value!!.fcmToken!!, "high", notification, channelType)
+            notificationRepository.sendNotification(
+                onComplete = { _isLoading.value = false },
+                onError = { _sendMessageError.value = true },
+                "key=${BuildConfig.FCM_SERVER_KEY}",
+                notificationRequest
+            ).collectLatest {
+            }
+        }
     }
 
     fun addChatDetailEventListener() {
