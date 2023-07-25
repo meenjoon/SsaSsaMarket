@@ -10,7 +10,9 @@ data class User(
     @Json(name = "userName")
     val userName: String? = null,
     @Json(name = "latLng")
-    val latLng: String? = null
+    val latLng: String? = null,
+    @Json(name = "fcmToken")
+    val fcmToken: String? = null
 )
 
 data class PatchUserLatLng(

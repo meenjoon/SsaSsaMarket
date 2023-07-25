@@ -9,6 +9,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
 import com.google.firebase.storage.FirebaseStorage
 import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.data.model.*
@@ -78,7 +79,8 @@ class FirebaseDataSource @Inject constructor(
         try {
             val (user, idToken) = getUserAndIdToken()
             val googleIdToken = idToken ?: ""
-            val userItem = User(user?.uid, nickname, null)
+            val fcmToken = Firebase.messaging.token.await()
+            val userItem = User(user?.uid, nickname, null, fcmToken)
             val response = apiClient.addUser(user?.uid ?: "", userItem, googleIdToken)
 
             response.onSuccess { data ->
