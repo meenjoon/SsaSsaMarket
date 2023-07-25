@@ -162,7 +162,7 @@ class HomeViewModel @Inject constructor(
             _isLoading.value = true
             _isError.value = false
             productRepository.getProduct(
-                onComplete = { _isLoading.value = false },
+                onComplete = { },
                 onError =
                 {
                     _isError.value = true
@@ -175,6 +175,7 @@ class HomeViewModel @Inject constructor(
                     val productEntities = convertToProductEntities(updatedProducts)
                     productRepository.insertProducts(productEntities)
                     productList.value = updatedProducts
+                    _isLoading.value
                     applyFilters()
                 }
             }
