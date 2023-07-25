@@ -1,6 +1,5 @@
 package com.mbj.ssassamarket.ui.detail.buyer
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mbj.ssassamarket.BuildConfig
@@ -131,7 +130,6 @@ class BuyerViewModel @Inject constructor(
                 ).collectLatest { chatRoomId ->
                     if (chatRoomId is ApiResultSuccess) {
                         _chatRoomId.value = chatRoomId.data
-
                     }
                 }
             }
@@ -162,6 +160,7 @@ class BuyerViewModel @Inject constructor(
                                 getCurrentTime(),
                             ).collectLatest { chatRoomId ->
                                 if (chatRoomId is ApiResultSuccess) {
+                                    sendBuyNotificationToSeller()
                                     _chatRoomId.value = chatRoomId.data
                                 }
                             }
@@ -269,6 +268,20 @@ class BuyerViewModel @Inject constructor(
                 if (myUser is ApiResultSuccess) {
                     _myUserItem.value = myUser.data
                 }
+            }
+        }
+    }
+
+    private suspend fun sendBuyNotificationToSeller() {
+        if (otherUserItem.value?.fcmToken != null) {
+            val notification = Notification(NotificationType.SELL.label,"판매 알림", " ${myUserItem.value?.userName} 님께서 [${productPostItem?.title}] 상품을 구매하셨습니다! 얼른 채팅방을 확인해주세요 :)")
+            val notificationRequest = FcmRequest(otherUserItem.value!!.fcmToken!!, "high", notification)
+            notificationRepository.sendNotification(
+                onComplete = { _isLoading.value = false },
+                onError = { _enterChatRoomError.value = true },
+                "key=${BuildConfig.FCM_SERVER_KEY}",
+                notificationRequest
+            ).collectLatest {
             }
         }
     }
