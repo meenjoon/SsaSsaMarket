@@ -158,6 +158,11 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
                         }
                     }
                 }
+                launch {
+                    viewModel.sendMessageToastId.collectLatest { sendMessageToastId ->
+                        showToast(sendMessageToastId)
+                    }
+                }
             }
         }
     }

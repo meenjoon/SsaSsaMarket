@@ -40,7 +40,7 @@
             android:id="@+id/chat_list_first_nickname_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:textSize="23sp"
             android:textStyle="bold"
             app:initialLetter="@{chatRoomItem.otherUserName}"
             app:layout_constraintBottom_toBottomOf="@id/chat_list_user_iv"

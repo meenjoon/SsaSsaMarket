@@ -1,6 +1,7 @@
 package com.mbj.ssassamarket.ui.writing
 
 import androidx.lifecycle.*
+import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.ImageContent
 import com.mbj.ssassamarket.data.model.PatchUserLatLng
 import com.mbj.ssassamarket.data.model.User
@@ -47,8 +48,8 @@ class WritingViewModel @Inject constructor(
     private val _isPostError = MutableStateFlow(false)
     val isPostError: StateFlow<Boolean> = _isPostError
 
-    private val _toastMessage = MutableStateFlow("")
-    val toastMessage: StateFlow<String> = _toastMessage
+    private val _toastMessageId = MutableSharedFlow<Int>()
+    val toastMessageId: SharedFlow<Int> = _toastMessageId.asSharedFlow()
 
     private val _requiredProperty = MutableStateFlow(false)
     val requiredProperty: StateFlow<Boolean> = _requiredProperty
@@ -66,6 +67,8 @@ class WritingViewModel @Inject constructor(
     val updateMyLatLngError: StateFlow<Boolean> = _updateMyLatLngError
 
     private var latLngString: String? = null
+    private var isLocationPermissionChecked = false
+    private var isSystemSettingsExited = false
 
     init {
         viewModelScope.launch {
@@ -112,6 +115,22 @@ class WritingViewModel @Inject constructor(
             .apply { remove(imageContent) }
     }
 
+    fun isLocationPermissionChecked(): Boolean {
+        return isLocationPermissionChecked
+    }
+
+    fun setLocationPermissionChecked(checked: Boolean) {
+        isLocationPermissionChecked = checked
+    }
+
+    fun isSystemSettingsExited(): Boolean {
+        return isSystemSettingsExited
+    }
+
+    fun setSystemSettingsExited(exited: Boolean) {
+        isSystemSettingsExited = exited
+    }
+
     fun setCategoryLabel(category: String) {
         _category.value = getCategoryLabelFromInput(category)
     }
@@ -129,9 +148,9 @@ class WritingViewModel @Inject constructor(
         val requiredPropertyCount = listOf(title.value, price.value, content.value)
             .count { it.isEmpty() } + if (category.value == CATEGORY_REQUEST) 1 else 0 +
                 if (selectedImageList.value.isEmpty()) 1 else 0
-        when (requiredPropertyCount) {
-            0 -> {
-                viewModelScope.launch {
+        viewModelScope.launch {
+            when (requiredPropertyCount) {
+                0 -> {
                     _isCompleted.value = false
                     postItemRepository.addProductPost(
                         onComplete = { },
@@ -156,22 +175,22 @@ class WritingViewModel @Inject constructor(
                         }
                     }
                 }
-            }
-            1 -> {
-                if (title.value.isEmpty())
-                    _toastMessage.value = "request_writing_title"
-                else if (price.value.isEmpty())
-                    _toastMessage.value = "request_writing_price"
-                else if (content.value.isEmpty())
-                    _toastMessage.value = "request_writing_content"
-                else if (category.value == CATEGORY_REQUEST)
-                    _toastMessage.value = "request_writing_request"
-                else if (selectedImageList.value.isEmpty()) {
-                    _toastMessage.value = "request_writing_image"
+                1 -> {
+                    if (title.value.isEmpty())
+                        _toastMessageId.emit(R.string.request_writing_title)
+                    else if (price.value.isEmpty())
+                        _toastMessageId.emit(R.string.request_writing_price)
+                    else if (content.value.isEmpty())
+                        _toastMessageId.emit(R.string.request_writing_content)
+                    else if (category.value == CATEGORY_REQUEST)
+                        _toastMessageId.emit(R.string.request_writing_request)
+                    else if (selectedImageList.value.isEmpty()) {
+                        _toastMessageId.emit(R.string.request_writing_image)
+                    }
                 }
-            }
-            else -> {
-                _toastMessage.value = "request_writing_all"
+                else -> {
+                    _toastMessageId.emit(R.string.request_writing_all)
+                }
             }
         }
     }

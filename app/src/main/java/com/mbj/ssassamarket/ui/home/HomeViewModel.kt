@@ -2,7 +2,7 @@ package com.mbj.ssassamarket.ui.home
 
 import androidx.lifecycle.*
 import com.mbj.ssassamarket.data.model.Category
-import com.mbj.ssassamarket.data.model.FilterType
+import com.mbj.ssassamarket.data.model.ProductFilterType
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.model.UserType
 import com.mbj.ssassamarket.data.source.ProductRepository
@@ -26,8 +26,8 @@ class HomeViewModel @Inject constructor(
     private val _items = MutableStateFlow<List<Pair<String, ProductPostItem>>>(emptyList())
     val items: StateFlow<List<Pair<String, ProductPostItem>>> = _items
 
-    private val _filterType = MutableStateFlow<FilterType>(FilterType.LATEST)
-    val filterType: StateFlow<FilterType> = _filterType
+    private val _productFilterType = MutableStateFlow<ProductFilterType>(ProductFilterType.LATEST)
+    val productFilterType: StateFlow<ProductFilterType> = _productFilterType
 
     private val _category = MutableStateFlow<Category?>(null)
     val category: StateFlow<Category?> = _category
@@ -85,29 +85,29 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun setupProductList() {
         val currentCategory = category.value
-        val currentFilterType = filterType.value
+        val currentFilterType = productFilterType.value
 
         productList.collectLatest { products ->
             val filteredProducts = products.filter { (_, product) ->
                 product.category == currentCategory?.label &&
-                        (searchText.value.isNullOrBlank() || product.title.contains(
+                        (searchText.value.isBlank() || product.title.contains(
                             searchText.value,
                             ignoreCase = true
                         ))
             }.toMutableList()
 
             when (currentFilterType) {
-                FilterType.LATEST -> filteredProducts.sortByDescending { (_, product) -> product.createdDate }
-                FilterType.PRICE -> filteredProducts.sortBy { (_, product) -> product.price }
-                FilterType.FAVORITE -> filteredProducts.sortByDescending { (_, product) -> product.favoriteCount }
+                ProductFilterType.LATEST -> filteredProducts.sortByDescending { (_, product) -> product.createdDate }
+                ProductFilterType.PRICE -> filteredProducts.sortBy { (_, product) -> product.price }
+                ProductFilterType.FAVORITE -> filteredProducts.sortByDescending { (_, product) -> product.favoriteCount }
             }
 
             _items.value = filteredProducts
         }
     }
 
-    fun updateFilterType(filterType: FilterType) {
-        _filterType.value = filterType
+    fun updateFilterType(productFilterType: ProductFilterType) {
+        _productFilterType.value = productFilterType
         applyFilters()
     }
 
@@ -121,7 +121,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun applyFilters() {
-        val currentFilterType = filterType.value
+        val currentFilterType = productFilterType.value
         val currentCategory = category.value
         val currentSearchText = searchText.value
 
@@ -132,16 +132,16 @@ class HomeViewModel @Inject constructor(
 
         val filteredProducts = productList.value.filter { (_, product) ->
             product.category == currentCategory.label &&
-                    (currentSearchText.isNullOrBlank() || product.title.contains(
+                    (currentSearchText.isBlank() || product.title.contains(
                         currentSearchText,
                         ignoreCase = true
                     ))
         }.toMutableList()
 
         when (currentFilterType) {
-            FilterType.LATEST -> filteredProducts.sortByDescending { (_, product) -> product.createdDate }
-            FilterType.PRICE -> filteredProducts.sortBy { (_, product) -> product.price }
-            FilterType.FAVORITE -> filteredProducts.sortByDescending { (_, product) -> product.favoriteCount }
+            ProductFilterType.LATEST -> filteredProducts.sortByDescending { (_, product) -> product.createdDate }
+            ProductFilterType.PRICE -> filteredProducts.sortBy { (_, product) -> product.price }
+            ProductFilterType.FAVORITE -> filteredProducts.sortByDescending { (_, product) -> product.favoriteCount }
         }
 
         _items.value = filteredProducts
@@ -162,7 +162,7 @@ class HomeViewModel @Inject constructor(
             _isLoading.value = true
             _isError.value = false
             productRepository.getProduct(
-                onComplete = { _isLoading.value = false },
+                onComplete = { },
                 onError =
                 {
                     _isError.value = true
@@ -175,6 +175,7 @@ class HomeViewModel @Inject constructor(
                     val productEntities = convertToProductEntities(updatedProducts)
                     productRepository.insertProducts(productEntities)
                     productList.value = updatedProducts
+                    _isLoading.value
                     applyFilters()
                 }
             }

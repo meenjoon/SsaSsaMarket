@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.ui.settingnickname
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
 import com.mbj.ssassamarket.util.Constants
@@ -32,8 +33,8 @@ class SettingNicknameViewModel @Inject constructor(private val repository: UserI
     private val _isError = MutableStateFlow(false)
     val isError: StateFlow<Boolean> = _isError
 
-    private val _responseToastMessage = MutableStateFlow("")
-    val responseToastMessage: StateFlow<String> = _responseToastMessage
+    private val _responseToastMessageId = MutableSharedFlow<Int>()
+    val responseToastMessageId: SharedFlow<Int> = _responseToastMessageId.asSharedFlow()
 
     private val _addUserClicks = MutableSharedFlow<Unit>()
 
@@ -41,17 +42,17 @@ class SettingNicknameViewModel @Inject constructor(private val repository: UserI
         viewModelScope.launch {
             _addUserClicks
                 .conflate()
+                .debounce(300)
                 .collectLatest {
                     if (_isLoading.value) {
                         return@collectLatest
                     }
-
-                    if (nickname.value.isNullOrEmpty()) {
-                        _responseToastMessage.value = NICKNAME_REQUEST
+                    if (nickname.value.isEmpty()) {
+                        _responseToastMessageId.emit(R.string.setting_nickname_request_nickname)
                     } else if (!nickname.value.matches(Constants.NICKNAME_PATTERN.toRegex())) {
-                        _responseToastMessage.value = NICKNAME_ERROR
+                        _responseToastMessageId.emit(R.string.setting_nickname_error_nickname)
                     } else if (isNicknameDuplicate()) {
-                        _responseToastMessage.value = NICKNAME_DUPLICATE
+                        _responseToastMessageId.emit(R.string.setting_nickname_duplicate)
                     } else {
                         _isLoading.value = true
                         repository.addUser(
@@ -67,7 +68,6 @@ class SettingNicknameViewModel @Inject constructor(private val repository: UserI
                 }
         }
     }
-
 
     fun addUser() {
         viewModelScope.launch {

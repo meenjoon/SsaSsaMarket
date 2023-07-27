@@ -2,11 +2,10 @@ package com.mbj.ssassamarket.ui.detail.buyer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mbj.ssassamarket.data.model.FavoriteCountRequest
-import com.mbj.ssassamarket.data.model.PatchBuyRequest
-import com.mbj.ssassamarket.data.model.ProductPostItem
-import com.mbj.ssassamarket.data.model.User
+import com.mbj.ssassamarket.BuildConfig
+import com.mbj.ssassamarket.data.model.*
 import com.mbj.ssassamarket.data.source.ChatRepository
+import com.mbj.ssassamarket.data.source.NotificationRepository
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
 import com.mbj.ssassamarket.data.source.remote.network.ApiResultSuccess
@@ -20,7 +19,8 @@ import javax.inject.Inject
 class BuyerViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val userInfoRepository: UserInfoRepository,
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     private val _chatRoomId = MutableStateFlow("")
@@ -49,6 +49,18 @@ class BuyerViewModel @Inject constructor(
 
     private val _buyError = MutableStateFlow(false)
     val buyError: StateFlow<Boolean> = _buyError
+
+    private val _otherUserDataError = MutableStateFlow(false)
+    val otherUserDataError: StateFlow<Boolean> = _otherUserDataError
+
+    private val _myUserDataError = MutableStateFlow(false)
+    val myUserDataError: StateFlow<Boolean> = _myUserDataError
+
+    private val _otherUserItem = MutableStateFlow<User?>(null)
+    val otherUserItem: StateFlow<User?> = _otherUserItem
+
+    private val _myUserItem = MutableStateFlow<User?>(null)
+    val myUserItem: StateFlow<User?> = _myUserItem
 
     private val _favoriteClicks = MutableSharedFlow<Unit>()
 
@@ -148,6 +160,7 @@ class BuyerViewModel @Inject constructor(
                                 getCurrentTime(),
                             ).collectLatest { chatRoomId ->
                                 if (chatRoomId is ApiResultSuccess) {
+                                    sendBuyNotificationToSeller()
                                     _chatRoomId.value = chatRoomId.data
                                 }
                             }
@@ -230,5 +243,47 @@ class BuyerViewModel @Inject constructor(
             userInfo.userId == userId
         }
         return matchingUser?.userName
+    }
+
+    fun getOtherUserItem(userId: String) {
+        viewModelScope.launch {
+            chatRepository.getOtherUserItem(
+                onComplete = { _isLoading.value = false },
+                onError = { _otherUserDataError.value = true },
+                userId
+            ).collectLatest { otherUser ->
+                if (otherUser is ApiResultSuccess) {
+                    _otherUserItem.value = otherUser.data
+                }
+            }
+        }
+    }
+
+    fun getMyUserItem() {
+        viewModelScope.launch {
+            chatRepository.getMyUserItem(
+                onComplete = { _isLoading.value = false },
+                onError = { _myUserDataError.value = true }
+            ).collectLatest { myUser ->
+                if (myUser is ApiResultSuccess) {
+                    _myUserItem.value = myUser.data
+                }
+            }
+        }
+    }
+
+    private suspend fun sendBuyNotificationToSeller() {
+        if (otherUserItem.value?.fcmToken != null) {
+            val notification = NotificationData("판매 알림","${myUserItem.value?.userName} 님께서 [${productPostItem?.title}] 상품을 구매하셨습니다! 얼른 채팅방을 확인해주세요 :)")
+            val channelType = mutableMapOf<String, String>("type" to NotificationType.SELL.label)
+            val notificationRequest = FcmRequest(otherUserItem.value!!.fcmToken!!, "high", notification, channelType)
+            notificationRepository.sendNotification(
+                onComplete = { _isLoading.value = false },
+                onError = { _enterChatRoomError.value = true },
+                "key=${BuildConfig.FCM_SERVER_KEY}",
+                notificationRequest
+            ).collectLatest {
+            }
+        }
     }
 }

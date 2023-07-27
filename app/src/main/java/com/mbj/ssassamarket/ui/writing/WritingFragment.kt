@@ -54,11 +54,9 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
     private lateinit var locationManager: LocationManager
     private lateinit var galleryLauncher: ActivityResultLauncher<Intent>
     private lateinit var pickMultipleVisualMediaLauncher: ActivityResultLauncher<PickVisualMediaRequest>
-    private lateinit var permissionResultLauncher: ActivityResultLauncher<String>
-    private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var requestGalleryPermissionLauncher: ActivityResultLauncher<String>
+    private lateinit var requestLocationPermissionLauncher: ActivityResultLauncher<Array<String>>
 
-    private var isLocationPermissionChecked = false
-    private var isSystemSettingsExited = false
     private var progressDialog: ProgressDialogFragment? = null
 
     private val viewModel: WritingViewModel by viewModels()
@@ -67,7 +65,7 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
         super.onCreate(savedInstanceState)
         initializeGalleryLauncher()
         initializePickMultipleVisualMediaLauncher()
-        initializePermissionResultLauncher()
+        initializeGalleryPermissionLauncher()
         initializeGalleryLauncher()
         initializeLocationPermissionLauncher()
         locationManager = LocationManager(requireContext(), 10000L, 10000.0F, this)
@@ -105,11 +103,8 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
                     }
                 }
                 launch {
-                    viewModel.toastMessage.collectLatest { toastMessage ->
-                        val messageId = resources.getIdentifier(toastMessage, "string", requireContext().packageName)
-                        if (messageId != 0) {
-                            showToast(messageId)
-                        }
+                    viewModel.toastMessageId.collectLatest { toastMessageId ->
+                        showToast(toastMessageId)
                     }
                 }
             }
@@ -232,7 +227,7 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                 galleryLauncher.launch(intent)
             } else {
-                permissionResultLauncher.launch(permission)
+                requestGalleryPermissionLauncher.launch(permission)
             }
         }
     }
@@ -274,8 +269,8 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
         builder.setPositiveButton(getString(R.string.permission_positive)) { dialog, _ ->
             dialog.dismiss()
             openAppSettings()
-            isLocationPermissionChecked = false
-            isSystemSettingsExited = true
+            viewModel.setSystemSettingsExited(true)
+            viewModel.setLocationPermissionChecked(false)
         }
         builder.setNegativeButton(getString(R.string.permission_negative)) { dialog, _ ->
             dialog.dismiss()
@@ -302,16 +297,16 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
     }
 
     private fun handleLocationPermissionAndTracking() {
-        if (!isLocationPermissionChecked) {
-            if (isSystemSettingsExited && !locationManager.isAnyLocationPermissionGranted()) {
+        if (!viewModel.isLocationPermissionChecked()) {
+            if (viewModel.isSystemSettingsExited() && !locationManager.isAnyLocationPermissionGranted()) {
                 // 시스템 설정에서 돌아온 경우이지만 위치 권한이 허용되지 않은 경우
                 findNavController().navigateUp()
-            } else if (isSystemSettingsExited && locationManager.isAnyLocationPermissionGranted()) {
+            } else if (viewModel.isSystemSettingsExited() && locationManager.isAnyLocationPermissionGranted()) {
                 // 시스템 설정에서 돌아온 경우이고 위치 권한이 허용된 경우
             } else {
                 // 처음 진입하는 경우 위치 권한 체크
-                locationManager.checkLocationPermission(locationPermissionLauncher)
-                isLocationPermissionChecked = true
+                locationManager.checkLocationPermission(requestLocationPermissionLauncher)
+                viewModel.setLocationPermissionChecked(true)
             }
         }
         locationManager.startLocationTracking()
@@ -367,8 +362,8 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
         }
     }
 
-    private fun initializePermissionResultLauncher() {
-        permissionResultLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+    private fun initializeGalleryPermissionLauncher() {
+        requestGalleryPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
                 openGallery()
             } else {
@@ -386,7 +381,7 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
     }
 
     private fun initializeLocationPermissionLauncher() {
-        locationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions: Map<String, Boolean> ->
+        requestLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions: Map<String, Boolean> ->
             val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
             val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
 

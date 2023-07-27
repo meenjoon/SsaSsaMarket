@@ -9,6 +9,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
 import com.google.firebase.storage.FirebaseStorage
 import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.data.model.*
@@ -16,6 +17,7 @@ import com.mbj.ssassamarket.data.source.remote.network.*
 import com.mbj.ssassamarket.util.Constants.CHATS
 import com.mbj.ssassamarket.util.Constants.CHAT_ROOMS
 import com.mbj.ssassamarket.util.Constants.CHAT_ROOM_ID
+import com.mbj.ssassamarket.util.Constants.FCM_TOKEN
 import com.mbj.ssassamarket.util.Constants.LAST_MESSAGE
 import com.mbj.ssassamarket.util.Constants.LAST_SENT_TIME
 import com.mbj.ssassamarket.util.Constants.LAT_LNG
@@ -78,7 +80,8 @@ class FirebaseDataSource @Inject constructor(
         try {
             val (user, idToken) = getUserAndIdToken()
             val googleIdToken = idToken ?: ""
-            val userItem = User(user?.uid, nickname, null)
+            val fcmToken = Firebase.messaging.token.await()
+            val userItem = User(user?.uid, nickname, null, fcmToken)
             val response = apiClient.addUser(user?.uid ?: "", userItem, googleIdToken)
 
             response.onSuccess { data ->
@@ -371,9 +374,10 @@ class FirebaseDataSource @Inject constructor(
                 val otherUserId = childSnapshot.child(USER_ID).getValue(String::class.java)
                 val otherUserName = childSnapshot.child(USER_NAME).getValue(String::class.java)
                 val otherLatLng = childSnapshot.child(LAT_LNG).getValue(String::class.java)
+                val otherFcmToken = childSnapshot.child(FCM_TOKEN).getValue(String::class.java)
 
                 if (otherUserId != null && otherUserName != null && otherLatLng != null) {
-                    User(otherUserId, otherUserName, otherLatLng)
+                    User(otherUserId, otherUserName, otherLatLng, otherFcmToken)
                 } else {
                     null
                 }

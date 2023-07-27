@@ -19,7 +19,7 @@
             android:id="@+id/log_in_logo_iv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/login_logo"
+            android:src="@mipmap/logo_icon"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/guideline_horizontal_20" />

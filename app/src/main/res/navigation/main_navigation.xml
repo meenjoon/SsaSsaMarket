@@ -118,7 +118,9 @@
             app:argType="com.mbj.ssassamarket.data.model.ProductPostItem" />
         <action
             android:id="@+id/action_buyerFragment_to_chatDetailFragment"
-            app:destination="@id/chatDetailFragment" />
+            app:destination="@id/chatDetailFragment"
+            app:popUpTo="@id/buyerFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/chatDetailFragment"

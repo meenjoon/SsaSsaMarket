@@ -34,7 +34,7 @@
                         android:layout_width="120dp"
                         android:layout_height="50dp"
                         android:scaleType="centerCrop"
-                        android:src="@mipmap/login_logo"
+                        android:src="@mipmap/logo_icon"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />

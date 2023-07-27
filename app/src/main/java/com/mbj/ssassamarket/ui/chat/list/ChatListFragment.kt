@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.viewModels
@@ -39,37 +40,7 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
     private val viewModel: ChatListViewModel by viewModels()
 
     private lateinit var locationManager: LocationManager
-
-    private var isLocationPermissionChecked = false
-    private var isSystemSettingsExited = false
-
-    private val locationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions: Map<String, Boolean> ->
-            val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
-            val coarseLocationGranted =
-                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
-
-            if (!(fineLocationGranted || coarseLocationGranted)) {
-                // 위치 권한이 거부된 경우
-                val shouldShowRationaleFine = ActivityCompat.shouldShowRequestPermissionRationale(
-                    requireActivity(),
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-                val shouldShowRationaleCoarse = ActivityCompat.shouldShowRequestPermissionRationale(
-                    requireActivity(),
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-
-                if (!shouldShowRationaleFine || !shouldShowRationaleCoarse) {
-                    // 권한 요청이 다시 보여지지 않는 경우
-                    showLocationPermissionDeniedDialog()
-                } else {
-                    // 권한 요청이 다시 보여지는 경우
-                    findNavController().navigateUp()
-                    showToast(R.string.location_permission_cancel)
-                }
-            }
-        }
+    private lateinit var requestLocationPermissionLauncher: ActivityResultLauncher<Array<String>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,6 +53,7 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
         viewModel.getChatRooms()
         viewModel.addChatRoomsValueEventListener()
 
+        initializeLocationPermissionLauncher()
         initRecyclerView()
         observeChatRooms()
     }
@@ -102,16 +74,44 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
     }
 
     private fun handleLocationPermission() {
-        if (!isLocationPermissionChecked) {
-            if (isSystemSettingsExited && !locationManager.isAnyLocationPermissionGranted()) {
+        if (!viewModel.isLocationPermissionChecked()) {
+            if (viewModel.isSystemSettingsExited() && !locationManager.isAnyLocationPermissionGranted()) {
                 // 시스템 설정에서 돌아온 경우이지만 위치 권한이 허용되지 않은 경우
                 findNavController().navigateUp()
-            } else if (isSystemSettingsExited && locationManager.isAnyLocationPermissionGranted()) {
+            } else if (viewModel.isSystemSettingsExited() && locationManager.isAnyLocationPermissionGranted()) {
                 // 시스템 설정에서 돌아온 경우이고 위치 권한이 허용된 경우
             } else {
                 // 처음 진입하는 경우 위치 권한 체크
-                locationManager.checkLocationPermission(locationPermissionLauncher)
-                isLocationPermissionChecked = true
+                locationManager.checkLocationPermission(requestLocationPermissionLauncher)
+                viewModel.setLocationPermissionChecked(true)
+            }
+        }
+    }
+
+    private fun initializeLocationPermissionLauncher() {
+        requestLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions: Map<String, Boolean> ->
+            val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+            val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+
+            if (!(fineLocationGranted || coarseLocationGranted)) {
+                // 위치 권한이 거부된 경우
+                val shouldShowRationaleFine = ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+                val shouldShowRationaleCoarse = ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+
+                if (!shouldShowRationaleFine || !shouldShowRationaleCoarse) {
+                    // 권한 요청이 다시 보여지지 않는 경우
+                    showLocationPermissionDeniedDialog()
+                } else {
+                    // 권한 요청이 다시 보여지는 경우
+                    findNavController().navigateUp()
+                    showToast(R.string.location_permission_cancel)
+                }
             }
         }
     }
@@ -135,8 +135,8 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
         builder.setPositiveButton(getString(R.string.permission_positive)) { dialog, _ ->
             dialog.dismiss()
             openAppSettings()
-            isLocationPermissionChecked = false
-            isSystemSettingsExited = true
+            viewModel.setLocationPermissionChecked(false)
+            viewModel.setSystemSettingsExited(true)
         }
         builder.setNegativeButton(getString(R.string.permission_negative)) { dialog, _ ->
             dialog.dismiss()

@@ -11,10 +11,6 @@ import androidx.navigation.fragment.findNavController
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentSettingNicknameBinding
 import com.mbj.ssassamarket.ui.BaseFragment
-import com.mbj.ssassamarket.util.Constants.NICKNAME_DUPLICATE
-import com.mbj.ssassamarket.util.Constants.NICKNAME_ERROR
-import com.mbj.ssassamarket.util.Constants.NICKNAME_REQUEST
-import com.mbj.ssassamarket.util.Constants.SUCCESS
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -46,13 +42,8 @@ class SettingNicknameFragment : BaseFragment() {
                     }
                 }
                 launch {
-                    viewModel.responseToastMessage.collectLatest { responseToastMessage ->
-                        when (responseToastMessage) {
-                            SUCCESS -> showToast(R.string.setting_nickname_success)
-                            NICKNAME_DUPLICATE -> showToast(R.string.setting_nickname_duplicate)
-                            NICKNAME_REQUEST -> showToast(R.string.setting_nickname_request_nickname)
-                            NICKNAME_ERROR -> showToast(R.string.setting_nickname_error_nickname)
-                        }
+                    viewModel.responseToastMessageId.collectLatest { responseToastMessageId ->
+                        showToast(responseToastMessageId)
                     }
                 }
             }

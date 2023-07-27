@@ -32,6 +32,7 @@
     <string name="gallery_permission_content">갤러리를 접근하기 위해 권한 설정이 필요합니다. 설정으로 이동하시겠습니까?</string>
     <string name="location_permission_cancel">위치 접근 권한을 거부하셨습니다.</string>
     <string name="location_permission_content">상품을 등록하기 위해 위치 권한 설정이 필요합니다. 설정으로 이동하시겠습니까?</string>
+    <string name="notification_permission">알림 권한이 없으면 채팅 및 판매 알림을 받을 수 없습니다. 설정하시겠습니까?</string>
     <string name="product_title_request">상품 검색</string>
     <string name="korean_currency">원</string>
     <string name="years_ago">년 전</string>
@@ -90,4 +91,9 @@
     <string name="request_buy">구매 하시겠습니까?</string>
     <string name="buy_confirmed">구매 확정</string>
     <string name="chat_room_created">채팅방이 개설되었습니다 !</string>
+    <string name="error_location_issue">현재 위치 정보에 문제가 발생하여 메시지 전송이 불가합니다.</string>
+    <string name="chat_channel_name">채팅 알림</string>
+    <string name="chat_channel_description">채팅 알림입니다.</string>
+    <string name="sell_channel_name">판매 알림</string>
+    <string name="sell_channel_description">판매 알림입니다.</string>
 </resources>
