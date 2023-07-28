@@ -86,7 +86,8 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
 
     private fun setupUI() {
         binding.chatDetailBackIv.setOnClickListener {
-            findNavController().navigateUp()
+            val action = ChatDetailFragmentDirections.actionChatDetailFragmentToNavigationChat()
+            findNavController().navigate(action)
         }
 
         binding.chatDetailSendIv.setOnClickListener {

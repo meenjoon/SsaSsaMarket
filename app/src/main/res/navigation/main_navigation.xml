@@ -13,11 +13,15 @@
         <action
             android:id="@+id/action_logInFragment_to_settingNicknameFragment"
             app:destination="@id/settingNicknameFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
             app:popUpTo="@id/logInFragment"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_logInFragment_to_homeFragment"
             app:destination="@id/navigation_home"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
             app:popUpTo="@id/logInFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -28,6 +32,8 @@
         <action
             android:id="@+id/action_settingNicknameFragment_to_homeFragment"
             app:destination="@id/navigation_home"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
             app:popUpTo="@id/settingNicknameFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -37,10 +43,14 @@
         android:label="HomeFragment">
         <action
             android:id="@+id/action_navigation_home_to_sellerFragment"
-            app:destination="@id/sellerFragment" />
+            app:destination="@id/sellerFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left" />
         <action
             android:id="@+id/action_navigation_home_to_buyerFragment"
-            app:destination="@id/buyerFragment" />
+            app:destination="@id/buyerFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left" />
     </fragment>
     <fragment
         android:id="@+id/splashFragment"
@@ -49,16 +59,22 @@
         <action
             android:id="@+id/action_splashFragment_to_logInFragment"
             app:destination="@id/logInFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
             app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_splashFragment_to_settingNicknameFragment"
             app:destination="@id/settingNicknameFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
             app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_splashFragment_to_homeFragment"
             app:destination="@id/navigation_home"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
             app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -68,7 +84,9 @@
         android:label="ChatListFragment">
         <action
             android:id="@+id/action_navigation_chat_to_chatDetailFragment"
-            app:destination="@id/chatDetailFragment" />
+            app:destination="@id/chatDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left" />
     </fragment>
     <fragment
         android:id="@+id/navigation_inventory"
@@ -76,10 +94,14 @@
         android:label="InventoryFragment">
         <action
             android:id="@+id/action_navigation_inventory_to_sellerFragment"
-            app:destination="@id/sellerFragment" />
+            app:destination="@id/sellerFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left" />
         <action
             android:id="@+id/action_navigation_inventory_to_buyerFragment"
-            app:destination="@id/buyerFragment" />
+            app:destination="@id/buyerFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left" />
     </fragment>
     <fragment
         android:id="@+id/navigation_setting"
@@ -88,6 +110,8 @@
         <action
             android:id="@+id/action_navigation_setting_to_logInFragment"
             app:destination="@id/logInFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
             app:popUpTo="@id/main_navigation"
             app:popUpToInclusive="true" />
     </fragment>
@@ -119,6 +143,8 @@
         <action
             android:id="@+id/action_buyerFragment_to_chatDetailFragment"
             app:destination="@id/chatDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
             app:popUpTo="@id/buyerFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -146,5 +172,12 @@
             android:defaultValue="@null"
             app:argType="com.mbj.ssassamarket.data.model.ChatRoomItem"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_chatDetailFragment_to_navigation_chat"
+            app:destination="@id/navigation_chat"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popUpTo="@id/chatDetailFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>
