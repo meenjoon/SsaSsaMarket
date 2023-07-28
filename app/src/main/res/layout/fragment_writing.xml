@@ -49,20 +49,19 @@
                         android:layout_height="40dp"
                         android:layout_marginEnd="20dp"
                         android:onClick="@{() -> viewModel.registerProductWithValidation()}"
-                        app:cardBackgroundColor="@{viewModel.requiredProperty ? @color/orange_700 : @color/orange_300}"
+                        app:cardBackgroundColor="@{viewModel.requiredProperty ? @color/color_product_registerable : @color/color_product_non_registerable}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
 
                         <TextView
+                            style="@style/CardViewButtonTextStyle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:gravity="center"
                             android:text="@string/writing_register"
-                            android:textColor="@color/white"
-                            android:textSize="17sp"
-                            android:textStyle="bold" />
+                            android:textSize="17sp" />
 
                     </com.google.android.material.card.MaterialCardView>
 

@@ -42,7 +42,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:text="@string/text_greeting_suffix"
-            android:textColor="@color/black"
             android:textSize="22sp"
             app:layout_constraintBottom_toBottomOf="@id/inventory_nickname_tv"
             app:layout_constraintStart_toEndOf="@id/inventory_nickname_tv" />

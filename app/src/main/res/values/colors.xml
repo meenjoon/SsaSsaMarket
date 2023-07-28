@@ -16,7 +16,15 @@
     <color name="white_grey">#EFE4E4</color>
     <color name="shrine_pink_900">#ECDDDD</color>
     <color name="deep_red">#3D1717</color>
-
+    <color name="yellow">#FFEB3B</color>
+    <color name="grey_500">#5B5B5B</color>
+    <color name="dark_grey">#3C3939</color>
+    <color name="color_product_registerable">@color/orange_700</color>
+    <color name="color_product_non_registerable">@color/orange_300</color>
+    <color name="color_title_and_price_read_mode">@color/black</color>
+    <color name="color_title_and_price_edit_mode">@color/grey_100</color>
+    <color name="color_content_read_mode">@color/black</color>
+    <color name="color_content_edit_mode">@color/grey_100</color>
     <array name="random_colors">
         <item>"#55ff0000"</item>
         <item>"#78D5FF"</item>
