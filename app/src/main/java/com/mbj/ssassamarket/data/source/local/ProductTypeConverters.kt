@@ -20,7 +20,8 @@ class ProductTypeConverters {
     @TypeConverter
     fun toStringList(value: String): List<String>? {
         return try {
-            jsonAdapter.fromJson(value)
+            val lenientJsonAdapter = jsonAdapter.lenient()
+            lenientJsonAdapter.fromJson(value)
         } catch (e: JsonDataException) {
             null
         }
