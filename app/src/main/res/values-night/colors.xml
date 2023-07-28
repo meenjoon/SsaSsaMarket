@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="color_product_registerable">@color/white</color>
+    <color name="color_product_non_registerable">@color/dark_grey</color>
+    <color name="color_title_and_price_read_mode">@color/white</color>
+    <color name="color_title_and_price_edit_mode">@color/dark_grey</color>
+    <color name="color_content_read_mode">@color/black</color>
+    <color name="color_content_edit_mode">@color/grey_100</color>
+</resources>

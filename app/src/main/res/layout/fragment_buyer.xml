@@ -82,6 +82,7 @@
 
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/detail_tl"
+                    style="@style/AppBackgroundStyle"
                     android:layout_width="0dp"
                     android:layout_height="45dp"
                     app:layout_constraintBottom_toBottomOf="@id/detail_vp2"
@@ -130,20 +131,18 @@
                 style="@style/CardViewButtonStyle"
                 android:layout_width="140dp"
                 android:layout_height="0dp"
-                app:cardBackgroundColor="@color/orange_700"
                 app:layout_constraintEnd_toEndOf="@id/guideline_vertical_5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
+                    style="@style/CardViewButtonTextStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:text="@string/buyer_chat"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textSize="20sp" />
 
             </com.google.android.material.card.MaterialCardView>
 
@@ -152,21 +151,19 @@
                 style="@style/CardViewButtonStyle"
                 android:layout_width="140dp"
                 android:layout_height="0dp"
-                app:cardBackgroundColor="@color/orange_700"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@id/guideline_vertical_5"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
+                    style="@style/CardViewButtonTextStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:text="@string/buyer_buy"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textSize="20sp" />
 
             </com.google.android.material.card.MaterialCardView>
 
