@@ -114,3 +114,5 @@ fabric.properties
 ### Kakao Open API Files
 /app/src/main/jniLibs
 /app/libs/
+
+output-metadata.json
