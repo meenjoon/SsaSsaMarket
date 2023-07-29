@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.mbj.ssassamarket"
-        minSdkVersion(21)
+        minSdkVersion(24)
         targetSdkVersion(33)
         versionCode = 1
         versionName = "1.0"
@@ -89,7 +89,7 @@ dependencies {
     implementation ("com.google.firebase:firebase-database-ktx") // Realtime Database 관련
     implementation ("com.google.firebase:firebase-messaging-ktx") // messaging 관련
 
-     //Google Play Services 관련
+    //Google Play Services 관련
     implementation("com.google.android.gms:play-services-base:18.2.0") //base 관련
     implementation("com.google.android.gms:play-services-auth:20.5.0") //auth 관련
     implementation("com.google.android.gms:play-services-location:21.0.1") //location 관련
