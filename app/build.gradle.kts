@@ -134,4 +134,7 @@ dependencies {
     implementation ("androidx.room:room-ktx:2.5.2")
     implementation ("androidx.room:room-runtime:2.5.2")
     kapt ("androidx.room:room-compiler:2.5.2")
+
+    //Junit(유닛 테스트) 관련
+    implementation("junit:junit:4.13.2")
 }

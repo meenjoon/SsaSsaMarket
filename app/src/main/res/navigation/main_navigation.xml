@@ -172,12 +172,5 @@
             android:defaultValue="@null"
             app:argType="com.mbj.ssassamarket.data.model.ChatRoomItem"
             app:nullable="true" />
-        <action
-            android:id="@+id/action_chatDetailFragment_to_navigation_chat"
-            app:destination="@id/navigation_chat"
-            app:enterAnim="@anim/slide_in_left"
-            app:exitAnim="@anim/slide_out_right"
-            app:popUpTo="@id/chatDetailFragment"
-            app:popUpToInclusive="true" />
     </fragment>
 </navigation>
