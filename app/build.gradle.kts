@@ -38,6 +38,8 @@ android {
         manifestPlaceholders["DEFAULT_NOTIFICATION_CHANNEL_ID"] = DEFAULT_NOTIFICATION_CHANNEL_ID
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        setProperty("archivesBaseName", "${applicationId}-v${versionName}")
     }
 
     buildTypes {
@@ -48,9 +50,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            versionNameSuffix = "-release"
         }
         getByName("debug") {
             isDebuggable = true
+            versionNameSuffix = "-debug"
         }
     }
 
