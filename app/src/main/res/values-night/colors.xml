@@ -6,4 +6,5 @@
     <color name="color_title_and_price_edit_mode">@color/dark_grey</color>
     <color name="color_content_read_mode">@color/black</color>
     <color name="color_content_edit_mode">@color/grey_100</color>
+    <color name="color_category_spinner">@color/white</color>
 </resources>
