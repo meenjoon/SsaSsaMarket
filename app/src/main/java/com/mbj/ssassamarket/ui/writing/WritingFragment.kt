@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -191,7 +190,7 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
 
                 if (selectedItem != getString(R.string.category_hint)) {
                     if (view is TextView) {
-                        view.setTextColor(Color.BLACK)
+                        view.setTextColor(ContextCompat.getColor(requireContext(), R.color.color_category_spinner))
                     }
                 }
                 viewModel.setCategoryLabel(selectedItem)
