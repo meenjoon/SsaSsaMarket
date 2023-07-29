@@ -22,8 +22,8 @@ android {
         applicationId = "com.mbj.ssassamarket"
         minSdkVersion(24)
         targetSdkVersion(33)
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
 
         buildConfigField("String", "GOOGLE_CLIENT_ID", properties.getProperty("google_client_id"))
         buildConfigField("String", "FIREBASE_BASE_URL", properties.getProperty("firebase_base_url"))
