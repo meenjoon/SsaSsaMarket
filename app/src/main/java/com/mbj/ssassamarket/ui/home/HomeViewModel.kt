@@ -175,7 +175,7 @@ class HomeViewModel @Inject constructor(
                     val productEntities = convertToProductEntities(updatedProducts)
                     productRepository.insertProducts(productEntities)
                     productList.value = updatedProducts
-                    _isLoading.value
+                    _isLoading.value = false
                     applyFilters()
                 }
             }
