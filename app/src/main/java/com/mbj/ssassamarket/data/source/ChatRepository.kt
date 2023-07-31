@@ -64,11 +64,18 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         )
     }
 
-    fun getChatRooms(
+    fun getMyChatRooms(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
     ): Flow<ApiResponse<List<ChatRoomItem>>> {
-        return marketNetworkDataSource.getChatRooms(onComplete, onError)
+        return marketNetworkDataSource.getMyChatRoom(onComplete, onError)
+    }
+
+    fun getAllChatRoomData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+    ): Flow<ApiResponse<Map<String, Map<String, ChatRoomItem>>>> {
+        return marketNetworkDataSource.getAllChatRoomData(onComplete, onError)
     }
 
     fun addChatDetailEventListener(

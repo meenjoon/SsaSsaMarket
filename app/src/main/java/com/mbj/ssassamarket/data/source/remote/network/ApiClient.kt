@@ -74,5 +74,10 @@ interface ApiClient {
         @Path("postId") postId: String,
         @Query("auth") auth: String
     ): ApiResponse<Unit>
+
+    @GET("chatRooms.json")
+    suspend fun getAllChatRoomData(
+        @Query("auth") auth: String
+    ): ApiResponse<Map<String, Map<String, ChatRoomItem>>>
 }
 

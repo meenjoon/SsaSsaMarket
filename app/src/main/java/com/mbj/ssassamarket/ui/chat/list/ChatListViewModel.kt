@@ -47,7 +47,7 @@ class ChatListViewModel @Inject constructor(private val chatRepository: ChatRepo
 
     fun getChatRooms() {
         viewModelScope.launch {
-            chatRepository.getChatRooms(
+            chatRepository.getMyChatRooms(
                 onComplete = { _isLoading.value = false },
                 onError = { _chatRoomsError.value = true }
             ).collectLatest { chatRoomList ->

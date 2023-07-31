@@ -108,7 +108,7 @@ interface MarketNetworkDataSource {
         dataId: String,
     ): Flow<ApiResponse<Unit>>
 
-    fun getChatRooms(
+    fun getMyChatRoom(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
     ): Flow<ApiResponse<List<ChatRoomItem>>>
@@ -129,6 +129,11 @@ interface MarketNetworkDataSource {
         onError: (message: String?) -> Unit,
         postUid: String
     ): Flow<ApiResponse<Unit>>
+
+    fun getAllChatRoomData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+    ): Flow<ApiResponse<Map<String, Map<String, ChatRoomItem>>>>
 
     fun addChatDetailEventListener(chatRoomId: String, onChatItemAdded: (ChatItem) -> Unit): ChildEventListener
 
