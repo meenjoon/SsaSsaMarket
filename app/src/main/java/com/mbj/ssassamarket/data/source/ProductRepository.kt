@@ -98,4 +98,12 @@ class ProductRepository @Inject constructor(
     fun getAllProducts(): Flow<List<ProductEntity>> {
         return marketDatabaseDataSource.getAllProducts()
     }
+
+    fun deleteProductData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postUid: String
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.deleteProductData(onComplete, onError, postUid)
+    }
 }

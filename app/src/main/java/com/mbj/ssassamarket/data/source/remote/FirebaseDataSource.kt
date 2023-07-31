@@ -518,6 +518,30 @@ class FirebaseDataSource @Inject constructor(
         onComplete()
     }.flowOn(defaultDispatcher)
 
+    override fun deleteProductData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postUid: String
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.deleteProductData(postUid, googleIdToken)
+
+            response.onSuccess {
+                emit(ApiResultSuccess(Unit))
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
+
     override fun addChatDetailEventListener(
         chatRoomId: String,
         onChatItemAdded: (ChatItem) -> Unit
