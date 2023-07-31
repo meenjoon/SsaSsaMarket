@@ -78,6 +78,14 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         return marketNetworkDataSource.getAllChatRoomData(onComplete, onError)
     }
 
+    fun deleteChatRoomsDataForMyUid(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        uid: String
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.deleteChatRoomsDataForMyUid(onComplete, onError, uid)
+    }
+
     fun addChatDetailEventListener(
         chatRoomId: String,
         onChatItemAdded: (ChatItem) -> Unit

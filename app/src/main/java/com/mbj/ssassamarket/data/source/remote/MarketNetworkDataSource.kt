@@ -135,6 +135,12 @@ interface MarketNetworkDataSource {
         onError: (message: String?) -> Unit,
     ): Flow<ApiResponse<Map<String, Map<String, ChatRoomItem>>>>
 
+    fun deleteChatRoomsDataForMyUid(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        uid: String
+    ): Flow<ApiResponse<Unit>>
+
     fun addChatDetailEventListener(chatRoomId: String, onChatItemAdded: (ChatItem) -> Unit): ChildEventListener
 
     fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String)

@@ -79,5 +79,11 @@ interface ApiClient {
     suspend fun getAllChatRoomData(
         @Query("auth") auth: String
     ): ApiResponse<Map<String, Map<String, ChatRoomItem>>>
+
+    @DELETE("chatRooms/{uid}.json")
+    suspend fun deleteChatRoomsDataForMyUid(
+        @Path("uid") uid: String,
+        @Query("auth") auth: String
+    ): ApiResponse<Unit>
 }
 
