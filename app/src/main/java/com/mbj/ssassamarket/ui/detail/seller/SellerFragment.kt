@@ -72,7 +72,7 @@ class SellerFragment : BaseFragment() {
 
     private fun setupClickListeners() {
         binding.detailEditBt.setOnClickListener {
-            showConfirmationDialog()
+            showEditConfirmationDialog()
         }
         binding.detailSubmitTv.setOnClickListener {
             viewModel.updateProduct(
@@ -85,16 +85,16 @@ class SellerFragment : BaseFragment() {
             if (viewModel.isReadOnlyMode()) {
                 findNavController().navigateUp()
             } else {
-                showConfirmationDialog()
+                showEditConfirmationDialog()
             }
         }
     }
 
-    private fun showConfirmationDialog() {
+    private fun showEditConfirmationDialog() {
         val dialogMessage = if (viewModel.isReadOnlyMode().not()) {
-            getString(R.string.confirmation_dialog_message_edit)
+            getString(R.string.confirmation_dialog_message_read)
         } else {
-            getString(R.string.confirmation_dialog_message_cancel)
+            getString(R.string.confirmation_dialog_message_edit)
         }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.confirmation_dialog_title)
@@ -128,6 +128,14 @@ class SellerFragment : BaseFragment() {
                     viewModel.isProductInfoUnchanged.collectLatest { isProductInfoUnchanged ->
                         if (isProductInfoUnchanged) {
                             showToast(R.string.request_edit_product)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.productDeleteSuccess.collectLatest {productDeleteSuccess ->
+                        if (productDeleteSuccess) {
+                            findNavController().navigateUp()
+                            showToast(R.string.product_delete_success)
                         }
                     }
                 }

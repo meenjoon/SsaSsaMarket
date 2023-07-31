@@ -44,6 +44,12 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
     private val _isProductInfoUnchanged = MutableStateFlow(false)
     val isProductInfoUnchanged: StateFlow<Boolean> = _isProductInfoUnchanged
 
+    private val _productDeleteError = MutableStateFlow(false)
+    val productDeleteError: StateFlow<Boolean> = _productDeleteError
+
+    private val _productDeleteSuccess = MutableStateFlow(false)
+    val productDeleteSuccess: StateFlow<Boolean> = _productDeleteSuccess
+
     private var originalProduct: ProductPostItem? = null
 
     private var postId: String? = null
@@ -135,5 +141,22 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
         content: String
     ): Boolean {
         return title != product?.title || price.toInt() != product.price || content != product.content
+    }
+
+    fun deleteProductData() {
+        _isLoading.value = true
+        viewModelScope.launch {
+            if (postId != null) {
+                productRepository.deleteProductData(
+                    onComplete = { _isLoading.value = false },
+                    onError = { _productDeleteError.value = true },
+                    postId!!
+                ).collectLatest { response ->
+                    if (response is ApiResultSuccess) {
+                        _productDeleteSuccess.value = true
+                    }
+                }
+            }
+        }
     }
 }

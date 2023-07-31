@@ -57,6 +57,17 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:visibleEdit="@{viewModel.editMode}" />
 
+                    <ImageView
+                        android:id="@+id/detail_product_deletion_iv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{() -> viewModel.deleteProductData()}"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="@id/guideline_vertical_93"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/delete_icon"
+                        app:visibleReadOnly="@{viewModel.editMode}" />
+
                     <TextView
                         android:id="@+id/detail_submit_tv"
                         android:layout_width="wrap_content"
@@ -173,6 +184,20 @@
             android:layout_gravity="center"
             android:text="@string/error_message_product_update"
             app:visible="@{viewModel.productUpdateError}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/error_message_product_update"
+            app:visible="@{viewModel.productUpdateError}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/error_message_product_delete"
+            app:visible="@{viewModel.productDeleteError}" />
 
         <com.mbj.ssassamarket.util.ProgressIndicatorView
             android:layout_width="wrap_content"
