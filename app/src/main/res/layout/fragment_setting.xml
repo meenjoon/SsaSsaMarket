@@ -83,6 +83,26 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/setting_logout_md" />
 
+        <TextView
+            android:id="@+id/setting_membership_withdrawal_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/membership_withdrawal"
+            android:textSize="23sp"
+            app:layout_constraintBottom_toTopOf="@id/setting_membership_withdrawal_md"
+            app:layout_constraintStart_toStartOf="@id/guideline_horizontal_3"
+            app:layout_constraintTop_toBottomOf="@id/setting_feedback_md" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/setting_membership_withdrawal_md"
+            android:layout_width="0dp"
+            android:layout_height="0.7dp"
+            android:layout_marginTop="70dp"
+            app:dividerColor="@color/grey_100"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/setting_feedback_md" />
+
 
         <com.mbj.ssassamarket.util.ProgressIndicatorView
             android:layout_width="wrap_content"
@@ -101,6 +121,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:visible="@{viewModel.isLogoutError}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.isMembershipWithdrawalError()}" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline_horizontal_3"

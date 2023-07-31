@@ -127,6 +127,7 @@
                 android:background="@null"
                 android:hint="@string/request_message"
                 android:textColor="@color/black"
+                android:textColorHint="@color/grey_300"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

@@ -62,5 +62,41 @@ interface ApiClient {
         @Path("postId") postId: String,
         @Query("auth") auth: String
     ): ApiResponse<ProductPostItem>
+
+    @DELETE("user/{uid}.json")
+    suspend fun deleteUserData(
+        @Path("uid") uid: String,
+        @Query("auth") auth: String
+    ): ApiResponse<Unit>
+
+    @DELETE("posts/{postId}.json")
+    suspend fun deleteProductData(
+        @Path("postId") postId: String,
+        @Query("auth") auth: String
+    ): ApiResponse<Unit>
+
+    @GET("chatRooms.json")
+    suspend fun getAllChatRoomData(
+        @Query("auth") auth: String
+    ): ApiResponse<Map<String, Map<String, ChatRoomItem>>>
+
+    @DELETE("chatRooms/{uid}.json")
+    suspend fun deleteChatRoomsDataForMyUid(
+        @Path("uid") uid: String,
+        @Query("auth") auth: String
+    ): ApiResponse<Unit>
+
+    @DELETE("chatRooms/{otherUid}/{myUid}.json")
+    suspend fun deleteMyInfoFromChatRoomsForOtherUser(
+        @Path("otherUid") otherUid: String,
+        @Path("myUid") myUid: String,
+        @Query("auth") auth: String
+    ): ApiResponse<Unit>
+
+    @DELETE("chats/{chatRoomId}.json")
+    suspend fun deleteChatMessageByChatRoomId(
+        @Path("chatRoomId") chatRoomId: String,
+        @Query("auth") auth: String
+    ): ApiResponse<Unit>
 }
 

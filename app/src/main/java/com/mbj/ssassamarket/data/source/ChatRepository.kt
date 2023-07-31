@@ -64,11 +64,26 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         )
     }
 
-    fun getChatRooms(
+    fun getMyChatRooms(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
     ): Flow<ApiResponse<List<ChatRoomItem>>> {
-        return marketNetworkDataSource.getChatRooms(onComplete, onError)
+        return marketNetworkDataSource.getMyChatRoom(onComplete, onError)
+    }
+
+    fun getAllChatRoomData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+    ): Flow<ApiResponse<Map<String, Map<String, ChatRoomItem>>>> {
+        return marketNetworkDataSource.getAllChatRoomData(onComplete, onError)
+    }
+
+    fun deleteChatRoomsDataForMyUid(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        uid: String
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.deleteChatRoomsDataForMyUid(onComplete, onError, uid)
     }
 
     fun addChatDetailEventListener(
@@ -76,6 +91,23 @@ class ChatRepository @Inject constructor(private val marketNetworkDataSource: Ma
         onChatItemAdded: (ChatItem) -> Unit
     ): ChildEventListener {
         return marketNetworkDataSource.addChatDetailEventListener(chatRoomId, onChatItemAdded)
+    }
+
+    fun deleteMyInfoFromChatRoomsForOtherUser(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        otherUid: String,
+        myUid: String,
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.deleteMyInfoFromChatRoomsForOtherUser(onComplete, onError, otherUid, myUid)
+    }
+
+    fun deleteChatMessageByChatRoomId(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        chatRoomId: String,
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.deleteChatMessageByChatRoomId(onComplete, onError, chatRoomId)
     }
 
     fun removeChatDetailEventListener(

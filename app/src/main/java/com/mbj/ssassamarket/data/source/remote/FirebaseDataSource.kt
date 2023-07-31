@@ -445,7 +445,7 @@ class FirebaseDataSource @Inject constructor(
         onComplete()
     }.flowOn(defaultDispatcher)
 
-    override fun getChatRooms(
+    override fun getMyChatRoom(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
     ): Flow<ApiResponse<List<ChatRoomItem>>> = flow<ApiResponse<List<ChatRoomItem>>> {
@@ -493,6 +493,150 @@ class FirebaseDataSource @Inject constructor(
     }.onCompletion {
         onComplete()
     }.flowOn(Dispatchers.IO)
+
+    override fun deleteUserData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        uid: String
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.deleteUserData(uid, googleIdToken)
+
+            response.onSuccess {
+                emit(ApiResultSuccess(Unit))
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
+
+    override fun deleteProductData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postUid: String
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.deleteProductData(postUid, googleIdToken)
+
+            response.onSuccess {
+                emit(ApiResultSuccess(Unit))
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
+
+    override fun getAllChatRoomData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<Map<String, Map<String, ChatRoomItem>>>> = flow {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.getAllChatRoomData(googleIdToken)
+
+            response.onSuccess {
+                emit(response)
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException {
+                onError(it.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
+
+    override fun deleteChatRoomsDataForMyUid(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        uid: String
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.deleteChatRoomsDataForMyUid(uid, googleIdToken)
+
+            response.onSuccess {
+                emit(ApiResultSuccess(Unit))
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
+
+    override fun deleteMyInfoFromChatRoomsForOtherUser(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        otherUid: String,
+        myUid: String
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.deleteMyInfoFromChatRoomsForOtherUser(otherUid, myUid, googleIdToken)
+
+            response.onSuccess {
+                emit(ApiResultSuccess(Unit))
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
+
+    override fun deleteChatMessageByChatRoomId(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        chatRoomId: String
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.deleteChatMessageByChatRoomId(chatRoomId, googleIdToken)
+
+            response.onSuccess {
+                emit(ApiResultSuccess(Unit))
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
 
     override fun addChatDetailEventListener(
         chatRoomId: String,
@@ -573,7 +717,7 @@ class FirebaseDataSource @Inject constructor(
             return Pair(user, idToken)
         } catch (e: Exception) {
             Log.e(TAG, "Error getting user and ID token: ${e.message}")
-            return Pair(null, null) // 또는 원하는 값으로 반환하거나, 예외를 다시 던질 수도 있습니다.
+            return Pair(null, null)
         }
     }
 

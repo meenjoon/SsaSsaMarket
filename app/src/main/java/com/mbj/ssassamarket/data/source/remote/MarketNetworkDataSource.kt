@@ -108,7 +108,7 @@ interface MarketNetworkDataSource {
         dataId: String,
     ): Flow<ApiResponse<Unit>>
 
-    fun getChatRooms(
+    fun getMyChatRoom(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
     ): Flow<ApiResponse<List<ChatRoomItem>>>
@@ -116,6 +116,42 @@ interface MarketNetworkDataSource {
     fun logout(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
+    ): Flow<ApiResponse<Unit>>
+
+    fun deleteUserData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        uid: String
+    ): Flow<ApiResponse<Unit>>
+
+    fun deleteProductData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        postUid: String
+    ): Flow<ApiResponse<Unit>>
+
+    fun getAllChatRoomData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+    ): Flow<ApiResponse<Map<String, Map<String, ChatRoomItem>>>>
+
+    fun deleteChatRoomsDataForMyUid(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        uid: String
+    ): Flow<ApiResponse<Unit>>
+
+    fun deleteMyInfoFromChatRoomsForOtherUser(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        otherUid: String,
+        myUid: String,
+    ): Flow<ApiResponse<Unit>>
+
+    fun deleteChatMessageByChatRoomId(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        chatRoomId: String,
     ): Flow<ApiResponse<Unit>>
 
     fun addChatDetailEventListener(chatRoomId: String, onChatItemAdded: (ChatItem) -> Unit): ChildEventListener
