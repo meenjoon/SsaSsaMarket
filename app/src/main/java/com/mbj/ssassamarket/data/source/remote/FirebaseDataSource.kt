@@ -589,6 +589,31 @@ class FirebaseDataSource @Inject constructor(
         onComplete()
     }.flowOn(defaultDispatcher)
 
+    override fun deleteMyInfoFromChatRoomsForOtherUser(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        otherUid: String,
+        myUid: String
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.deleteMyInfoFromChatRoomsForOtherUser(otherUid, myUid, googleIdToken)
+
+            response.onSuccess {
+                emit(ApiResultSuccess(Unit))
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
+
     override fun addChatDetailEventListener(
         chatRoomId: String,
         onChatItemAdded: (ChatItem) -> Unit

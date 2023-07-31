@@ -85,5 +85,12 @@ interface ApiClient {
         @Path("uid") uid: String,
         @Query("auth") auth: String
     ): ApiResponse<Unit>
+
+    @DELETE("chatRooms/{otherUid}/{myUid}.json")
+    suspend fun deleteMyInfoFromChatRoomsForOtherUser(
+        @Path("otherUid") otherUid: String,
+        @Path("myUid") myUid: String,
+        @Query("auth") auth: String
+    ): ApiResponse<Unit>
 }
 
