@@ -61,7 +61,6 @@
                         android:id="@+id/detail_product_deletion_iv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:onClick="@{() -> viewModel.deleteProductData()}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="@id/guideline_vertical_93"
                         app:layout_constraintTop_toTopOf="parent"

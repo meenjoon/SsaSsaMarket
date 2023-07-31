@@ -72,7 +72,7 @@ class SellerFragment : BaseFragment() {
 
     private fun setupClickListeners() {
         binding.detailEditBt.setOnClickListener {
-            showEditConfirmationDialog()
+            showEditModeExitConfirmationDialog()
         }
         binding.detailSubmitTv.setOnClickListener {
             viewModel.updateProduct(
@@ -85,12 +85,15 @@ class SellerFragment : BaseFragment() {
             if (viewModel.isReadOnlyMode()) {
                 findNavController().navigateUp()
             } else {
-                showEditConfirmationDialog()
+                showEditModeExitConfirmationDialog()
             }
+        }
+        binding.detailProductDeletionIv.setOnClickListener {
+            showProductDeleteConfirmationDialog()
         }
     }
 
-    private fun showEditConfirmationDialog() {
+    private fun showEditModeExitConfirmationDialog() {
         val dialogMessage = if (viewModel.isReadOnlyMode().not()) {
             getString(R.string.confirmation_dialog_message_read)
         } else {
@@ -101,6 +104,19 @@ class SellerFragment : BaseFragment() {
             .setMessage(dialogMessage)
             .setPositiveButton(R.string.permission_positive) { _, _ ->
                 viewModel.toggleEditMode()
+            }
+            .setNegativeButton(R.string.permission_negative) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun showProductDeleteConfirmationDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.confirmation_dialog_title)
+            .setMessage(R.string.confirmation_dialog_message_delete)
+            .setPositiveButton(R.string.permission_positive) { _, _ ->
+                viewModel.deleteProductData()
             }
             .setNegativeButton(R.string.permission_negative) { dialog, _ ->
                 dialog.dismiss()

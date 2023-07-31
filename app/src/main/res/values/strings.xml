@@ -50,6 +50,7 @@
     <string name="success">완료</string>
     <string name="confirmation_dialog_message_read">상품 수정모드를 나가겠습니까?</string>
     <string name="confirmation_dialog_message_edit">상품 수정모드로 이동 하시겠습니까?</string>
+    <string name="confirmation_dialog_message_delete">상품을 정말로 삭제 하시겠습니까?</string>
     <string name="confirmation_dialog_title">"재확인"</string>
     <string name="product_update_failed">상품 업데이트에 실패하셨습니다.</string>
     <string name="product_update_success">상품이 업데이트 되었습니다.</string>
