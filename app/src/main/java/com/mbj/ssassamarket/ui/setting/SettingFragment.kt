@@ -29,6 +29,7 @@ class SettingFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
         observeLogoutSuccess()
+        observeMembershipWithdrawalSuccess()
 
         binding.settingLogoutTv.setOnClickListener {
             showLogoutConfirmationDialog()
@@ -36,12 +37,25 @@ class SettingFragment : BaseFragment() {
         binding.settingFeedbackTv.setOnClickListener {
             openGoogleFeedbackForm()
         }
+        binding.settingMembershipWithdrawalTv.setOnClickListener {
+            showMembershipWithdrawalConfirmationDialog()
+        }
     }
 
     private fun observeLogoutSuccess() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLogoutSuccess.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED).collectLatest { isLogoutSuccess ->
                 if (isLogoutSuccess) {
+                    navigateToLoginFragment()
+                }
+            }
+        }
+    }
+
+    private fun observeMembershipWithdrawalSuccess() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isMembershipWithdrawalSuccess.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED).collectLatest { isMembershipWithdrawalSuccess ->
+                if (isMembershipWithdrawalSuccess) {
                     navigateToLoginFragment()
                 }
             }
@@ -66,6 +80,22 @@ class SettingFragment : BaseFragment() {
         builder.setPositiveButton(getString(R.string.confirm)) { dialog, _ ->
             dialog.dismiss()
             viewModel.onLogoutButtonClicked()
+        }
+        builder.setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun showMembershipWithdrawalConfirmationDialog() {
+        val builder = MaterialAlertDialogBuilder(requireContext())
+        builder.setMessage(getString(R.string.request_membership_withdrawal))
+
+        builder.setPositiveButton(getString(R.string.confirm)) { dialog, _ ->
+            dialog.dismiss()
+            viewModel.onMembershipWithdrawalClicked()
         }
         builder.setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
             dialog.dismiss()
