@@ -36,6 +36,9 @@ class SettingViewModel @Inject constructor(
     private val _isMembershipWithdrawalError = MutableStateFlow(false)
     val isMembershipWithdrawalError: StateFlow<Boolean> = _isMembershipWithdrawalError
 
+    private val _isMembershipWithdrawalCompleted = MutableStateFlow<Boolean?>(null)
+    val isMembershipWithdrawalCompleted: StateFlow<Boolean?> = _isMembershipWithdrawalCompleted
+
     private var myUid: String? = null
 
     init {
@@ -65,6 +68,7 @@ class SettingViewModel @Inject constructor(
     fun onMembershipWithdrawalClicked() {
         viewModelScope.launch {
             _isLoading.value = true
+            _isMembershipWithdrawalCompleted.value = false
             deleteChatRoomData()
             deleteProductData()
             performLogout()
@@ -81,6 +85,7 @@ class SettingViewModel @Inject constructor(
                 myUid!!
             ).collectLatest { response ->
                 if (response is ApiResultSuccess) {
+                    _isMembershipWithdrawalCompleted.value = true
                     _isMembershipWithdrawalSuccess.value = true
                 }
             }

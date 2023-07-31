@@ -14,6 +14,8 @@ import com.mbj.ssassamarket.BuildConfig
 import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.databinding.FragmentSettingBinding
 import com.mbj.ssassamarket.ui.BaseFragment
+import com.mbj.ssassamarket.util.Constants
+import com.mbj.ssassamarket.util.ProgressDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -24,12 +26,14 @@ class SettingFragment : BaseFragment() {
     override val layoutId: Int get() = R.layout.fragment_setting
 
     private val viewModel: SettingViewModel by viewModels()
+    private var progressDialog: ProgressDialogFragment? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
         observeLogoutSuccess()
         observeMembershipWithdrawalSuccess()
+        observeIsMembershipWithdrawalCompleted()
 
         binding.settingLogoutTv.setOnClickListener {
             showLogoutConfirmationDialog()
@@ -57,6 +61,18 @@ class SettingFragment : BaseFragment() {
             viewModel.isMembershipWithdrawalSuccess.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED).collectLatest { isMembershipWithdrawalSuccess ->
                 if (isMembershipWithdrawalSuccess) {
                     navigateToLoginFragment()
+                }
+            }
+        }
+    }
+
+    private fun observeIsMembershipWithdrawalCompleted() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isMembershipWithdrawalCompleted.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED).collectLatest { isMembershipWithdrawalCompleted ->
+                if (isMembershipWithdrawalCompleted == true) {
+                    hideLoadingDialog()
+                } else if (isMembershipWithdrawalCompleted == false) {
+                    showLoadingDialog()
                 }
             }
         }
@@ -103,5 +119,15 @@ class SettingFragment : BaseFragment() {
 
         val dialog = builder.create()
         dialog.show()
+    }
+
+    private fun showLoadingDialog() {
+        progressDialog = ProgressDialogFragment()
+        progressDialog?.show(childFragmentManager, Constants.PROGRESS_DIALOG)
+    }
+
+    private fun hideLoadingDialog() {
+        progressDialog?.dismiss()
+        progressDialog = null
     }
 }
