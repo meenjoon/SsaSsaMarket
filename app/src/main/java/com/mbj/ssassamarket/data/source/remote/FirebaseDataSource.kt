@@ -494,6 +494,30 @@ class FirebaseDataSource @Inject constructor(
         onComplete()
     }.flowOn(Dispatchers.IO)
 
+    override fun deleteUserData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        uid: String
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val response = apiClient.deleteUserData(uid, googleIdToken)
+
+            response.onSuccess {
+                emit(ApiResultSuccess(Unit))
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
+
     override fun addChatDetailEventListener(
         chatRoomId: String,
         onChatItemAdded: (ChatItem) -> Unit
@@ -573,7 +597,7 @@ class FirebaseDataSource @Inject constructor(
             return Pair(user, idToken)
         } catch (e: Exception) {
             Log.e(TAG, "Error getting user and ID token: ${e.message}")
-            return Pair(null, null) // 또는 원하는 값으로 반환하거나, 예외를 다시 던질 수도 있습니다.
+            return Pair(null, null)
         }
     }
 

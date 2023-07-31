@@ -41,6 +41,13 @@ class UserInfoRepository @Inject constructor(private val marketNetworkDataSource
         return marketNetworkDataSource.logout(onComplete, onError)
     }
 
+    fun deleteUserData(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        uid: String
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.deleteUserData(onComplete, onError, uid)
+    }
 
     suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
         return marketNetworkDataSource.getUserAndIdToken()

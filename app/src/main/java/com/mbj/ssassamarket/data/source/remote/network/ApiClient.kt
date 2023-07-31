@@ -62,5 +62,11 @@ interface ApiClient {
         @Path("postId") postId: String,
         @Query("auth") auth: String
     ): ApiResponse<ProductPostItem>
+
+    @DELETE("user/{uid}.json")
+    suspend fun deleteUserData(
+        @Path("uid") uid: String,
+        @Query("auth") auth: String
+    ): ApiResponse<Unit>
 }
 
