@@ -92,5 +92,11 @@ interface ApiClient {
         @Path("myUid") myUid: String,
         @Query("auth") auth: String
     ): ApiResponse<Unit>
+
+    @DELETE("chats/{chatRoomId}.json")
+    suspend fun deleteChatMessageByChatRoomId(
+        @Path("chatRoomId") chatRoomId: String,
+        @Query("auth") auth: String
+    ): ApiResponse<Unit>
 }
 

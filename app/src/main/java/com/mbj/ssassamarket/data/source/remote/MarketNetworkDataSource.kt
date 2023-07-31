@@ -6,8 +6,6 @@ import com.google.firebase.database.ValueEventListener
 import com.mbj.ssassamarket.data.model.*
 import com.mbj.ssassamarket.data.source.remote.network.ApiResponse
 import kotlinx.coroutines.flow.Flow
-import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface MarketNetworkDataSource {
 
@@ -148,6 +146,12 @@ interface MarketNetworkDataSource {
         onError: (message: String?) -> Unit,
         otherUid: String,
         myUid: String,
+    ): Flow<ApiResponse<Unit>>
+
+    fun deleteChatMessageByChatRoomId(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        chatRoomId: String,
     ): Flow<ApiResponse<Unit>>
 
     fun addChatDetailEventListener(chatRoomId: String, onChatItemAdded: (ChatItem) -> Unit): ChildEventListener
