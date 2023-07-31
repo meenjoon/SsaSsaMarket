@@ -91,8 +91,9 @@ class ChatDetailFragment : BaseFragment(), LocationManager.LocationUpdateListene
 
         binding.chatDetailSendIv.setOnClickListener {
             val message = binding.chatDetailTiev.text.toString()
-            if (message.isEmpty()) {
+            if (message.isNullOrBlank()) {
                 showToast(R.string.empty_message_error)
+                binding.chatDetailTiev.text?.clear()
                 return@setOnClickListener
             }
             viewModel.sendMessage(message, viewModel.myDataId.value)
