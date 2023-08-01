@@ -71,9 +71,7 @@
     <string name="error_message_chat_room">채팅방 목록을 가져오는데 문제가 발생하였습니다. 잠시 후 다시 시도해주세요.</string>
     <string name="error_message_product_update">상품 정보를 수정하는데 문제가 발생하였습니다. 잠시 후 다시 시도해주세요.</string>
     <string name="error_message_nickname">닉네임 정보를 가지고 오는데 문제가 발생하였습니다. 잠시 후 다시 시도해주세요.</string>
-    <string name="error_message_product_post">상품을 등록하는데 문제가 발생하였습니다. 잠시 후 다시 시도해주세요.</string>
-    <string name="error_message_latlng_post">위치정보를 등록하는데 문제가 발생하였습니다. 잠시 후 다시 시도해주세요.</string>
-    <string name="error_message_product_get">상품을 가져오는데 문제가 발생하였습니다. 잠시 후 다시 시도해주세요.</string>
+    <string name="error_message_inventory">인벤토리 화면을 구성하는데 문제가 발생하였습니다. 잠시 후 다시 시도해주세요.</string>
     <string name="error_message_product_delete">상품 정보를 삭제하는데 문제가 발생하였습니다. 잠시 후 다시 시도해주세요.</string>
     <string name="request_writing_title">제목을 작성해주세요.</string>
     <string name="request_writing_request">카테고리를 선택해주세요.</string>
@@ -82,7 +80,7 @@
     <string name="request_writing_image">상품 사진을 등록해주세요.</string>
     <string name="request_writing_all">글의 내용들을 작성해주세요.</string>
     <string name="request_edit_product">변경된 내용이 없습니다.</string>
-    <string name="error_network">네트워크 상태를 확인해주세요.</string>
+    <string name="error_network">네트워크 연결 상태를 확인해주세요.</string>
     <string name="setting">설정</string>
     <string name="logout">로그아웃</string>
     <string name="customer_feedback">고객 의견</string>
