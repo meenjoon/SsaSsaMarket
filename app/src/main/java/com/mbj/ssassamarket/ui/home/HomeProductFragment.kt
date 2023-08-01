@@ -97,7 +97,7 @@ class HomeProductFragment : BaseFragment(), ProductClickListener {
                 launch {
                     viewModel.isError.collectLatest { isError ->
                         if (isError) {
-                            showToast(R.string.error_message_product_get)
+                            showToast(R.string.error_network)
                         }
                     }
                 }
