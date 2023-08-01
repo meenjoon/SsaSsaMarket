@@ -64,11 +64,26 @@ class SplashFragment : BaseFragment() {
                 }
                 launch {
                     viewModel.isAccountExistsOnServer.collectLatest { isAccountExistsOnServer ->
-                        delay(2000)
-                        if (isAccountExistsOnServer != null) {
+                        if (isAccountExistsOnServer == true) {
+                            delay(1000)
+                            viewModel.refreshFcmToken()
+                        }
+                        else if(isAccountExistsOnServer == false) {
+                            delay(2000)
                             navigateBasedOnUserState(
                                 viewModel.autoLoginState,
                                 isAccountExistsOnServer,
+                                viewModel.currentUser
+                            )
+                        }
+                    }
+                }
+                launch {
+                    viewModel.isFcmTokenRefreshCompleted.collectLatest { isFcmTokenRefreshCompleted ->
+                        if (isFcmTokenRefreshCompleted) {
+                            navigateBasedOnUserState(
+                                viewModel.autoLoginState,
+                                viewModel.isAccountExistsOnServer.value!!,
                                 viewModel.currentUser
                             )
                         }

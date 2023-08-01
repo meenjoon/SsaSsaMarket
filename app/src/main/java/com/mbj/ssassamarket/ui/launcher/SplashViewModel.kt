@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    private val repository: UserInfoRepository,
+    private val userInfoRepository: UserInfoRepository,
     private val userPreferenceRepository: UserPreferenceRepository
 ) : ViewModel() {
 
@@ -30,14 +30,14 @@ class SplashViewModel @Inject constructor(
     val autoLoginState = userPreferenceRepository.getSaveAutoLoginState()
     var currentUser: FirebaseUser? = null
 
-    init {
-        viewModelScope.launch {
-            currentUser = repository.getUserAndIdToken().first
-        }
-    }
+    private val _isFcmTokenRefreshCompleted = MutableStateFlow<Boolean>(false)
+    val isFcmTokenRefreshCompleted: StateFlow<Boolean> = _isFcmTokenRefreshCompleted
 
-    private fun checkCurrentUserExists(): Flow<Boolean> = repository.getUser(
-        onComplete = {},
+    private var myUid: String? = null
+    private var userPostKey: String? = null
+
+    private fun checkCurrentUserExists(): Flow<Boolean> = userInfoRepository.getUser(
+        onComplete = { },
         onError = { _isError.value = true }
     ).mapNotNull { response ->
         if (response is ApiResultSuccess) {
@@ -49,7 +49,40 @@ class SplashViewModel @Inject constructor(
     }
 
     private suspend fun isAccountExistsOnServer(userMap: Map<String, Map<String, User>>): Boolean {
-        val uid = repository.getUserAndIdToken().first?.uid ?: ""
-        return userMap.containsKey(uid)
+        myUid = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
+        return userMap.containsKey(myUid)
+    }
+
+    fun refreshFcmToken() {
+        viewModelScope.launch {
+            userInfoRepository.getUser(
+                onComplete = { },
+                onError = { _isError.value = true }
+            ).collectLatest { response ->
+                if (response is ApiResultSuccess) {
+                    response.data.forEach { (uid, userData) ->
+                        if (uid == myUid) {
+                            userPostKey = userData.keys.firstOrNull()
+                            updateFcmToken(userPostKey!!)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun updateFcmToken(userPostKey: String) {
+        if (myUid != null) {
+            userInfoRepository.updateUserFcmToken(
+                onComplete = { },
+                onError = { _isError.value = (true) },
+                myUid!!,
+                userPostKey
+            ).collectLatest { response ->
+                if (response is ApiResultSuccess) {
+                    _isFcmTokenRefreshCompleted.value = true
+                }
+            }
+        }
     }
 }

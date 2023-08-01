@@ -98,5 +98,13 @@ interface ApiClient {
         @Path("chatRoomId") chatRoomId: String,
         @Query("auth") auth: String
     ): ApiResponse<Unit>
+
+    @PATCH("user/{userId}/{userPostKey}.json")
+    suspend fun updateUserFcmToken(
+        @Path("userId") userId: String,
+        @Path("userPostKey") userPostKey: String,
+        @Body requestFcmToken: PatchUserFcmToken,
+        @Query("auth") auth: String
+    ): ApiResponse<Unit>
 }
 

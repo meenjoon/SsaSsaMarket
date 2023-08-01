@@ -638,6 +638,33 @@ class FirebaseDataSource @Inject constructor(
         onComplete()
     }.flowOn(defaultDispatcher)
 
+    override fun updateUserFcmToken(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        userId: String,
+        userPostKey: String
+    ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
+        try {
+            val (user, idToken) = getUserAndIdToken()
+            val googleIdToken = idToken ?: ""
+            val fcmToken = Firebase.messaging.token.await()
+            val requestFcmToken = PatchUserFcmToken(fcmToken)
+            val response = apiClient.updateUserFcmToken(userId, userPostKey, requestFcmToken, googleIdToken)
+
+            response.onSuccess {
+                emit(response)
+            }.onError { code, message ->
+                onError("code: $code, message: $message")
+            }.onException { throwable ->
+                onError(throwable.message)
+            }
+        } catch (e: Exception) {
+            onError(e.message)
+        }
+    }.onCompletion {
+        onComplete()
+    }.flowOn(defaultDispatcher)
+
     override fun addChatDetailEventListener(
         chatRoomId: String,
         onChatItemAdded: (ChatItem) -> Unit

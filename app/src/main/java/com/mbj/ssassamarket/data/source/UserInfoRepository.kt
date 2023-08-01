@@ -49,6 +49,15 @@ class UserInfoRepository @Inject constructor(private val marketNetworkDataSource
         return marketNetworkDataSource.deleteUserData(onComplete, onError, uid)
     }
 
+    fun updateUserFcmToken(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        userId: String,
+        userPostKey: String
+    ): Flow<ApiResponse<Unit>> {
+        return marketNetworkDataSource.updateUserFcmToken(onComplete, onError, userId, userPostKey)
+    }
+
     suspend fun getUserAndIdToken(): Pair<FirebaseUser?, String?> {
         return marketNetworkDataSource.getUserAndIdToken()
     }
