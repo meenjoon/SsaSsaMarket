@@ -2,6 +2,7 @@ package com.mbj.ssassamarket.ui.inventory
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
@@ -31,6 +32,7 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
         binding.inventoryOuterRv.adapter = adapter
         viewModel.getMyNickname()
         observeInventoryDataList(adapter)
+        observeInventoryError()
     }
 
     private fun observeInventoryDataList(adapter: InventoryOuterAdapter) {
@@ -42,6 +44,19 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
                 if (productPostItemList.isNotEmpty()) {
                     val updateInventoryDataList = viewModel.updateInventoryDataList(productPostItemList)
                     adapter.submitList(updateInventoryDataList)
+                }
+            }
+        }
+    }
+
+    private fun observeInventoryError() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.inventoryError.flowWithLifecycle(
+                viewLifecycleOwner.lifecycle,
+                Lifecycle.State.STARTED
+            ).collectLatest { inventoryError ->
+                if (inventoryError) {
+                    showToast(R.string.error_network)
                 }
             }
         }
@@ -68,5 +83,9 @@ class InventoryFragment : BaseFragment(), ProductClickListener {
                 }
             }
         }
+    }
+
+    private fun showToast(messageResId: Int) {
+        Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
     }
 }

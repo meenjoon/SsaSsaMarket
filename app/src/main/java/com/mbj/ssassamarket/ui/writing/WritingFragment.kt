@@ -106,6 +106,11 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
                         showToast(toastMessageId)
                     }
                 }
+                launch {
+                    viewModel.isPostError.collectLatest { isPostError ->
+                        showToast(isPostError)
+                    }
+                }
             }
         }
     }

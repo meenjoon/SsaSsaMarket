@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -53,6 +54,7 @@ class BuyerFragment : BaseFragment() {
         setupViewModel()
         setupViews()
         observeChatRoomIdAndNavigateToChatDetail()
+        observeBuyError()
     }
 
     private fun setupLocationPermissionLauncher() {
@@ -193,6 +195,21 @@ class BuyerFragment : BaseFragment() {
                     }
                 }
         }
+    }
+
+    private fun observeBuyError() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.buyError.flowWithLifecycle(
+                viewLifecycleOwner.lifecycle,
+                Lifecycle.State.STARTED
+            ).collectLatest { buyError ->
+                showToast(buyError)
+            }
+        }
+    }
+
+    private fun showToast(messageResId: Int) {
+        Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
     }
 
     private fun navigateToChatDetailFragment(chatRoomId: String, otherId: String) {

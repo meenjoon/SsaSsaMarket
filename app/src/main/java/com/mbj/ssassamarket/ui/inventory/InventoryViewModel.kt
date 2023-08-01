@@ -23,11 +23,8 @@ class InventoryViewModel @Inject constructor(
     private val _nickname = MutableStateFlow("")
     val nickname: StateFlow<String> = _nickname
 
-    private val _nicknameError = MutableStateFlow(false)
-    val nicknameError: StateFlow<Boolean> = _nicknameError
-
-    private val _productError = MutableStateFlow(false)
-    val productError: StateFlow<Boolean> = _productError
+    private val _inventoryError = MutableStateFlow(false)
+    val inventoryError: StateFlow<Boolean> = _inventoryError
 
     val productPostItemList: StateFlow<List<Pair<String, ProductPostItem>>> =
         initProductPostItemList().stateIn(
@@ -41,10 +38,11 @@ class InventoryViewModel @Inject constructor(
             onComplete = { },
             onError = {
                 _isLoading.value = false
-                _productError.value = true
+                _inventoryError.value = true
             }
         ).mapNotNull { productMap ->
             if (productMap is ApiResultSuccess) {
+                _inventoryError.value = false
                 val updatedProducts = updateProductsWithImageUrls(productMap.data)
                 updatedProducts
             } else {
@@ -119,12 +117,13 @@ class InventoryViewModel @Inject constructor(
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             userInfoRepository.getUser(
                 onComplete = { },
-                onError = { _nicknameError.value = true }
+                onError = { _inventoryError.value = true }
             ).collectLatest { response ->
                 if (response is ApiResultSuccess) {
                     val users = response.data
                     val nickname = findNicknameByUserId(users, uId)
                     if (nickname != null) {
+                        _inventoryError.value = false
                         _nickname.value = nickname
                     }
                 }

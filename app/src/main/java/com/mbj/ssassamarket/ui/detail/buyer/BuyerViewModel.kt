@@ -3,6 +3,7 @@ package com.mbj.ssassamarket.ui.detail.buyer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mbj.ssassamarket.BuildConfig
+import com.mbj.ssassamarket.R
 import com.mbj.ssassamarket.data.model.*
 import com.mbj.ssassamarket.data.source.ChatRepository
 import com.mbj.ssassamarket.data.source.NotificationRepository
@@ -32,29 +33,14 @@ class BuyerViewModel @Inject constructor(
         initialValue = ""
     )
 
-    private val _nicknameError = MutableStateFlow(false)
-    val nicknameError: StateFlow<Boolean> = _nicknameError
-
     private val _isLiked = MutableStateFlow(false)
     val isLiked: StateFlow<Boolean> = _isLiked
-
-    private val _likedError = MutableStateFlow(false)
-    val likedError: StateFlow<Boolean> = _likedError
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _enterChatRoomError = MutableStateFlow(false)
-    val enterChatRoomError: StateFlow<Boolean> = _enterChatRoomError
-
-    private val _buyError = MutableStateFlow(false)
-    val buyError: StateFlow<Boolean> = _buyError
-
-    private val _otherUserDataError = MutableStateFlow(false)
-    val otherUserDataError: StateFlow<Boolean> = _otherUserDataError
-
-    private val _myUserDataError = MutableStateFlow(false)
-    val myUserDataError: StateFlow<Boolean> = _myUserDataError
+    private val _buyError = MutableSharedFlow<Int>()
+    val buyError: SharedFlow<Int> = _buyError.asSharedFlow()
 
     private val _otherUserItem = MutableStateFlow<User?>(null)
     val otherUserItem: StateFlow<User?> = _otherUserItem
@@ -97,7 +83,12 @@ class BuyerViewModel @Inject constructor(
 
     private fun getProductNickname(): Flow<String> = userInfoRepository.getUser(
         onComplete = { _isLoading.value = false },
-        onError = { _nicknameError.value = true }
+        onError = {
+            viewModelScope.launch {
+                _isLoading.value = false
+                _buyError.emit(R.string.error_network)
+            }
+        }
     ).mapNotNull { response ->
         if (response is ApiResultSuccess) {
             val users = response.data
@@ -119,10 +110,15 @@ class BuyerViewModel @Inject constructor(
     fun onChatButtonClicked() {
         viewModelScope.launch {
             _isLoading.value = true
-            if (productPostItem?.location != null && otherUserId != null) {
+            if (productPostItem?.location != null && otherUserId != null && nickname.value.isNotEmpty()) {
                 chatRepository.enterChatRoom(
                     onComplete = { _isLoading.value = false },
-                    onError = { _enterChatRoomError.value = true },
+                    onError = {
+                        viewModelScope.launch {
+                            _isLoading.value = false
+                            _buyError.emit(R.string.error_network)
+                        }
+                    },
                     otherUserId!!,
                     nickname.value,
                     productPostItem?.location!!,
@@ -132,6 +128,9 @@ class BuyerViewModel @Inject constructor(
                         _chatRoomId.value = chatRoomId.data
                     }
                 }
+            } else {
+                _isLoading.value = false
+                _buyError.emit(R.string.error_synchronization)
             }
         }
     }
@@ -141,32 +140,43 @@ class BuyerViewModel @Inject constructor(
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             val patchRequest = PatchBuyRequest(true, listOf(uId))
 
-            if (postId != null) {
+            if (postId != null && productPostItem?.location != null && otherUserId != null && nickname.value.isNotEmpty()) {
                 _isLoading.value = true
                 productRepository.buyProduct(
                     onComplete = { },
-                    onError = { _buyError.value = true },
+                    onError = {
+                        viewModelScope.launch {
+                            _isLoading.value = false
+                            _buyError.emit(R.string.error_network)
+                        }
+                    },
                     postId!!,
                     patchRequest
                 ).collectLatest { response ->
                     if (response is ApiResultSuccess) {
-                        if (productPostItem?.location != null && otherUserId != null) {
-                            chatRepository.enterChatRoom(
-                                onComplete = { _isLoading.value = false },
-                                onError = { _enterChatRoomError.value = true },
-                                otherUserId!!,
-                                nickname.value,
-                                productPostItem?.location!!,
-                                getCurrentTime(),
-                            ).collectLatest { chatRoomId ->
-                                if (chatRoomId is ApiResultSuccess) {
-                                    sendBuyNotificationToSeller()
-                                    _chatRoomId.value = chatRoomId.data
+                        chatRepository.enterChatRoom(
+                            onComplete = { _isLoading.value = false },
+                            onError = {
+                                viewModelScope.launch {
+                                    _isLoading.value = false
+                                    _buyError.emit(R.string.error_network)
                                 }
+                            },
+                            otherUserId!!,
+                            nickname.value,
+                            productPostItem?.location!!,
+                            getCurrentTime(),
+                        ).collectLatest { chatRoomId ->
+                            if (chatRoomId is ApiResultSuccess) {
+                                sendBuyNotificationToSeller()
+                                _chatRoomId.value = chatRoomId.data
                             }
                         }
                     }
                 }
+            } else {
+                _isLoading.value = false
+                _buyError.emit(R.string.error_synchronization)
             }
         }
     }
@@ -179,7 +189,12 @@ class BuyerViewModel @Inject constructor(
             if (postId != null) {
                 productRepository.getProductDetail(
                     onComplete = { _isLoading.value = false },
-                    onError = { _likedError.value = true },
+                    onError = {
+                        viewModelScope.launch {
+                            _isLoading.value = false
+                            _buyError.emit(R.string.error_network)
+                        }
+                    },
                     postId!!
                 ).collectLatest { product ->
                     if (product is ApiResultSuccess) {
@@ -192,18 +207,24 @@ class BuyerViewModel @Inject constructor(
                             currentFavoriteCount + 1
                         }
 
-                        val newFavoriteList = product.data.favoriteList.orEmpty().toMutableList().apply {
-                            if (isLiked) {
-                                remove(uId)
-                            } else {
-                                add(uId)
+                        val newFavoriteList =
+                            product.data.favoriteList.orEmpty().toMutableList().apply {
+                                if (isLiked) {
+                                    remove(uId)
+                                } else {
+                                    add(uId)
+                                }
                             }
-                        }
 
                         val request = FavoriteCountRequest(newFavoriteCount, newFavoriteList)
                         productRepository.updateProductFavorite(
                             onComplete = { _isLoading.value = false },
-                            onError = { _likedError.value = true },
+                            onError = {
+                                viewModelScope.launch {
+                                    _isLoading.value = false
+                                    _buyError.emit(R.string.error_network)
+                                }
+                            },
                             postId!!,
                             request
                         ).collectLatest { response ->
@@ -224,7 +245,11 @@ class BuyerViewModel @Inject constructor(
             if (postId != null) {
                 productRepository.getProductDetail(
                     onComplete = { _isLoading.value = false },
-                    onError = { _likedError.value = true },
+                    onError = {
+                        viewModelScope.launch {
+                            _isLoading.value = false
+                        }
+                    },
                     postId!!
                 ).collectLatest { product ->
                     if (product is ApiResultSuccess) {
@@ -249,7 +274,12 @@ class BuyerViewModel @Inject constructor(
         viewModelScope.launch {
             chatRepository.getOtherUserItem(
                 onComplete = { _isLoading.value = false },
-                onError = { _otherUserDataError.value = true },
+                onError = {
+                    viewModelScope.launch {
+                        _isLoading.value = false
+                        _buyError.emit(R.string.error_network)
+                    }
+                },
                 userId
             ).collectLatest { otherUser ->
                 if (otherUser is ApiResultSuccess) {
@@ -263,7 +293,12 @@ class BuyerViewModel @Inject constructor(
         viewModelScope.launch {
             chatRepository.getMyUserItem(
                 onComplete = { _isLoading.value = false },
-                onError = { _myUserDataError.value = true }
+                onError = {
+                    viewModelScope.launch {
+                        _isLoading.value = false
+                        _buyError.emit(R.string.error_network)
+                    }
+                }
             ).collectLatest { myUser ->
                 if (myUser is ApiResultSuccess) {
                     _myUserItem.value = myUser.data
@@ -274,12 +309,21 @@ class BuyerViewModel @Inject constructor(
 
     private suspend fun sendBuyNotificationToSeller() {
         if (otherUserItem.value?.fcmToken != null) {
-            val notification = NotificationData("판매 알림","${myUserItem.value?.userName} 님께서 [${productPostItem?.title}] 상품을 구매하셨습니다! 얼른 채팅방을 확인해주세요 :)")
+            val notification = NotificationData(
+                "판매 알림",
+                "${myUserItem.value?.userName} 님께서 [${productPostItem?.title}] 상품을 구매하셨습니다! 얼른 채팅방을 확인해주세요 :)"
+            )
             val channelType = mutableMapOf<String, String>("type" to NotificationType.SELL.label)
-            val notificationRequest = FcmRequest(otherUserItem.value!!.fcmToken!!, "high", notification, channelType)
+            val notificationRequest =
+                FcmRequest(otherUserItem.value!!.fcmToken!!, "high", notification, channelType)
             notificationRepository.sendNotification(
                 onComplete = { _isLoading.value = false },
-                onError = { _enterChatRoomError.value = true },
+                onError = {
+                    viewModelScope.launch {
+                        _isLoading.value = false
+                        _buyError.emit(R.string.error_network)
+                    }
+                },
                 "key=${BuildConfig.FCM_SERVER_KEY}",
                 notificationRequest
             ).collectLatest {

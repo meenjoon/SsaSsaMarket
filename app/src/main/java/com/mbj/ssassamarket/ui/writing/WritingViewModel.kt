@@ -42,11 +42,11 @@ class WritingViewModel @Inject constructor(
     private val _isCompleted = MutableStateFlow(true)
     val isCompleted: StateFlow<Boolean> = _isCompleted
 
-    private val _isSuccess= MutableStateFlow(false)
+    private val _isSuccess = MutableStateFlow(false)
     val isSuccess: StateFlow<Boolean> = _isSuccess
 
-    private val _isPostError = MutableStateFlow(false)
-    val isPostError: StateFlow<Boolean> = _isPostError
+    private val _isWritingError = MutableSharedFlow<Int>()
+    val isPostError: SharedFlow<Int> = _isWritingError.asSharedFlow()
 
     private val _toastMessageId = MutableSharedFlow<Int>()
     val toastMessageId: SharedFlow<Int> = _toastMessageId.asSharedFlow()
@@ -59,12 +59,6 @@ class WritingViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = ""
     )
-
-    private val _myDataIdError = MutableStateFlow(false)
-    val myDataIdError: StateFlow<Boolean> = _myDataIdError
-
-    private val _updateMyLatLngError = MutableStateFlow(false)
-    val updateMyLatLngError: StateFlow<Boolean> = _updateMyLatLngError
 
     private var latLngString: String? = null
     private var isLocationPermissionChecked = false
@@ -145,52 +139,62 @@ class WritingViewModel @Inject constructor(
     }
 
     fun registerProductWithValidation() {
-        val requiredPropertyCount = listOf(title.value, price.value, content.value)
-            .count { it.isEmpty() } + if (category.value == CATEGORY_REQUEST) 1 else 0 +
-                if (selectedImageList.value.isEmpty()) 1 else 0
-        viewModelScope.launch {
-            when (requiredPropertyCount) {
-                0 -> {
-                    _isCompleted.value = false
-                    postItemRepository.addProductPost(
-                        onComplete = { },
-                        onError = {
-                            _isPostError.value = true
-                            _isCompleted.value = true
-                        },
-                        title = title.value,
-                        category = category.value,
-                        price = price.value.toInt(),
-                        content = content.value,
-                        imageLocations = selectedImageList.value,
-                        location = location.value,
-                        latLng = latLngString!!,
-                        soldOut = false,
-                        favoriteCount = 0,
-                        shoppingList = List<String?>(0) { null },
-                        favoriteList = List<String?>(0) { null }
-                    ).collectLatest { response ->
-                        if (response is ApiResultSuccess) {
-                            updateMyLatLng(myDataId.value)
+        if (location.value.isNotEmpty()) {
+            val requiredPropertyCount = listOf(title.value, price.value, content.value)
+                .count { it.isEmpty() } + if (category.value == CATEGORY_REQUEST) 1 else 0 +
+                    if (selectedImageList.value.isEmpty()) 1 else 0
+            viewModelScope.launch {
+                when (requiredPropertyCount) {
+                    0 -> {
+                        _isCompleted.value = false
+                        postItemRepository.addProductPost(
+                            onComplete = { },
+                            onError = {
+                                _isCompleted.value = true
+                                viewModelScope.launch {
+                                    _isWritingError.emit(R.string.error_network)
+                                }
+                            },
+                            title = title.value,
+                            category = category.value,
+                            price = price.value.toInt(),
+                            content = content.value,
+                            imageLocations = selectedImageList.value,
+                            location = location.value,
+                            latLng = latLngString!!,
+                            soldOut = false,
+                            favoriteCount = 0,
+                            shoppingList = List<String?>(0) { null },
+                            favoriteList = List<String?>(0) { null }
+                        ).collectLatest { response ->
+                            if (response is ApiResultSuccess) {
+                                updateMyLatLng(myDataId.value)
+                            }
                         }
                     }
-                }
-                1 -> {
-                    if (title.value.isEmpty())
-                        _toastMessageId.emit(R.string.request_writing_title)
-                    else if (price.value.isEmpty())
-                        _toastMessageId.emit(R.string.request_writing_price)
-                    else if (content.value.isEmpty())
-                        _toastMessageId.emit(R.string.request_writing_content)
-                    else if (category.value == CATEGORY_REQUEST)
-                        _toastMessageId.emit(R.string.request_writing_request)
-                    else if (selectedImageList.value.isEmpty()) {
-                        _toastMessageId.emit(R.string.request_writing_image)
+
+                    1 -> {
+                        if (title.value.isEmpty())
+                            _toastMessageId.emit(R.string.request_writing_title)
+                        else if (price.value.isEmpty())
+                            _toastMessageId.emit(R.string.request_writing_price)
+                        else if (content.value.isEmpty())
+                            _toastMessageId.emit(R.string.request_writing_content)
+                        else if (category.value == CATEGORY_REQUEST)
+                            _toastMessageId.emit(R.string.request_writing_request)
+                        else if (selectedImageList.value.isEmpty()) {
+                            _toastMessageId.emit(R.string.request_writing_image)
+                        }
+                    }
+
+                    else -> {
+                        _toastMessageId.emit(R.string.request_writing_all)
                     }
                 }
-                else -> {
-                    _toastMessageId.emit(R.string.request_writing_all)
-                }
+            }
+        } else {
+            viewModelScope.launch {
+                _isWritingError.emit(R.string.error_synchronization)
             }
         }
     }
@@ -216,7 +220,11 @@ class WritingViewModel @Inject constructor(
 
     private fun getMyDataId(): Flow<String> = userInfoRepository.getUser(
         onComplete = { _isLoading.value = false },
-        onError = { _myDataIdError.value = true }
+        onError = {
+            viewModelScope.launch {
+                _isWritingError.emit(R.string.error_network)
+            }
+        }
     ).mapNotNull { response ->
         if (response is ApiResultSuccess) {
             val users = response.data
@@ -245,8 +253,10 @@ class WritingViewModel @Inject constructor(
             userInfoRepository.updateMyLatLng(
                 onComplete = { _isLoading.value = false },
                 onError = {
-                    _updateMyLatLngError.value = true
                     _isCompleted.value = true
+                    viewModelScope.launch {
+                        _isWritingError.emit(R.string.error_network)
+                    }
                 },
                 dataId,
                 request
