@@ -154,6 +154,13 @@ interface MarketNetworkDataSource {
         chatRoomId: String,
     ): Flow<ApiResponse<Unit>>
 
+    fun updateUserFcmToken(
+        onComplete: () -> Unit,
+        onError: (message: String?) -> Unit,
+        userId: String,
+        userPostKey: String
+    ): Flow<ApiResponse<Unit>>
+
     fun addChatDetailEventListener(chatRoomId: String, onChatItemAdded: (ChatItem) -> Unit): ChildEventListener
 
     fun removeChatDetailEventListener(chatDetailEventListener: ChildEventListener?, chatRoomId: String)
