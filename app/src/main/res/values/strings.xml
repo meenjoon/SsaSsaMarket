@@ -81,6 +81,7 @@
     <string name="request_writing_all">글의 내용들을 작성해주세요.</string>
     <string name="request_edit_product">변경된 내용이 없습니다.</string>
     <string name="error_network">네트워크 연결 상태를 확인해주세요.</string>
+    <string name="error_synchronization">동기화를 위해 방을 나갔다가 들어와주세요.</string>
     <string name="setting">설정</string>
     <string name="logout">로그아웃</string>
     <string name="customer_feedback">고객 의견</string>

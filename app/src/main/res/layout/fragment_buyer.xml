@@ -176,30 +176,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            app:visible="@{viewModel.nicknameError}" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            app:visible="@{viewModel.buyError}" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            app:visible="@{viewModel.enterChatRoomError}" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            app:visible="@{viewModel.likedError}" />
-
         <com.mbj.ssassamarket.util.ProgressIndicatorView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
