@@ -148,11 +148,16 @@ class SellerFragment : BaseFragment() {
                     }
                 }
                 launch {
-                    viewModel.productDeleteSuccess.collectLatest {productDeleteSuccess ->
+                    viewModel.productDeleteSuccess.collectLatest { productDeleteSuccess ->
                         if (productDeleteSuccess) {
                             findNavController().navigateUp()
                             showToast(R.string.product_delete_success)
                         }
+                    }
+                }
+                launch {
+                    viewModel.isInvalidProductInfoClicked.collectLatest {
+                        showToast(R.string.request_edit_product_valid)
                     }
                 }
             }

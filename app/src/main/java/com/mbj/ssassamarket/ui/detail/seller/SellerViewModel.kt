@@ -50,6 +50,9 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
     private val _productDeleteSuccess = MutableStateFlow(false)
     val productDeleteSuccess: StateFlow<Boolean> = _productDeleteSuccess
 
+    private val _isInvalidProductInfoClicked = MutableSharedFlow<Unit>()
+    val isInvalidProductInfoClicked: SharedFlow<Unit> = _isInvalidProductInfoClicked.asSharedFlow()
+
     private var originalProduct: ProductPostItem? = null
 
     private var postId: String? = null
@@ -99,28 +102,34 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
     }
 
     fun updateProduct(title: String, price: String, content: String) {
-        val productValue = _product.value
-        val patchRequest = PatchProductRequest(title, price.toLong(), content)
-        if (isProductInfoChanged(productValue, title, price, content)) {
+        if (title.isNullOrBlank() || price.isNullOrBlank() || content.isNullOrBlank()) {
             viewModelScope.launch {
-                _isLoading.value = true
-                if (postId != null) {
-                    productRepository.updateProduct(
-                        onComplete = { _isLoading.value = false },
-                        onError = { _productUpdateError.value = true },
-                        postId!!,
-                        patchRequest
-                    ).collectLatest { response ->
-                        if (response is ApiResultSuccess) {
-                            _productUpdateCompleted.value = true
-                        }
-                    }
-                } else {
-                    _productUpdateError.value = true
-                }
+                _isInvalidProductInfoClicked.emit(Unit)
             }
         } else {
-            _isProductInfoUnchanged.value = true
+            val productValue = _product.value
+            val patchRequest = PatchProductRequest(title, price.toLong(), content)
+            if (isProductInfoChanged(productValue, title, price, content)) {
+                viewModelScope.launch {
+                    _isLoading.value = true
+                    if (postId != null) {
+                        productRepository.updateProduct(
+                            onComplete = { _isLoading.value = false },
+                            onError = { _productUpdateError.value = true },
+                            postId!!,
+                            patchRequest
+                        ).collectLatest { response ->
+                            if (response is ApiResultSuccess) {
+                                _productUpdateCompleted.value = true
+                            }
+                        }
+                    } else {
+                        _productUpdateError.value = true
+                    }
+                }
+            } else {
+                _isProductInfoUnchanged.value = true
+            }
         }
     }
 
