@@ -54,7 +54,8 @@ class ChatListViewModel @Inject constructor(private val chatRepository: ChatRepo
                 if (chatRoomList is ApiResultSuccess) {
                     _chatRooms.value = chatRoomList.data
                         .sortedByDescending { chatRoomItem -> chatRoomItem.lastSentTime }
-
+                } else {
+                    _chatRoomsError.value = true
                 }
             }
         }

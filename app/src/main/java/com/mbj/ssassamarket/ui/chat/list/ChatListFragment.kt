@@ -156,6 +156,15 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
                     adapter.submitList(chatRooms)
                 }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.chatRoomsError.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collectLatest { chatRoomsError ->
+                    if (chatRoomsError) {
+                        showToast(R.string.error_network)
+                    }
+                }
+        }
     }
 
     override fun onChatRoomClicked(chatRoomItem: ChatRoomItem, otherImageColor: String) {
