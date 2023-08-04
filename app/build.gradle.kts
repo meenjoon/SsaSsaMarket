@@ -11,19 +11,29 @@ plugins {
 
 val properties = Properties()
 properties.load(rootProject.file("local.properties").inputStream())
+val keystoreProperties = Properties()
+keystoreProperties.load(rootProject.file("keystore.properties").inputStream())
 
 val KAKAO_MAP_NATIVE_KEY = properties.getProperty("kakao_map_native_key")
 val DEFAULT_NOTIFICATION_CHANNEL_ID = properties.getProperty("default_notification_channel_id")
 
 android {
+    signingConfigs {
+        create("release") {
+            storeFile = file(keystoreProperties.getProperty("storeFile"))
+            storePassword = keystoreProperties.getProperty("storePassword")
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+        }
+    }
     compileSdkVersion(33)
 
     defaultConfig {
         applicationId = "com.mbj.ssassamarket"
         minSdkVersion(24)
         targetSdkVersion(33)
-        versionCode = 4
-        versionName = "1.0.3"
+        versionCode = 5
+        versionName = "1.0.4"
 
         buildConfigField("String", "GOOGLE_CLIENT_ID", properties.getProperty("google_client_id"))
         buildConfigField("String", "FIREBASE_BASE_URL", properties.getProperty("firebase_base_url"))
@@ -44,7 +54,9 @@ android {
 
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+            signingConfig = signingConfigs["release"]
+            isMinifyEnabled = true
+            isShrinkResources = true
             isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

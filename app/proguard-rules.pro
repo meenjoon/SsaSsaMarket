@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep all classes under net.daum package
+-keep class net.daum.** { *; }
+
+# Keep all classes under android.opengl package
+-keep class android.opengl.** { *; }
