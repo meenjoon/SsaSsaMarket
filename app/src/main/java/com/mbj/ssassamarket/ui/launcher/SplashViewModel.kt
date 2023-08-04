@@ -36,6 +36,12 @@ class SplashViewModel @Inject constructor(
     private var myUid: String? = null
     private var userPostKey: String? = null
 
+    init {
+        viewModelScope.launch {
+            currentUser = userInfoRepository.getUserAndIdToken().first
+        }
+    }
+
     private fun checkCurrentUserExists(): Flow<Boolean> = userInfoRepository.getUser(
         onComplete = { },
         onError = { _isError.value = true }
