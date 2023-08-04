@@ -145,6 +145,8 @@ class ChatDetailViewModel @Inject constructor(
                 ).collectLatest { response ->
                     if (response is ApiResultSuccess) {
                         sendChatNotification(myUserName, message)
+                    } else {
+                        _sendMessageToastId.emit(R.string.error_network)
                     }
                 }
             } else if (myUserLocation.isNullOrEmpty()) {

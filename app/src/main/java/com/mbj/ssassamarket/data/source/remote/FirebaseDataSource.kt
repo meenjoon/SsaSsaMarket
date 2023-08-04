@@ -410,7 +410,11 @@ class FirebaseDataSource @Inject constructor(
         dataId: String,
     ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
         try {
-            val userId = getUserAndIdToken().first?.uid ?: ""
+            val userId = getUserAndIdToken().first?.uid
+            if (userId == null) {
+                emit(ApiResultError(code = 400, message = "network error"))
+                return@flow
+            }
 
             val newChatItem = ChatItem(
                 message = message,
