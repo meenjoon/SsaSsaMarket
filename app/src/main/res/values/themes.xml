@@ -59,6 +59,16 @@
         <item name="buttonTint">@color/black</item>
     </style>
 
+    <style name="CustomTabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabTextAppearance">@style/TabTextAppearance</item>
+        <item name="android:background">@color/white</item>
+        <item name="tabIndicatorColor">@color/black</item>
+    </style>
+
+    <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">12sp</item>
+    </style>
+
     <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
         <item name="android:textStyle">bold</item>
         <item name="colorPrimary">@color/grey_300</item>
