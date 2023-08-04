@@ -97,7 +97,7 @@ class SettingNicknameViewModel @Inject constructor(private val repository: UserI
 
         repository.getUser(
             onComplete = { _isLoading.value = false },
-            onError = { _isError.value = true }
+            onError = { }
         ).collect { response ->
             if (response is ApiResultSuccess) {
                 val users = response.data

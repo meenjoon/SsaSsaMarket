@@ -56,7 +56,6 @@
             android:layout_width="70dp"
             android:layout_height="50dp"
             android:layout_marginTop="10dp"
-            android:background="@color/orange_700"
             android:enabled="@{viewModel.nicknameErrorMessage != @string/setting_nickname_valid}"
             android:onClick="@{() -> viewModel.addUser()}"
             android:text="@string/setting_nickname_register"
