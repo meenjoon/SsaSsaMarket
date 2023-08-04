@@ -100,7 +100,7 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
 
     fun updateProduct(title: String, price: String, content: String) {
         val productValue = _product.value
-        val patchRequest = PatchProductRequest(title, price.toInt(), content)
+        val patchRequest = PatchProductRequest(title, price.toLong(), content)
         if (isProductInfoChanged(productValue, title, price, content)) {
             viewModelScope.launch {
                 _isLoading.value = true
@@ -140,7 +140,7 @@ class SellerViewModel @Inject constructor(private val userInfoRepository: UserIn
         price: String,
         content: String
     ): Boolean {
-        return title != product?.title || price.toInt() != product.price || content != product.content
+        return title != product?.title || price.toLong() != product.price || content != product.content
     }
 
     fun deleteProductData() {

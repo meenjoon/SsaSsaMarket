@@ -14,7 +14,7 @@ data class ProductPostItem(
     @Json(name = "imageLocations")
     val imageLocations: List<String?>? = null,
     @Json(name = "price")
-    val price: Int,
+    val price: Long,
     @Json(name = "title")
     val title: String,
     @Json(name = "category")
@@ -35,7 +35,7 @@ data class ProductPostItem(
 
 data class PatchProductRequest(
     val title: String,
-    val price: Int,
+    val price: Long,
     val content: String
 )
 

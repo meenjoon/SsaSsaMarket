@@ -103,7 +103,7 @@ class FirebaseDataSource @Inject constructor(
         onError: (message: String?) -> Unit,
         content: String,
         imageLocations: List<ImageContent>,
-        price: Int,
+        price: Long,
         title: String,
         category: String,
         soldOut: Boolean,

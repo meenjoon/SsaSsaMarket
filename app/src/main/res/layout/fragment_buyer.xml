@@ -102,7 +102,7 @@
                     app:detailLocationText="@{viewModel.productPostItem.location}"
                     app:detailNicknameText="@{viewModel.nickname}"
                     app:detailPriceEnabled="false"
-                    app:detailPriceText="@{Integer.toString(viewModel.productPostItem.price)}"
+                    app:detailPriceText="@{Long.toString(viewModel.productPostItem.price)}"
                     app:detailTimeText="@{viewModel.productPostItem.createdDate}"
                     app:detailTitleEnabled="false"
                     app:detailTitleText="@{viewModel.productPostItem.title}"

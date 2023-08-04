@@ -157,7 +157,7 @@ class WritingViewModel @Inject constructor(
                             },
                             title = title.value,
                             category = category.value,
-                            price = price.value.toInt(),
+                            price = price.value.toLong(),
                             content = content.value,
                             imageLocations = selectedImageList.value,
                             location = location.value,
