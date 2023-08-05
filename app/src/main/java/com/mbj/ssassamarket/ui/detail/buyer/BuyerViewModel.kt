@@ -48,6 +48,9 @@ class BuyerViewModel @Inject constructor(
     private val _myUserItem = MutableStateFlow<User?>(null)
     val myUserItem: StateFlow<User?> = _myUserItem
 
+    private val _buySoldOutState = MutableSharedFlow<Unit>()
+    val buySoldOutState: SharedFlow<Unit> = _buySoldOutState.asSharedFlow()
+
     private val _favoriteClicks = MutableSharedFlow<Unit>()
 
     private var otherUserId: String? = null
@@ -140,45 +143,70 @@ class BuyerViewModel @Inject constructor(
             val uId = userInfoRepository.getUserAndIdToken().first?.uid ?: ""
             val patchRequest = PatchBuyRequest(true, listOf(uId))
 
-            if (postId != null && productPostItem?.location != null && otherUserId != null && nickname.value.isNotEmpty()) {
-                _isLoading.value = true
-                productRepository.buyProduct(
-                    onComplete = { },
-                    onError = {
-                        viewModelScope.launch {
-                            _isLoading.value = false
-                            _buyError.emit(R.string.error_network)
-                        }
-                    },
-                    postId!!,
-                    patchRequest
-                ).collectLatest { response ->
-                    if (response is ApiResultSuccess) {
-                        chatRepository.enterChatRoom(
-                            onComplete = { _isLoading.value = false },
+            if (postId != null) {
+                if (getProductSoldOutState(postId!!)) {
+                    _buySoldOutState.emit(Unit)
+                } else {
+                    if (productPostItem?.location != null && otherUserId != null && nickname.value.isNotEmpty()) {
+                        _isLoading.value = true
+                        productRepository.buyProduct(
+                            onComplete = { },
                             onError = {
                                 viewModelScope.launch {
                                     _isLoading.value = false
                                     _buyError.emit(R.string.error_network)
                                 }
                             },
-                            otherUserId!!,
-                            nickname.value,
-                            productPostItem?.location!!,
-                            getCurrentTime(),
-                        ).collectLatest { chatRoomId ->
-                            if (chatRoomId is ApiResultSuccess) {
-                                sendBuyNotificationToSeller()
-                                _chatRoomId.value = chatRoomId.data
+                            postId!!,
+                            patchRequest
+                        ).collectLatest { response ->
+                            if (response is ApiResultSuccess) {
+                                chatRepository.enterChatRoom(
+                                    onComplete = { _isLoading.value = false },
+                                    onError = {
+                                        viewModelScope.launch {
+                                            _isLoading.value = false
+                                            _buyError.emit(R.string.error_network)
+                                        }
+                                    },
+                                    otherUserId!!,
+                                    nickname.value,
+                                    productPostItem?.location!!,
+                                    getCurrentTime(),
+                                ).collectLatest { chatRoomId ->
+                                    if (chatRoomId is ApiResultSuccess) {
+                                        sendBuyNotificationToSeller()
+                                        _chatRoomId.value = chatRoomId.data
+                                    }
+                                }
                             }
                         }
+                    } else {
+                        _isLoading.value = false
+                        _buyError.emit(R.string.error_synchronization)
                     }
                 }
-            } else {
-                _isLoading.value = false
-                _buyError.emit(R.string.error_synchronization)
             }
         }
+    }
+
+    private suspend fun getProductSoldOutState(postId: String): Boolean {
+        var productState = false
+        productRepository.getProductDetail(
+            onComplete = { },
+            onError = {
+                viewModelScope.launch {
+                    _isLoading.value = false
+                    _buyError.emit(R.string.error_network)
+                }
+            },
+            postId
+        ).collectLatest { response ->
+            if (response is ApiResultSuccess) {
+                productState = response.data.soldOut
+            }
+        }
+        return productState
     }
 
     fun toggleProductFavorite() {

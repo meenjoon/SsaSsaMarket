@@ -99,4 +99,5 @@
     <string name="chat_channel_description">채팅 알림입니다.</string>
     <string name="sell_channel_name">판매 알림</string>
     <string name="sell_channel_description">판매 알림입니다.</string>
+    <string name="product_sold_out">해당 제품은 이미 팔린 제품입니다.</string>
 </resources>
