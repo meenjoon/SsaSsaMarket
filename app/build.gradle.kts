@@ -7,6 +7,7 @@ plugins {
     id ("androidx.navigation.safeargs.kotlin")
     id ("kotlin-kapt")
     id ("dagger.hilt.android.plugin")
+    id("com.google.firebase.crashlytics")
 }
 
 val properties = Properties()
@@ -108,6 +109,7 @@ dependencies {
     implementation("com.google.firebase:firebase-storage-ktx:20.2.1") // storage 관련
     implementation ("com.google.firebase:firebase-database-ktx") // Realtime Database 관련
     implementation ("com.google.firebase:firebase-messaging-ktx") // messaging 관련
+    implementation("com.google.firebase:firebase-crashlytics-ktx") // crashlytics 관련
 
     //Google Play Services 관련
     implementation("com.google.android.gms:play-services-base:18.2.0") //base 관련
