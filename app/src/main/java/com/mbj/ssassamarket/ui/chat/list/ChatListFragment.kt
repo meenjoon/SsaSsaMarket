@@ -153,7 +153,16 @@ class ChatListFragment() : BaseFragment(), ChatListClickListener {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chatRooms.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collectLatest { chatRooms ->
-                    adapter.submitList(chatRooms)
+                    adapter.submitList(chatRooms.sortedByDescending { chatRoomItem -> chatRoomItem.lastSentTime })
+                }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.chatRoomsError.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collectLatest { chatRoomsError ->
+                    if (chatRoomsError) {
+                        showToast(R.string.error_network)
+                    }
                 }
         }
     }

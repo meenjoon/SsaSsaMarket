@@ -141,7 +141,7 @@ class WritingViewModel @Inject constructor(
     fun registerProductWithValidation() {
         if (location.value.isNotEmpty()) {
             val requiredPropertyCount = listOf(title.value, price.value, content.value)
-                .count { it.isEmpty() } + if (category.value == CATEGORY_REQUEST) 1 else 0 +
+                .count { it.isNullOrBlank() } + if (category.value == CATEGORY_REQUEST) 1 else 0 +
                     if (selectedImageList.value.isEmpty()) 1 else 0
             viewModelScope.launch {
                 when (requiredPropertyCount) {
@@ -157,7 +157,7 @@ class WritingViewModel @Inject constructor(
                             },
                             title = title.value,
                             category = category.value,
-                            price = price.value.toInt(),
+                            price = price.value.toLong(),
                             content = content.value,
                             imageLocations = selectedImageList.value,
                             location = location.value,
@@ -174,11 +174,11 @@ class WritingViewModel @Inject constructor(
                     }
 
                     1 -> {
-                        if (title.value.isEmpty())
+                        if (title.value.isNullOrBlank())
                             _toastMessageId.emit(R.string.request_writing_title)
-                        else if (price.value.isEmpty())
+                        else if (price.value.isNullOrBlank())
                             _toastMessageId.emit(R.string.request_writing_price)
-                        else if (content.value.isEmpty())
+                        else if (content.value.isNullOrBlank())
                             _toastMessageId.emit(R.string.request_writing_content)
                         else if (category.value == CATEGORY_REQUEST)
                             _toastMessageId.emit(R.string.request_writing_request)
@@ -207,15 +207,15 @@ class WritingViewModel @Inject constructor(
         selectedImageListValue: List<ImageContent>
     ): Boolean {
         val categoryRequest = categoryValue != CATEGORY_REQUEST
-        return !titleValue.isEmpty() &&
-                !priceValue.isEmpty() &&
-                !contentValue.isEmpty() &&
+        return !titleValue.isNullOrBlank() &&
+                !priceValue.isNullOrBlank() &&
+                !contentValue.isNullOrBlank() &&
                 categoryRequest &&
                 selectedImageListValue.isNotEmpty()
     }
 
     fun isPriceNullOrEmpty(price: String?): Boolean {
-        return price.isNullOrEmpty()
+        return price.isNullOrBlank()
     }
 
     private fun getMyDataId(): Flow<String> = userInfoRepository.getUser(

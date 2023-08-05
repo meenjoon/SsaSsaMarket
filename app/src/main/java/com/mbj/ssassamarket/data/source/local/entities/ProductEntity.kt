@@ -19,7 +19,7 @@ data class ProductEntity(
     @ColumnInfo(name = "product_image_locations")
     val imageLocations: List<String?>?,
     @ColumnInfo(name = "product_price")
-    val price: Int,
+    val price: Long,
     @ColumnInfo(name = "product_title")
     val title: String,
     @ColumnInfo(name = "product_category")

@@ -103,7 +103,7 @@ class FirebaseDataSource @Inject constructor(
         onError: (message: String?) -> Unit,
         content: String,
         imageLocations: List<ImageContent>,
-        price: Int,
+        price: Long,
         title: String,
         category: String,
         soldOut: Boolean,
@@ -410,7 +410,11 @@ class FirebaseDataSource @Inject constructor(
         dataId: String,
     ): Flow<ApiResponse<Unit>> = flow<ApiResponse<Unit>> {
         try {
-            val userId = getUserAndIdToken().first?.uid ?: ""
+            val userId = getUserAndIdToken().first?.uid
+            if (userId == null) {
+                emit(ApiResultError(code = 400, message = "network error"))
+                return@flow
+            }
 
             val newChatItem = ChatItem(
                 message = message,
@@ -448,9 +452,14 @@ class FirebaseDataSource @Inject constructor(
     override fun getMyChatRoom(
         onComplete: () -> Unit,
         onError: (message: String?) -> Unit
-    ): Flow<ApiResponse<List<ChatRoomItem>>> = flow<ApiResponse<List<ChatRoomItem>>> {
+    ): Flow<ApiResponse<List<ChatRoomItem>>> = flow {
         try {
-            val userId = getUserAndIdToken().first?.uid ?: ""
+            val userId = getUserAndIdToken().first?.uid
+            if (userId == null) {
+                emit(ApiResultError<List<ChatRoomItem>>(code = 400, message = "network error"))
+                return@flow
+            }
+
             val chatRoomsDB = Firebase.database(BuildConfig.FIREBASE_BASE_URL)
                 .reference.child(CHAT_ROOMS)
                 .child(userId)
@@ -470,9 +479,7 @@ class FirebaseDataSource @Inject constructor(
                 code = 400,
                 message = e.message ?: "Failed to get chat rooms"
             )
-            emit(
-                ApiResultError<List<ChatRoomItem>>(code = 400, message = e.message ?: "Failed to get chat rooms")
-            )
+            emit(ApiResultError<List<ChatRoomItem>>(code = 400, message = e.message ?: "Failed to get chat rooms"))
             onError(errorResponse.message)
         }
     }.onCompletion {

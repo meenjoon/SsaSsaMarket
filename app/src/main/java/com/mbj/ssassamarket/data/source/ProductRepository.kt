@@ -18,7 +18,7 @@ class ProductRepository @Inject constructor(
         onError: (message: String?) -> Unit,
         content: String,
         imageLocations: List<ImageContent>,
-        price: Int,
+        price: Long,
         title: String,
         category: String,
         soldOut: Boolean,
@@ -93,6 +93,10 @@ class ProductRepository @Inject constructor(
 
     suspend fun insertProducts(products: List<ProductEntity>) {
         marketDatabaseDataSource.insertProducts(products)
+    }
+
+    suspend fun deleteAllProducts(){
+        marketDatabaseDataSource.deleteAllProducts()
     }
 
     fun getAllProducts(): Flow<List<ProductEntity>> {

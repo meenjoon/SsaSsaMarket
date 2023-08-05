@@ -48,7 +48,7 @@ fun TextView.setFormattedElapsedTime(createdDate: String) {
 }
 
 @BindingAdapter("priceFormatted")
-fun TextView.setFormattedPrice(price: Int) {
+fun TextView.setFormattedPrice(price: Long) {
     val context = this.context
     val decimalFormat = DecimalFormat(PATTERN_COMMA_THOUSANDS)
     val formattedPrice = decimalFormat.format(price)

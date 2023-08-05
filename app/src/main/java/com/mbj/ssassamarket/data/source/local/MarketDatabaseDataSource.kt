@@ -7,5 +7,7 @@ interface MarketDatabaseDataSource {
 
     suspend fun insertProducts(products: List<ProductEntity>)
 
+    suspend fun deleteAllProducts()
+
     fun getAllProducts(): Flow<List<ProductEntity>>
 }

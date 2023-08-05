@@ -55,6 +55,7 @@ class BuyerFragment : BaseFragment() {
         setupViews()
         observeChatRoomIdAndNavigateToChatDetail()
         observeBuyError()
+        observeBuySoldOutState()
     }
 
     private fun setupLocationPermissionLauncher() {
@@ -204,6 +205,17 @@ class BuyerFragment : BaseFragment() {
                 Lifecycle.State.STARTED
             ).collectLatest { buyError ->
                 showToast(buyError)
+            }
+        }
+    }
+
+    private fun observeBuySoldOutState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.buySoldOutState.flowWithLifecycle(
+                viewLifecycleOwner.lifecycle,
+                Lifecycle.State.STARTED
+            ).collectLatest { buySoldOutState ->
+                showToast(R.string.product_sold_out)
             }
         }
     }

@@ -10,6 +10,10 @@ class RoomDataSource @Inject constructor(private val appDatabase: AppDatabase) :
         return appDatabase.productDao().insertProducts(products)
     }
 
+    override suspend fun deleteAllProducts() {
+        return appDatabase.productDao().deleteAllProducts()
+    }
+
     override fun getAllProducts(): Flow<List<ProductEntity>> {
         return appDatabase.productDao().getAllProducts()
     }

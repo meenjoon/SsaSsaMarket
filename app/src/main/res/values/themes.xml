@@ -33,8 +33,6 @@
     <style name="ButtonStyle" parent="Widget.MaterialComponents.Button">
         <item name="android:stateListAnimator">@null</item>
         <item name="android:elevation">0dp</item>
-        <item name="android:backgroundTint">@color/orange_700</item>
-        <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="CardViewButtonStyle" parent="Widget.MaterialComponents.Button">
@@ -59,6 +57,16 @@
 
     <style name="CheckBoxStyle">
         <item name="buttonTint">@color/black</item>
+    </style>
+
+    <style name="CustomTabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabTextAppearance">@style/TabTextAppearance</item>
+        <item name="android:background">@color/white</item>
+        <item name="tabIndicatorColor">@color/black</item>
+    </style>
+
+    <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">13sp</item>
     </style>
 
     <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
