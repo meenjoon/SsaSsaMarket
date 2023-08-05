@@ -3,6 +3,8 @@ package com.mbj.ssassamarket.ui.setting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mbj.ssassamarket.data.model.ChatRoomItem
+import com.mbj.ssassamarket.data.model.FavoriteCountRequest
+import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.source.ChatRepository
 import com.mbj.ssassamarket.data.source.ProductRepository
 import com.mbj.ssassamarket.data.source.UserInfoRepository
@@ -100,15 +102,36 @@ class SettingViewModel @Inject constructor(
         ).collectLatest { response ->
             if (response is ApiResultSuccess) {
                 response.data.forEach { (postId, postData) ->
-                    if (postData.id == myUid) {
-                        _isLoading.value = true
-                        productRepository.deleteProductData(
-                            onComplete = { _isLoading.value = false },
-                            onError = { _isMembershipWithdrawalError.value = true },
-                            postId
-                        ).collectLatest {
-                        }
-                    }
+                    deleteProductData(postId, postData)
+                    deleteProductsWithFavorites(postId, postData.favoriteCount, postData.favoriteList)
+                }
+            }
+        }
+    }
+
+    private suspend fun deleteProductData(postId: String, postData: ProductPostItem) {
+        if (postData.id == myUid) {
+            _isLoading.value = true
+            productRepository.deleteProductData(
+                onComplete = { _isLoading.value = false },
+                onError = { _isMembershipWithdrawalError.value = true },
+                postId
+            ).collectLatest {
+            }
+        }
+    }
+
+    private suspend fun deleteProductsWithFavorites(postId:String, favoriteCount:Int, favoriteList: List<String?>?) {
+        favoriteList?.forEach {
+            if (it == myUid) {
+                val filteredFavorites = favoriteList.filter { it != myUid }
+                val request = FavoriteCountRequest(favoriteCount -1 ,filteredFavorites)
+                productRepository.updateProductFavorite(
+                    onComplete = { _isLoading.value = false },
+                    onError = { _isMembershipWithdrawalError.value = true },
+                    postId,
+                    request
+                ).collectLatest {
                 }
             }
         }
