@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mbj.ssassamarket.data.model.ChatRoomItem
 import com.mbj.ssassamarket.data.model.FavoriteCountRequest
+import com.mbj.ssassamarket.data.model.PatchBuyRequest
 import com.mbj.ssassamarket.data.model.ProductPostItem
 import com.mbj.ssassamarket.data.source.ChatRepository
 import com.mbj.ssassamarket.data.source.ProductRepository
@@ -104,6 +105,7 @@ class SettingViewModel @Inject constructor(
                 response.data.forEach { (postId, postData) ->
                     deleteProductData(postId, postData)
                     deleteProductsWithFavorites(postId, postData.favoriteCount, postData.favoriteList)
+                    deleteProductsWithShoppingList(postId, postData.shoppingList)
                 }
             }
         }
@@ -127,6 +129,22 @@ class SettingViewModel @Inject constructor(
                 val filteredFavorites = favoriteList.filter { it != myUid }
                 val request = FavoriteCountRequest(favoriteCount -1 ,filteredFavorites)
                 productRepository.updateProductFavorite(
+                    onComplete = { _isLoading.value = false },
+                    onError = { _isMembershipWithdrawalError.value = true },
+                    postId,
+                    request
+                ).collectLatest {
+                }
+            }
+        }
+    }
+
+    private suspend fun deleteProductsWithShoppingList(postId:String, shoppingList: List<String?>?) {
+        shoppingList?.forEach {
+            if (it == myUid) {
+                val filteredShoppingList = shoppingList.filter { it != myUid }
+                val request = PatchBuyRequest(true, filteredShoppingList)
+                productRepository.buyProduct(
                     onComplete = { _isLoading.value = false },
                     onError = { _isMembershipWithdrawalError.value = true },
                     postId,
