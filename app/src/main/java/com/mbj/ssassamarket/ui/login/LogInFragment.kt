@@ -125,7 +125,7 @@ class LogInFragment : BaseFragment() {
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)
                     .setServerClientId(BuildConfig.GOOGLE_CLIENT_ID)
-                    .setFilterByAuthorizedAccounts(true)
+                    .setFilterByAuthorizedAccounts(false)
                     .build()
             )
             .build()
