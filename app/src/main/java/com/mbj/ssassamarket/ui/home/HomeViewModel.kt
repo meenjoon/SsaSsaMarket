@@ -57,7 +57,8 @@ class HomeViewModel @Inject constructor(
             ).collectLatest { productMap ->
                 if (productMap is ApiResultSuccess) {
                     val updatedProducts = filterAndMapProducts(productMap.data)
-                    val productEntities = convertToProductEntities(updatedProducts)
+                    val productEntities = convertToProductEntities(updatedProducts).filter { it.soldOut.not() }
+                    productRepository.deleteAllProducts()
                     productRepository.insertProducts(productEntities)
                     productList.value = updatedProducts
                     _isLoading.value = false
@@ -172,7 +173,8 @@ class HomeViewModel @Inject constructor(
             ).collectLatest { productMap ->
                 if (productMap is ApiResultSuccess) {
                     val updatedProducts = filterAndMapProducts(productMap.data)
-                    val productEntities = convertToProductEntities(updatedProducts)
+                    val productEntities = convertToProductEntities(updatedProducts).filter { it.soldOut.not() }
+                    productRepository.deleteAllProducts()
                     productRepository.insertProducts(productEntities)
                     productList.value = updatedProducts
                     _isLoading.value = false
