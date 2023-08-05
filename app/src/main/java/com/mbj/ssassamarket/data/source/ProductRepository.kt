@@ -95,6 +95,10 @@ class ProductRepository @Inject constructor(
         marketDatabaseDataSource.insertProducts(products)
     }
 
+    suspend fun deleteAllProducts(){
+        marketDatabaseDataSource.deleteAllProducts()
+    }
+
     fun getAllProducts(): Flow<List<ProductEntity>> {
         return marketDatabaseDataSource.getAllProducts()
     }
