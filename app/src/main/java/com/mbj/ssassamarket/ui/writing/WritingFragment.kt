@@ -217,7 +217,7 @@ class WritingFragment : BaseFragment(), LocationManager.LocationUpdateListener, 
     }
 
     private fun openGallery() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             pickMultipleVisualMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         } else {
             val permission = Manifest.permission.READ_EXTERNAL_STORAGE
