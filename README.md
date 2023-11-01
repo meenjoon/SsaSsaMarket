@@ -13,13 +13,26 @@
     <img width = '900' src="https://github.com/meenjoon/SsaSsaMarket/assets/88024665/0a35761e-701a-4ef3-9941-394da1fba50e" alt="SsaSsa Market">
 </div>
 
-## Go Play Store ➔ [Store](https://play.google.com/store/apps/details?id=com.mbj.ssassamarket) <br>
-## Go document ➔  [Documented files](https://docs.google.com/spreadsheets/d/1TUqe6q8c2EUH-EN_W1N8Z9lt2UwcFd1BynxX0GRGyXg/edit?usp=sharing)
-## Go Figma ➔  [Figma files](https://www.figma.com/file/3Y0TEWGzYi9iTlQOFXNNk2/Ssa-Ssa-Market?type=design&node-id=0%3A1&mode=design&t=IMRA7szPslcJnFJr-1)
-## Go UserFlow ➔ [UserFlow](https://drive.google.com/file/d/1rlRqZj6xH3i-ib6l6zWGEfG1164BbdqG/view?usp=sharing)
-## Go ERD ➔ [ERD](https://www.erdcloud.com/d/QyFKWgEhLc9mtu2Sa)
+<a href="https://play.google.com/store/apps/details?id=com.mbj.ssassamarket">
+    <img src="http://github.com/PARKJONGMlN/Cours/assets/77707692/ab98934b-b749-4e67-9175-a9eb7faea3d6" width="250" height="100"/>
+</a>
 
-<br>
+> ### **신뢰성 있게 상대방과의 중고거래를 도와주는 ‘SsaSsa Market’입니다.**
+
+- 위치 기반 거래 앱으로, 권한을 허용해야만 앱을 온전히 사용할 수 있습니다.
+- 상품을 등록하고, 원하는 상품을 구매할 수 있습니다.
+- 물품을 최신순, 최저가순, 또는 좋아요순으로 정렬하고 원하는 물품을 검색할 수 있습니다.
+- 상품의 판매자와 채팅을 할 수 있습니다.
+- 채팅방 내에서는 상대방의 현재 지역과 나와의 거리 차이를 표시하여, 거래의 안전성과 신뢰성을 높이는 기능을 제공합니다.
+
+> ### **Document**
+- [Documented files](https://docs.google.com/spreadsheets/d/1TUqe6q8c2EUH-EN_W1N8Z9lt2UwcFd1BynxX0GRGyXg/edit?usp=sharing)
+> ### **Figma**
+- [Figma files](https://www.figma.com/file/3Y0TEWGzYi9iTlQOFXNNk2/Ssa-Ssa-Market?type=design&node-id=0%3A1&mode=design&t=IMRA7szPslcJnFJr-1)
+> ### **UserFlow**
+- [UserFlow](https://drive.google.com/file/d/1rlRqZj6xH3i-ib6l6zWGEfG1164BbdqG/view?usp=sharing)
+> ### **ERD**
+- [ERD](https://www.erdcloud.com/d/QyFKWgEhLc9mtu2Sa)
 
 ## Tech stack & Open-source libraries
 
